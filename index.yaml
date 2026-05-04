@@ -5209,3 +5209,23 @@ components:
               - Meat
               - Dairy
               - Pantry
+    IngredientSubstitutionResponse:
+      type: object
+      properties:
+        ingredient:
+          type: string
+          example: "butter"
+        substitutions:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example: "margarine"
+              ratio:
+                type: string
+                example: "1:1"
+        message:
+          type: string
+          example: "Substitutions found successfully"
