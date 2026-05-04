@@ -6,3 +6,6 @@ test-results/
 security/reports/
 *.log
 package-lock.json
+trivy-report.json
+audit-report.json
+build-info.txt
