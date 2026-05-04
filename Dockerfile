@@ -1,10 +1,10 @@
 # Pinned Node LTS base image for reproducible local development.
 FROM node:22-bookworm@sha256:f90672bf4c76dfc077d17be4c115b1ae7731d2e8558b457d86bca42aeb193866 AS base
-
 WORKDIR /usr/src/app
 
-# System deps:
+# System deps + upgrade vulnerable packages (ImageMagick, OpenSSL)
 RUN apt-get update \
+  && apt-get upgrade -y \
   && apt-get install -y --no-install-recommends \
     python3.11 \
     python3-pip \
