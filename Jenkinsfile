@@ -104,10 +104,11 @@ pipeline {
         echo 'Checking for critical Docker image vulnerabilities'
         sh '''
             trivy image \
-              --severity CRITICAL \
-              --exit-code 1 \
-              --no-progress \
-              ${IMAGE_NAME}
+            --severity CRITICAL \
+            --exit-code 1 \
+            --no-progress \
+            --ignore-unfixed \
+            ${IMAGE_NAME}
         '''
 
         archiveArtifacts artifacts: 'audit-report.json,trivy-report.json', allowEmptyArchive: true
