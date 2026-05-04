@@ -13,7 +13,7 @@
     "test:contract": "npx jest test/contractTests/ --testTimeout=10000 --forceExit",
     "test:ci": "mocha \"./test/ci/**/*.test.js\" --timeout 5000 --exit",
     "lint": "eslint . --ext .js --max-warnings=0",
-    "lint:ci": "eslint controller services routes middleware model server.js --ext .js --max-warnings=50",
+    "lint:ci": "eslint services routes middleware server.js test/ci --ext .js --max-warnings=50",
     "lint:fix": "eslint . --ext .js --fix",
     "format": "prettier --write \"**/*.{js,json,md}\"",
     "format:check": "prettier --check \"**/*.{js,json,md}\"",
