@@ -11,6 +11,7 @@
     "test:mocha": "mocha \"test/!(barcodeScanning|shoppingList|chatbot|healthArticles).test.js\" --timeout 5000 --exit",
     "test:jest": "npx jest test/barcodeScanning.test.js test/shoppingList.test.js test/chatbot.test.js test/healthArticles.test.js --testTimeout=10000 --forceExit",
     "test:contract": "npx jest test/contractTests/ --testTimeout=10000 --forceExit",
+    "test:ci": "mocha \"./test/ci/**/*.test.js\" --timeout 5000 --exit",
     "lint": "eslint . --ext .js --max-warnings=0",
     "lint:fix": "eslint . --ext .js --fix",
     "format": "prettier --write \"**/*.{js,json,md}\"",

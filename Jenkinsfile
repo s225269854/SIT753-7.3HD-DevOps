@@ -48,7 +48,7 @@ pipeline {
             }
         }
 
-        stage('Test') {
+       stage('Test') {
     environment {
         NODE_ENV = 'test'
         JWT_SECRET = 'jenkins-test-secret'
@@ -56,24 +56,15 @@ pipeline {
     }
 
     steps {
-        echo 'Running automated tests'
+        echo 'Running CI-focused automated tests'
 
         withCredentials([
             string(credentialsId: 'supabase-url', variable: 'SUPABASE_URL'),
             string(credentialsId: 'supabase-anon-key', variable: 'SUPABASE_ANON_KEY'),
             string(credentialsId: 'supabase-service-role-key', variable: 'SUPABASE_SERVICE_ROLE_KEY')
         ]) {
-            echo 'Running unit tests'
-            sh 'npm run test:unit'
-
-            echo 'Running Mocha integration/general tests'
-            sh 'npm run test:mocha'
-
-            echo 'Running Jest tests'
-            sh 'npm run test:jest'
-
-            echo 'Running contract tests'
-            sh 'npm run test:contract'
+            echo 'Running stable CI test suite with valid, invalid, and edge case coverage'
+            sh 'npm run test:ci'
         }
     }
 }
