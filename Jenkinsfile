@@ -47,20 +47,34 @@ pipeline {
  
             }
         }
+
         stage('Test') {
-            steps {
-                echo 'Running automated test'
+    environment {
+        NODE_ENV = 'test'
+        JWT_SECRET = 'jenkins-test-secret'
+        PORT = '8081'
+    }
 
-                echo 'Running unit tests'
-                sh 'npm run test:unit'
+    steps {
+        echo 'Running automated tests'
 
-                echo 'Running full automated test excluding contract tests'
-                sh 'npm test'
+        withCredentials([
+            string(credentialsId: 'supabase-url', variable: 'SUPABASE_URL'),
+            string(credentialsId: 'supabase-anon-key', variable: 'SUPABASE_ANON_KEY'),
+            string(credentialsId: 'supabase-service-role-key', variable: 'SUPABASE_SERVICE_ROLE_KEY')
+        ]) {
+            echo 'Running unit tests'
+            sh 'npm run test:unit'
 
-                echo 'Running contract tests'
-                sh 'npm run test:contract'
-            }
+            echo 'Running full automated tests excluding contract tests'
+            sh 'npm test'
+
+            echo 'Running contract tests'
+            sh 'npm run test:contract'
         }
+    }
+}
+    
 
 
     }
