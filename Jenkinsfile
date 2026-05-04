@@ -66,9 +66,12 @@ pipeline {
             echo 'Running unit tests'
             sh 'npm run test:unit'
 
-            echo 'Executing Integration Tests...'
-            sh 'npx mocha "./test/integration/**/*.test.js" --timeout 5000 --exit'
-            
+            echo 'Running Mocha integration/general tests'
+            sh 'npm run test:mocha'
+
+            echo 'Running Jest tests'
+            sh 'npm run test:jest'
+
             echo 'Running contract tests'
             sh 'npm run test:contract'
         }
