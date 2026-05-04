@@ -76,10 +76,10 @@ pipeline {
             sh 'npm run lint:ci'
 
             echo 'Checking code formatting'
-            sh 'npm run format:check || true'
+            sh 'npm run format:check'
 
             echo 'Validating OpenAPI specification'
-            sh 'npm run openapi:validate || true'
+            sh 'npm run openapi:validate'
         }
     }
 
