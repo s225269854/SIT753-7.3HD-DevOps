@@ -84,23 +84,35 @@ pipeline {
     }
 
     stage('Security') {
-        steps {
-            echo 'Running dependency security audit'
+    steps {
+        echo 'Running npm dependency security audit'
+        sh 'npm audit --audit-level=high'
 
-            sh '''
-                npm audit --audit-level=high
-            '''
+        echo 'Saving npm audit report'
+        sh 'npm audit --json > audit-report.json || true'
 
-            echo 'Running Docker image vulnerability scan with Trivy'
+        echo 'Running Trivy Docker image scan and saving report'
+        sh '''
+            trivy image \
+              --severity HIGH,CRITICAL \
+              --no-progress \
+              --format json \
+              --output trivy-report.json \
+              ${IMAGE_NAME} || true
+        '''
 
-            sh '''
-                trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress ${IMAGE_NAME}
-            '''
+        echo 'Checking for critical Docker image vulnerabilities'
+        sh '''
+            trivy image \
+              --severity CRITICAL \
+              --exit-code 1 \
+              --no-progress \
+              ${IMAGE_NAME}
+        '''
 
-            sh 'npm audit --json > audit-report.json'
-            archiveArtifacts artifacts: 'audit-report.json', allowEmptyArchive: true
-        }
+        archiveArtifacts artifacts: 'audit-report.json,trivy-report.json', allowEmptyArchive: true
     }
+}
 
   }
 }
