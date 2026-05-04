@@ -1,6 +1,6 @@
-const supabase = require("../dbConnection.js");
-const { EMPTY_HEALTH_CONTEXT, saveUserPreferenceState } = require("./userPreferenceState");
-const { ServiceError } = require("../services/serviceError");
+const supabase = require('../dbConnection.js');
+const { EMPTY_HEALTH_CONTEXT, saveUserPreferenceState } = require('./userPreferenceState');
+const { ServiceError } = require('../services/serviceError');
 
 function listFromHealthContext(items = []) {
   return (Array.isArray(items) ? items : [])
@@ -16,8 +16,10 @@ function listFromHealthContext(items = []) {
 function normalizeHealthContext(healthContext = {}) {
   return {
     allergies: Array.isArray(healthContext.allergies) ? healthContext.allergies : [],
-    chronic_conditions: Array.isArray(healthContext.chronic_conditions) ? healthContext.chronic_conditions : [],
-    medications: Array.isArray(healthContext.medications) ? healthContext.medications : []
+    chronic_conditions: Array.isArray(healthContext.chronic_conditions)
+      ? healthContext.chronic_conditions
+      : [],
+    medications: Array.isArray(healthContext.medications) ? healthContext.medications : [],
   };
 }
 
@@ -25,7 +27,7 @@ function normalizeUiSettings(settings = {}) {
   return {
     language: settings.language || 'en',
     theme: settings.theme || 'light',
-    font_size: settings.font_size || '16px'
+    font_size: settings.font_size || '16px',
   };
 }
 
@@ -35,7 +37,7 @@ function normalizeNotificationPreferences(preferences = {}) {
     waterReminders: preferences.waterReminders !== false,
     healthTips: preferences.healthTips !== false,
     weeklyReports: Boolean(preferences.weeklyReports),
-    systemUpdates: preferences.systemUpdates !== false
+    systemUpdates: preferences.systemUpdates !== false,
   };
 }
 
@@ -44,9 +46,11 @@ function normalizePreferenceIds(values = []) {
     return [];
   }
 
-  return [...new Set(values
-    .map((value) => Number(value))
-    .filter((value) => Number.isInteger(value) && value > 0))];
+  return [
+    ...new Set(
+      values.map((value) => Number(value)).filter((value) => Number.isInteger(value) && value > 0)
+    ),
+  ];
 }
 
 function hasOwnProperty(object, key) {
@@ -54,20 +58,21 @@ function hasOwnProperty(object, key) {
 }
 
 const PREFERENCE_TABLES = [
-  { table: "user_dietary_requirements", foreignKey: "dietary_requirement_id", key: "dietary_requirements" },
-  { table: "user_allergies", foreignKey: "allergy_id", key: "allergies" },
-  { table: "user_cuisines", foreignKey: "cuisine_id", key: "cuisines" },
-  { table: "user_dislikes", foreignKey: "dislike_id", key: "dislikes" },
-  { table: "user_health_conditions", foreignKey: "health_condition_id", key: "health_conditions" },
-  { table: "user_spice_levels", foreignKey: "spice_level_id", key: "spice_levels" },
-  { table: "user_cooking_methods", foreignKey: "cooking_method_id", key: "cooking_methods" }
+  {
+    table: 'user_dietary_requirements',
+    foreignKey: 'dietary_requirement_id',
+    key: 'dietary_requirements',
+  },
+  { table: 'user_allergies', foreignKey: 'allergy_id', key: 'allergies' },
+  { table: 'user_cuisines', foreignKey: 'cuisine_id', key: 'cuisines' },
+  { table: 'user_dislikes', foreignKey: 'dislike_id', key: 'dislikes' },
+  { table: 'user_health_conditions', foreignKey: 'health_condition_id', key: 'health_conditions' },
+  { table: 'user_spice_levels', foreignKey: 'spice_level_id', key: 'spice_levels' },
+  { table: 'user_cooking_methods', foreignKey: 'cooking_method_id', key: 'cooking_methods' },
 ];
 
 async function replaceJoinTable(table, userId, foreignKey, values = []) {
-  const { error: deleteError } = await supabase
-    .from(table)
-    .delete()
-    .eq("user_id", userId);
+  const { error: deleteError } = await supabase.from(table).delete().eq('user_id', userId);
 
   if (deleteError) {
     throw deleteError;
@@ -79,7 +84,7 @@ async function replaceJoinTable(table, userId, foreignKey, values = []) {
 
   const records = values.map((value) => ({
     user_id: userId,
-    [foreignKey]: value
+    [foreignKey]: value,
   }));
 
   const { error: insertError } = await supabase.from(table).insert(records);
@@ -95,7 +100,7 @@ async function replaceUserPreferencesFallback(userId, preferenceGroups) {
 }
 
 async function replaceUserPreferencesTransaction(userId, preferenceGroups) {
-  const { error } = await supabase.rpc("replace_user_preferences", {
+  const { error } = await supabase.rpc('replace_user_preferences', {
     p_user_id: userId,
     p_dietary_requirements: preferenceGroups.dietary_requirements,
     p_allergies: preferenceGroups.allergies,
@@ -103,16 +108,17 @@ async function replaceUserPreferencesTransaction(userId, preferenceGroups) {
     p_dislikes: preferenceGroups.dislikes,
     p_health_conditions: preferenceGroups.health_conditions,
     p_spice_levels: preferenceGroups.spice_levels,
-    p_cooking_methods: preferenceGroups.cooking_methods
+    p_cooking_methods: preferenceGroups.cooking_methods,
   });
 
   if (!error) {
     return;
   }
 
-  const rpcMissing = error.code === "PGRST202"
-    || error.code === "42883"
-    || /replace_user_preferences/i.test(error.message || "");
+  const rpcMissing =
+    error.code === 'PGRST202' ||
+    error.code === '42883' ||
+    /replace_user_preferences/i.test(error.message || '');
 
   if (rpcMissing) {
     await replaceUserPreferencesFallback(userId, preferenceGroups);
@@ -131,36 +137,43 @@ async function updateUserPreferences(userId, body = {}) {
 
     const healthContext = normalizeHealthContext(body.health_context);
 
-    const dietaryRequirements = Array.isArray(body.dietary_requirements) ? body.dietary_requirements : [];
-    const allergies = Array.isArray(body.allergies) ? body.allergies : listFromHealthContext(healthContext.allergies);
+    const dietaryRequirements = Array.isArray(body.dietary_requirements)
+      ? body.dietary_requirements
+      : [];
+    const allergies = Array.isArray(body.allergies)
+      ? body.allergies
+      : listFromHealthContext(healthContext.allergies);
     const cuisines = Array.isArray(body.cuisines) ? body.cuisines : [];
     const dislikes = Array.isArray(body.dislikes) ? body.dislikes : [];
-    const healthConditions = Array.isArray(body.health_conditions) ? body.health_conditions : listFromHealthContext(healthContext.chronic_conditions);
+    const healthConditions = Array.isArray(body.health_conditions)
+      ? body.health_conditions
+      : listFromHealthContext(healthContext.chronic_conditions);
     const spiceLevels = Array.isArray(body.spice_levels) ? body.spice_levels : [];
     const cookingMethods = Array.isArray(body.cooking_methods) ? body.cooking_methods : [];
 
-    const shouldUpdateJoinTables = [
-      'dietary_requirements',
-      'allergies',
-      'cuisines',
-      'dislikes',
-      'health_conditions',
-      'spice_levels',
-      'cooking_methods'
-    ].some((key) => body[key] !== undefined) || body.health_context !== undefined;
-
-    if (
-      !body.health_context
-      && !body.notification_preferences
-      && !body.ui_settings
-      && ![
+    const shouldUpdateJoinTables =
+      [
         'dietary_requirements',
         'allergies',
         'cuisines',
         'dislikes',
         'health_conditions',
         'spice_levels',
-        'cooking_methods'
+        'cooking_methods',
+      ].some((key) => body[key] !== undefined) || body.health_context !== undefined;
+
+    if (
+      !body.health_context &&
+      !body.notification_preferences &&
+      !body.ui_settings &&
+      ![
+        'dietary_requirements',
+        'allergies',
+        'cuisines',
+        'dislikes',
+        'health_conditions',
+        'spice_levels',
+        'cooking_methods',
       ].every((key) => hasOwnProperty(body, key))
     ) {
       throw new ServiceError(
@@ -177,7 +190,7 @@ async function updateUserPreferences(userId, body = {}) {
         dislikes: normalizePreferenceIds(dislikes),
         health_conditions: normalizePreferenceIds(healthConditions),
         spice_levels: normalizePreferenceIds(spiceLevels),
-        cooking_methods: normalizePreferenceIds(cookingMethods)
+        cooking_methods: normalizePreferenceIds(cookingMethods),
       });
     }
 
@@ -188,15 +201,18 @@ async function updateUserPreferences(userId, body = {}) {
     ) {
       await saveUserPreferenceState(normalizedUserId, (current) => ({
         ...current,
-        health_context: body.health_context !== undefined
-          ? normalizeHealthContext(body.health_context)
-          : current.health_context || EMPTY_HEALTH_CONTEXT,
-        notification_preferences: body.notification_preferences !== undefined
-          ? normalizeNotificationPreferences(body.notification_preferences)
-          : current.notification_preferences || {},
-        ui_settings: body.ui_settings !== undefined
-          ? normalizeUiSettings(body.ui_settings)
-          : current.ui_settings || {}
+        health_context:
+          body.health_context !== undefined
+            ? normalizeHealthContext(body.health_context)
+            : current.health_context || EMPTY_HEALTH_CONTEXT,
+        notification_preferences:
+          body.notification_preferences !== undefined
+            ? normalizeNotificationPreferences(body.notification_preferences)
+            : current.notification_preferences || {},
+        ui_settings:
+          body.ui_settings !== undefined
+            ? normalizeUiSettings(body.ui_settings)
+            : current.ui_settings || {},
       }));
     }
   } catch (error) {

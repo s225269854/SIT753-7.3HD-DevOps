@@ -1,14 +1,14 @@
 function createLog({
   event_type,
-  severity_level = "LOW",
+  severity_level = 'LOW',
   user_id = null,
-  source_service = "backend",
+  source_service = 'backend',
   ip_address = null,
   endpoint = null,
   method = null,
-  status = "SUCCESS",
-  message = "",
-  metadata = {}
+  status = 'SUCCESS',
+  message = '',
+  metadata = {},
 }) {
   return {
     timestamp: new Date().toISOString(),
@@ -21,7 +21,7 @@ function createLog({
     method,
     status,
     message,
-    metadata
+    metadata,
   };
 }
 

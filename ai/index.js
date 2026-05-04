@@ -1,6 +1,6 @@
 /**
  * ai/index.js
- * 
+ *
  * Main entry point for AI module exports
  * Use this for importing AI functionality anywhere in the application
  */
@@ -14,7 +14,7 @@ const {
   ChatbotAIClientInterface,
   MedicalPredictionAIClientInterface,
   ImageClassificationAIClientInterface,
-  RecommendationAIClientInterface
+  RecommendationAIClientInterface,
 } = require('./interfaces');
 
 // Clients - Direct implementations (advanced use only)
@@ -24,25 +24,25 @@ const {
   ExternalMedicalPredictionClient,
   PythonImageClassificationClient,
   GroqChatbotClient,
-  ChromaRecommendationClient
+  ChromaRecommendationClient,
 } = require('./clients');
 
 // Mocks - For testing
 const {
   MockChatbotClient,
   MockMedicalPredictionClient,
-  MockImageClassificationClient
+  MockImageClassificationClient,
 } = require('./mocks');
 
 /**
  * RECOMMENDED USAGE:
- * 
+ *
  * // In any controller or service
  * const { getAIAdapter } = require('./ai');
- * 
+ *
  * const aiAdapter = getAIAdapter();
  * const response = await aiAdapter.generateChatResponse({ query });
- * 
+ *
  * See ./SUMMARY.md for quick reference
  * See ./README.md for complete architecture guide
  * See ./MIGRATION_GUIDE.md for implementation examples
@@ -72,5 +72,5 @@ module.exports = {
   // Mocks (for testing)
   MockChatbotClient,
   MockMedicalPredictionClient,
-  MockImageClassificationClient
+  MockImageClassificationClient,
 };

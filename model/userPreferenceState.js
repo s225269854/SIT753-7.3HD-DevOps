@@ -1,6 +1,6 @@
-const supabase = require("../dbConnection.js");
+const supabase = require('../dbConnection.js');
 
-const PREFERENCE_STATE_TABLE = "user_preference_states";
+const PREFERENCE_STATE_TABLE = 'user_preference_states';
 
 const EMPTY_HEALTH_CONTEXT = {
   allergies: [],
@@ -22,13 +22,13 @@ function normalizeHealthContext(healthContext = {}) {
 }
 
 function normalizeNotificationPreferences(preferences = {}) {
-  return typeof preferences === "object" && preferences !== null
+  return typeof preferences === 'object' && preferences !== null
     ? preferences
     : EMPTY_NOTIFICATION_PREFERENCES;
 }
 
 function normalizeUiSettings(settings = {}) {
-  return typeof settings === "object" && settings !== null ? settings : EMPTY_UI_SETTINGS;
+  return typeof settings === 'object' && settings !== null ? settings : EMPTY_UI_SETTINGS;
 }
 
 function buildPreferenceState(row = {}) {
@@ -44,8 +44,8 @@ function buildPreferenceState(row = {}) {
 async function getUserPreferenceState(userId) {
   const { data, error } = await supabase
     .from(PREFERENCE_STATE_TABLE)
-    .select("health_context, notification_preferences, ui_settings")
-    .eq("user_id", userId)
+    .select('health_context, notification_preferences, ui_settings')
+    .eq('user_id', userId)
     .maybeSingle();
 
   if (error) {
@@ -57,7 +57,7 @@ async function getUserPreferenceState(userId) {
 
 async function saveUserPreferenceState(userId, updater) {
   const current = await getUserPreferenceState(userId);
-  const nextValue = typeof updater === "function" ? updater(current) : updater;
+  const nextValue = typeof updater === 'function' ? updater(current) : updater;
   const normalized = buildPreferenceState(nextValue);
 
   const payload = {
@@ -69,8 +69,8 @@ async function saveUserPreferenceState(userId, updater) {
 
   const { data, error } = await supabase
     .from(PREFERENCE_STATE_TABLE)
-    .upsert(payload, { onConflict: "user_id" })
-    .select("health_context, notification_preferences, ui_settings")
+    .upsert(payload, { onConflict: 'user_id' })
+    .select('health_context, notification_preferences, ui_settings')
     .single();
 
   if (error) {

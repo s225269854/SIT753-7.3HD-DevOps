@@ -15,5 +15,5 @@ function isServiceError(error) {
 
 module.exports = {
   ServiceError,
-  isServiceError
+  isServiceError,
 };

@@ -19,20 +19,20 @@ describe('User Preferences Controller', () => {
       cooking_methods: [],
       health_context: { allergies: [], chronic_conditions: [], medications: [] },
       notification_preferences: {},
-      ui_settings: {}
+      ui_settings: {},
     });
 
     const controller = proxyquire('../controller/userPreferencesController', {
       '../model/fetchUserPreferences': fetchUserPreferences,
       '../model/updateUserPreferences': sinon.stub(),
       '../services/userPreferencesService': {},
-      '../utils/logger': { error: sinon.stub() }
+      '../utils/logger': { error: sinon.stub() },
     });
 
     const req = { user: { userId: 55 } };
     const res = {
       status: sinon.stub().returnsThis(),
-      json: sinon.stub()
+      json: sinon.stub(),
     };
 
     await controller.getUserPreferences(req, res);
@@ -48,7 +48,7 @@ describe('User Preferences Controller', () => {
       '../model/fetchUserPreferences': sinon.stub(),
       '../model/updateUserPreferences': updateUserPreferences,
       '../services/userPreferencesService': {},
-      '../utils/logger': { error: sinon.stub() }
+      '../utils/logger': { error: sinon.stub() },
     });
 
     const req = {
@@ -60,12 +60,12 @@ describe('User Preferences Controller', () => {
         dislikes: [4],
         health_conditions: [5],
         spice_levels: [6],
-        cooking_methods: [7]
-      }
+        cooking_methods: [7],
+      },
     };
     const res = {
       status: sinon.stub().returnsThis(),
-      send: sinon.stub()
+      send: sinon.stub(),
     };
 
     await controller.postUserPreferences(req, res);
@@ -75,21 +75,21 @@ describe('User Preferences Controller', () => {
   });
 
   it('preserves model statusCode errors on POST', async () => {
-    const updateUserPreferences = sinon.stub().rejects(
-      new ServiceError(400, 'All preference groups are required')
-    );
+    const updateUserPreferences = sinon
+      .stub()
+      .rejects(new ServiceError(400, 'All preference groups are required'));
 
     const controller = proxyquire('../controller/userPreferencesController', {
       '../model/fetchUserPreferences': sinon.stub(),
       '../model/updateUserPreferences': updateUserPreferences,
       '../services/userPreferencesService': {},
-      '../utils/logger': { error: sinon.stub() }
+      '../utils/logger': { error: sinon.stub() },
     });
 
     const req = { user: { userId: 55 }, body: {} };
     const res = {
       status: sinon.stub().returnsThis(),
-      json: sinon.stub()
+      json: sinon.stub(),
     };
 
     await controller.postUserPreferences(req, res);

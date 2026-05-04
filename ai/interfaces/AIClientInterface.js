@@ -1,9 +1,9 @@
 /**
  * AIClientInterface.js
- * 
+ *
  * Base interface for all AI client implementations.
  * All AI service wrappers should implement this interface or a specialized version of it.
- * 
+ *
  * This ensures consistent behavior, error handling, and logging across all AI services.
  */
 
@@ -68,10 +68,10 @@ class AIClientInterface {
       metadata: {
         context,
         errorType: error.constructor.name,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       warnings: [],
-      latencyMs: 0
+      latencyMs: 0,
     };
   }
 
@@ -88,10 +88,10 @@ class AIClientInterface {
       error: null,
       metadata: {
         timestamp: new Date().toISOString(),
-        ...options.metadata
+        ...options.metadata,
       },
       warnings: options.warnings || [],
-      latencyMs: options.latencyMs || 0
+      latencyMs: options.latencyMs || 0,
     };
   }
 

@@ -19,7 +19,9 @@ describe('Chatbot service', () => {
     } catch (error) {
       expect(error).to.be.instanceOf(ServiceError);
       expect(error.statusCode).to.equal(400);
-      expect(error.message).to.equal('Missing required fields: user_id and user_input are required');
+      expect(error.message).to.equal(
+        'Missing required fields: user_id and user_input are required'
+      );
     }
   });
 
@@ -29,8 +31,8 @@ describe('Chatbot service', () => {
       '../model/chatbotHistory': {
         addHistory,
         getHistory: sinon.stub(),
-        deleteHistory: sinon.stub()
-      }
+        deleteHistory: sinon.stub(),
+      },
     });
 
     const service = new ChatbotService();
@@ -42,7 +44,9 @@ describe('Chatbot service', () => {
     );
 
     expect(result.statusCode).to.equal(200);
-    expect(result.body.response_text).to.equal('I understand you\'re asking about "Hello". How can I help you with that?');
+    expect(result.body.response_text).to.equal(
+      'I understand you\'re asking about "Hello". How can I help you with that?'
+    );
     expect(addHistory.calledOnceWith(1, 'Hello', result.body.response_text)).to.equal(true);
   });
 

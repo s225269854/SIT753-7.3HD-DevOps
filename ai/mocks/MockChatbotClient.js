@@ -1,6 +1,6 @@
 /**
  * MockChatbotClient.js
- * 
+ *
  * Mock chatbot client for development and testing.
  * Provides consistent, predictable responses without external dependencies.
  */
@@ -20,9 +20,9 @@ class MockChatbotClient extends ChatbotAIClientInterface {
     }
 
     const { query, userId } = request;
-    
+
     // Simulate processing delay
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Generate mock response based on query keywords
     let responseText = this.generateMockResponse(query);
@@ -37,17 +37,20 @@ class MockChatbotClient extends ChatbotAIClientInterface {
       history.push({ role: 'assistant', content: responseText });
     }
 
-    return this.successResponse({
-      message: responseText,
-      query: query
-    }, {
-      latencyMs: 100,
-      metadata: {
-        source: 'mock_chatbot',
-        mockResponse: true,
-        timestamp: new Date().toISOString()
+    return this.successResponse(
+      {
+        message: responseText,
+        query: query,
+      },
+      {
+        latencyMs: 100,
+        metadata: {
+          source: 'mock_chatbot',
+          mockResponse: true,
+          timestamp: new Date().toISOString(),
+        },
       }
-    });
+    );
   }
 
   generateMockResponse(query) {
@@ -76,16 +79,19 @@ class MockChatbotClient extends ChatbotAIClientInterface {
 
     const history = this.conversationHistories.get(userId) || [];
 
-    return this.successResponse({
-      userId,
-      history,
-      count: history.length
-    }, {
-      latencyMs: 50,
-      metadata: {
-        source: 'mock_chatbot'
+    return this.successResponse(
+      {
+        userId,
+        history,
+        count: history.length,
+      },
+      {
+        latencyMs: 50,
+        metadata: {
+          source: 'mock_chatbot',
+        },
       }
-    });
+    );
   }
 
   async clearConversationHistory(userId) {
@@ -96,13 +102,16 @@ class MockChatbotClient extends ChatbotAIClientInterface {
     const hadHistory = this.conversationHistories.has(userId);
     this.conversationHistories.delete(userId);
 
-    return this.successResponse({
-      userId,
-      cleared: true,
-      hadHistory
-    }, {
-      latencyMs: 50
-    });
+    return this.successResponse(
+      {
+        userId,
+        cleared: true,
+        hadHistory,
+      },
+      {
+        latencyMs: 50,
+      }
+    );
   }
 
   async isHealthy() {
@@ -115,11 +124,11 @@ class MockChatbotClient extends ChatbotAIClientInterface {
       type: 'mock',
       healthy: true,
       activeConversations: this.conversationHistories.size,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
 
 module.exports = {
-  MockChatbotClient
+  MockChatbotClient,
 };

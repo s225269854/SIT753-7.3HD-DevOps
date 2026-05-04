@@ -1,9 +1,9 @@
 /**
  * GroqClient.js
- * 
+ *
  * Template for Groq LLM integration.
  * This is a placeholder for future implementation when Groq integration is stabilized.
- * 
+ *
  * SPRINT 2 MIGRATION: Will replace ExternalChatbotClient for LLM-based responses.
  */
 
@@ -11,7 +11,7 @@ const ChatbotAIClientInterface = require('../interfaces/ChatbotAIClientInterface
 
 /**
  * Groq AI Client - uses Groq API for LLM inference
- * 
+ *
  * Future implementation should:
  * - Connect to Groq API with proper authentication
  * - Handle streaming responses for long outputs
@@ -24,7 +24,7 @@ class GroqChatbotClient extends ChatbotAIClientInterface {
     this.apiKey = config.apiKey || process.env.GROQ_API_KEY;
     this.model = config.model || process.env.GROQ_MODEL || 'mixtral-8x7b-32768';
     this.baseUrl = config.baseUrl || 'https://api.groq.com/api/v1';
-    
+
     if (!this.apiKey) {
       console.warn('Groq API key not configured - GroqChatbotClient will not be functional');
     }
@@ -37,7 +37,7 @@ class GroqChatbotClient extends ChatbotAIClientInterface {
     // 3. Call Groq API
     // 4. Handle streaming if enabled
     // 5. Return standardized response
-    
+
     return this.errorResponse(
       new Error('GroqChatbotClient not yet implemented'),
       'generateResponse'
@@ -72,11 +72,11 @@ class GroqChatbotClient extends ChatbotAIClientInterface {
       model: this.model,
       configured: !!this.apiKey,
       baseUrl: this.baseUrl,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
 
 module.exports = {
-  GroqChatbotClient
+  GroqChatbotClient,
 };

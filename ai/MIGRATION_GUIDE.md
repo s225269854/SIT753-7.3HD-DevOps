@@ -9,16 +9,18 @@ This guide provides step-by-step instructions for updating backend controllers t
 ### Pattern 1: Direct HTTP Calls to External AI Server
 
 **Before:**
+
 ```javascript
 const result = await fetch('http://localhost:8000/ai-model/chatbot/chat', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ query: userInput })
+  body: JSON.stringify({ query: userInput }),
 });
 const data = await result.json();
 ```
 
 **After:**
+
 ```javascript
 const { getAIAdapter } = require('./ai/adapters');
 const aiAdapter = getAIAdapter();
@@ -30,15 +32,17 @@ const response = await aiAdapter.generateChatResponse({ query: userInput });
 ### Pattern 2: Python Script Execution
 
 **Before:**
+
 ```javascript
 const { executePythonScript } = require('./services/aiExecutionService');
 const result = await executePythonScript({
   scriptPath: './model/imageClassification.py',
-  stdin: imageData
+  stdin: imageData,
 });
 ```
 
 **After:**
+
 ```javascript
 const { getAIAdapter } = require('./ai/adapters');
 const aiAdapter = getAIAdapter();
@@ -54,35 +58,35 @@ const response = await aiAdapter.classifyFoodImage({ imageData });
 **Current Location:** `controller/chatbotController.js`
 
 **Original Code:**
+
 ```javascript
 const { addHistory, getHistory, deleteHistory } = require('../model/chatbotHistory');
-const fetch = (...args) =>
-  import('node-fetch').then(({default: fetch}) => fetch(...args));
+const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fetch(...args));
 
 const getChatResponse = async (req, res) => {
   const { user_id, user_input } = req.body;
 
   try {
     if (!user_id || !user_input) {
-      return res.status(400).json({ error: "Missing required fields" });
+      return res.status(400).json({ error: 'Missing required fields' });
     }
 
     let responseText = `I understand you're asking about "${user_input}". How can I help?`;
-    
+
     try {
       //   DIRECT EXTERNAL CALL
-      const ai_response = await fetch("http://localhost:8000/ai-model/chatbot/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ "query": user_input })
+      const ai_response = await fetch('http://localhost:8000/ai-model/chatbot/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: user_input }),
       });
-      
+
       const result = await ai_response.json();
       if (result && result.msg) {
         responseText = result.msg;
       }
     } catch (aiError) {
-      console.error("Error connecting to AI server:", aiError);
+      console.error('Error connecting to AI server:', aiError);
     }
 
     res.json({ success: true, msg: responseText });
@@ -96,9 +100,10 @@ module.exports = { getChatResponse };
 ```
 
 **Migrated Code:**
+
 ```javascript
 const { addHistory, getHistory, deleteHistory } = require('../model/chatbotHistory');
-const { getAIAdapter } = require('../ai/adapters');  // ✅ NEW IMPORT
+const { getAIAdapter } = require('../ai/adapters'); // ✅ NEW IMPORT
 
 const getChatResponse = async (req, res) => {
   const { user_id, user_input } = req.body;
@@ -106,28 +111,28 @@ const getChatResponse = async (req, res) => {
   try {
     // Validate input
     if (!user_id || !user_input) {
-      return res.status(400).json({ error: "Missing required fields" });
+      return res.status(400).json({ error: 'Missing required fields' });
     }
 
     // ✅ USE AI ADAPTER INSTEAD OF DIRECT CALL
     const aiAdapter = getAIAdapter();
     const response = await aiAdapter.generateChatResponse(
-      { 
+      {
         query: user_input,
-        userId: user_id
+        userId: user_id,
       },
-      { 
-        requestId: `chat_${user_id}_${Date.now()}` 
+      {
+        requestId: `chat_${user_id}_${Date.now()}`,
       }
     );
 
     // Check response
     if (!response.success) {
-      console.error("AI service error:", response.error);
+      console.error('AI service error:', response.error);
       // Fallback response
       return res.json({
         success: true,
-        msg: `I understand you're asking about "${user_input}". How can I help?`
+        msg: `I understand you're asking about "${user_input}". How can I help?`,
       });
     }
 
@@ -135,7 +140,7 @@ const getChatResponse = async (req, res) => {
     res.json({
       success: true,
       msg: response.data.message,
-      latency: response.latencyMs
+      latency: response.latencyMs,
     });
   } catch (error) {
     console.error('Error in getChatResponse:', error);
@@ -147,6 +152,7 @@ module.exports = { getChatResponse };
 ```
 
 **Benefits of Migration:**
+
 - ✅ No more manual fetch calls
 - ✅ Consistent error handling
 - ✅ Automatic fallback to mock if external service fails
@@ -160,6 +166,7 @@ module.exports = { getChatResponse };
 **Current Location:** `controller/imageClassificationController.js`
 
 **Original Code:**
+
 ```javascript
 const fs = require('fs');
 const path = require('path');
@@ -175,7 +182,7 @@ const predictImage = async (req, res) => {
   if (!req.file || !req.file.path) {
     return res.status(400).json({
       success: false,
-      error: 'No image uploaded.'
+      error: 'No image uploaded.',
     });
   }
 
@@ -186,21 +193,21 @@ const predictImage = async (req, res) => {
     //   DIRECT PYTHON SCRIPT EXECUTION
     const result = await executePythonScript({
       scriptPath: path.join(__dirname, '..', 'model', 'imageClassification.py'),
-      stdin: imageData
+      stdin: imageData,
     });
 
     if (!result.success) {
       const statusCode = result.timedOut ? 504 : 500;
       return res.status(statusCode).json({
         success: false,
-        error: result.error || 'Model execution failed.'
+        error: result.error || 'Model execution failed.',
       });
     }
 
     res.json({
       success: true,
       prediction: result.prediction,
-      confidence: result.confidence
+      confidence: result.confidence,
     });
   } catch (error) {
     console.error('Error:', error);
@@ -214,9 +221,10 @@ module.exports = { predictImage };
 ```
 
 **Migrated Code:**
+
 ```javascript
 const fs = require('fs');
-const { getAIAdapter } = require('../ai/adapters');  // ✅ NEW IMPORT
+const { getAIAdapter } = require('../ai/adapters'); // ✅ NEW IMPORT
 
 const deleteFile = (filePath) => {
   fs.unlink(filePath, (err) => {
@@ -228,7 +236,7 @@ const predictImage = async (req, res) => {
   if (!req.file || !req.file.path) {
     return res.status(400).json({
       success: false,
-      error: 'No image uploaded.'
+      error: 'No image uploaded.',
     });
   }
 
@@ -237,20 +245,17 @@ const predictImage = async (req, res) => {
   try {
     // Read image data
     const imageData = await fs.promises.readFile(imagePath);
-    
+
     // ✅ USE AI ADAPTER
     const aiAdapter = getAIAdapter();
-    const response = await aiAdapter.classifyFoodImage(
-      { imageData },
-      { timeout: 60000 }
-    );
+    const response = await aiAdapter.classifyFoodImage({ imageData }, { timeout: 60000 });
 
     // Check response
     if (!response.success) {
       const statusCode = response.latencyMs > 60000 ? 504 : 500;
       return res.status(statusCode).json({
         success: false,
-        error: response.error
+        error: response.error,
       });
     }
 
@@ -259,13 +264,13 @@ const predictImage = async (req, res) => {
       success: true,
       prediction: response.data.prediction,
       confidence: response.data.confidence,
-      nutritionInfo: response.data.nutritionInfo
+      nutritionInfo: response.data.nutritionInfo,
     });
   } catch (error) {
     console.error('Error in predictImage:', error);
     res.status(500).json({
       success: false,
-      error: 'Internal server error'
+      error: 'Internal server error',
     });
   } finally {
     deleteFile(imagePath);
@@ -276,6 +281,7 @@ module.exports = { predictImage };
 ```
 
 **Benefits:**
+
 - ✅ Abstracted away from specific Python implementation
 - ✅ Can switch to Groq vision model in future
 - ✅ Better error handling and timeouts
@@ -288,10 +294,10 @@ module.exports = { predictImage };
 **Current Location:** `controller/medicalPredictionController.js`
 
 **Original Code:**
+
 ```javascript
 const AI_RETRIEVE_URL =
-  process.env.AI_RETRIEVE_URL ||
-  "http://localhost:8000/ai-model/medical-report/retrieve";
+  process.env.AI_RETRIEVE_URL || 'http://localhost:8000/ai-model/medical-report/retrieve';
 
 const getPrediction = async (req, res) => {
   const { userId } = req.body;
@@ -299,9 +305,9 @@ const getPrediction = async (req, res) => {
   try {
     //   DIRECT EXTERNAL API CALL
     const result = await fetch(AI_RETRIEVE_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId })
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId }),
     });
 
     const data = await result.json();
@@ -321,8 +327,9 @@ module.exports = { getPrediction };
 ```
 
 **Migrated Code:**
+
 ```javascript
-const { getAIAdapter } = require('../ai/adapters');  // ✅ NEW IMPORT
+const { getAIAdapter } = require('../ai/adapters'); // ✅ NEW IMPORT
 
 const getPrediction = async (req, res) => {
   const { userId } = req.body;
@@ -336,26 +343,26 @@ const getPrediction = async (req, res) => {
     const aiAdapter = getAIAdapter();
     const response = await aiAdapter.retrieveMedicalReport(
       { userId },
-      { timeout: 45000 }  // Longer timeout for complex reports
+      { timeout: 45000 } // Longer timeout for complex reports
     );
 
     if (!response.success) {
       return res.status(500).json({
         error: response.error,
-        success: false
+        success: false,
       });
     }
 
     res.json({
       success: true,
       data: response.data,
-      msg: response.data.msg || 'Report retrieved successfully'
+      msg: response.data.msg || 'Report retrieved successfully',
     });
   } catch (error) {
     console.error('Error in getPrediction:', error);
     res.status(500).json({
       error: error.message,
-      success: false
+      success: false,
     });
   }
 };
@@ -364,6 +371,7 @@ module.exports = { getPrediction };
 ```
 
 **Benefits:**
+
 - ✅ No hardcoded URLs
 - ✅ Configuration-driven
 - ✅ Easy to test with mocks
@@ -376,6 +384,7 @@ module.exports = { getPrediction };
 ### Controllers to Update (Priority Order)
 
 #### High Priority (Core AI Features)
+
 - [ ] `controller/chatbotController.js` - Chatbot responses
 - [ ] `controller/medicalPredictionController.js` - Health predictions
 - [ ] `controller/imageClassificationController.js` - Food image classification
@@ -383,12 +392,14 @@ module.exports = { getPrediction };
 - [ ] `controller/recipeImageClassificationController.js` - Recipe images
 
 #### Medium Priority (Related Features)
+
 - [ ] `controller/healthToolsController.js` - If it uses AI
 - [ ] `controller/recommendationController.js` - Recommendations
 - [ ] `controller/mealplanController.js` - Meal planning
 - [ ] `controller/recipeNutritionController.js` - Nutrition analysis
 
 #### Low Priority (Can Wait)
+
 - [ ] Any other controllers that touch AI services
 
 ---
@@ -406,26 +417,26 @@ describe('Chatbot Controller Migration', () => {
   beforeEach(() => {
     // Use mocks for testing
     process.env.AI_USE_MOCK = 'true';
-    
+
     mockReq = {
-      body: { user_id: 'test_user', user_input: 'test query' }
+      body: { user_id: 'test_user', user_input: 'test query' },
     };
 
     mockRes = {
       json: jest.fn().mockReturnThis(),
-      status: jest.fn().mockReturnThis()
+      status: jest.fn().mockReturnThis(),
     };
   });
 
   it('should use AIAdapter for chat responses', async () => {
     const { getChatResponse } = require('../../controller/chatbotController');
-    
+
     await getChatResponse(mockReq, mockRes);
 
     expect(mockRes.json).toHaveBeenCalledWith(
       expect.objectContaining({
         success: true,
-        msg: expect.any(String)
+        msg: expect.any(String),
       })
     );
   });
@@ -444,7 +455,7 @@ describe('AI Adapter Integration', () => {
     const aiAdapter = new AIAdapter({ useMock: false });
 
     const response = await aiAdapter.generateChatResponse({
-      query: 'test'
+      query: 'test',
     });
 
     // Should still return valid response structure
@@ -462,10 +473,12 @@ describe('AI Adapter Integration', () => {
 If migration causes issues:
 
 1. **Keep using old pattern temporarily**
+
    - Controllers can use both old and new patterns simultaneously
    - No all-or-nothing commitment required
 
 2. **Add feature flag**
+
    ```javascript
    const useNewAI = process.env.USE_NEW_AI_ADAPTER === 'true';
 
@@ -495,6 +508,7 @@ If migration causes issues:
 **Error:** `Cannot find module '../ai/adapters'`
 
 **Solution:** Check your file location relative to `ai/adapters/index.js`
+
 ```javascript
 // If in controller/
 const { getAIAdapter } = require('../ai/adapters');
@@ -511,6 +525,7 @@ const { getAIAdapter } = require('../ai/adapters');
 **Error:** `Cannot read property 'message' of undefined`
 
 **Solution:** Check response structure
+
 ```javascript
 const response = await aiAdapter.generateChatResponse({...});
 
@@ -520,14 +535,15 @@ if (response.success) {
 }
 
 // Incorrect:
-console.log(response.message);  //  
+console.log(response.message);  //
 ```
 
 ### Issue 3: Mock vs. Real Service Behavior Differs
 
 **Problem:** Works with mocks but fails with real service
 
-**Solution:** 
+**Solution:**
+
 1. Check error logs: `response.error`
 2. Verify input format matches service expectations
 3. Test with both mocks and real service locally

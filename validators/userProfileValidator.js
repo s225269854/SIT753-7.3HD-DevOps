@@ -32,20 +32,47 @@ const updateUserProfileValidation = [
     .withMessage('email must be a valid email address')
     .customSanitizer(sanitizeEmail),
   body('profile').optional().isObject().withMessage('profile must be an object'),
-  body('profile.name').optional({ nullable: true }).isString().withMessage('profile.name must be a string').trim(),
-  body('profile.username').optional({ nullable: true }).isString().withMessage('profile.username must be a string').trim(),
-  body('profile.firstName').optional({ nullable: true }).isString().withMessage('profile.firstName must be a string').trim(),
-  body('profile.lastName').optional({ nullable: true }).isString().withMessage('profile.lastName must be a string').trim(),
-  body('profile.contactNumber').optional({ nullable: true }).isString().withMessage('profile.contactNumber must be a string').trim(),
-  body('profile.address').optional({ nullable: true }).isString().withMessage('profile.address must be a string').trim(),
-  body('profile.userImage').optional({ nullable: true }).isString().withMessage('profile.userImage must be a string'),
+  body('profile.name')
+    .optional({ nullable: true })
+    .isString()
+    .withMessage('profile.name must be a string')
+    .trim(),
+  body('profile.username')
+    .optional({ nullable: true })
+    .isString()
+    .withMessage('profile.username must be a string')
+    .trim(),
+  body('profile.firstName')
+    .optional({ nullable: true })
+    .isString()
+    .withMessage('profile.firstName must be a string')
+    .trim(),
+  body('profile.lastName')
+    .optional({ nullable: true })
+    .isString()
+    .withMessage('profile.lastName must be a string')
+    .trim(),
+  body('profile.contactNumber')
+    .optional({ nullable: true })
+    .isString()
+    .withMessage('profile.contactNumber must be a string')
+    .trim(),
+  body('profile.address')
+    .optional({ nullable: true })
+    .isString()
+    .withMessage('profile.address must be a string')
+    .trim(),
+  body('profile.userImage')
+    .optional({ nullable: true })
+    .isString()
+    .withMessage('profile.userImage must be a string'),
   body('profile.email')
     .optional({ nullable: true })
     .isEmail()
     .withMessage('profile.email must be a valid email address')
-    .customSanitizer(sanitizeEmail)
+    .customSanitizer(sanitizeEmail),
 ];
 
 module.exports = {
-  updateUserProfileValidation
+  updateUserProfileValidation,
 };

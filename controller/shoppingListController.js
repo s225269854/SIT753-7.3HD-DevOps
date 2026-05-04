@@ -8,14 +8,14 @@ function handleError(res, error, label) {
   if (isServiceError(error)) {
     return res.status(error.statusCode).json({
       error: error.message,
-      statusCode: error.statusCode
+      statusCode: error.statusCode,
     });
   }
 
   console.error(`${label} error:`, error);
   return res.status(500).json({
     error: 'Internal server error',
-    statusCode: 500
+    statusCode: 500,
   });
 }
 
@@ -36,7 +36,7 @@ async function generateFromMealPlan(req, res) {
   try {
     const result = await shoppingListService.generateFromMealPlan({
       userId: req.body.user_id,
-      mealPlanIds: req.body.meal_plan_ids
+      mealPlanIds: req.body.meal_plan_ids,
     });
     return handleServiceResult(res, result);
   } catch (error) {
@@ -50,7 +50,7 @@ async function createShoppingList(req, res) {
       userId: req.body.user_id,
       name: req.body.name,
       items: req.body.items,
-      estimatedTotalCost: req.body.estimated_total_cost
+      estimatedTotalCost: req.body.estimated_total_cost,
     });
     return handleServiceResult(res, result);
   } catch (error) {
@@ -72,7 +72,7 @@ async function updateShoppingListItem(req, res) {
     const result = await shoppingListService.updateShoppingListItem(req.params.id, {
       purchased: req.body.purchased,
       quantity: req.body.quantity,
-      notes: req.body.notes
+      notes: req.body.notes,
     });
     return handleServiceResult(res, result);
   } catch (error) {
@@ -91,7 +91,7 @@ async function addShoppingListItem(req, res) {
       measurement: req.body.measurement,
       notes: req.body.notes,
       mealTags: req.body.meal_tags,
-      estimatedCost: req.body.estimated_cost
+      estimatedCost: req.body.estimated_cost,
     });
     return handleServiceResult(res, result);
   } catch (error) {
@@ -115,5 +115,5 @@ module.exports = {
   getShoppingList,
   addShoppingListItem,
   updateShoppingListItem,
-  deleteShoppingListItem
+  deleteShoppingListItem,
 };

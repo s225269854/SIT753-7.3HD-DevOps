@@ -7,6 +7,7 @@ This is the backend API for the NutriHelp project. It exposes the REST endpoints
 The root backend runtime now enforces TLS 1.3 only for HTTPS connections, adds HSTS headers, and redirects HTTP traffic to HTTPS.
 
 ### TLS Configuration
+
 - **Protocol**: TLS 1.3 only (minVersion + maxVersion enforced)
 - **HSTS**: 2-year max-age with subdomains and preload
 - **Redirect**: HTTP requests automatically redirect to HTTPS
@@ -16,27 +17,32 @@ The root backend runtime now enforces TLS 1.3 only for HTTPS connections, adds H
 ### Verification Commands
 
 **Test TLS 1.3 Connection:**
+
 ```bash
 openssl s_client -connect localhost:443 -tls1_3
 ```
 
 **Test TLS 1.2 Block (should fail):**
+
 ```bash
 openssl s_client -connect localhost:443 -tls1_2
 ```
 
 **Check HSTS Header:**
+
 ```bash
 curl -k -I https://localhost:443/api/system/health | grep -i strict-transport-security
 ```
 
 **Test HTTP Redirect:**
+
 ```bash
 curl -I http://localhost:80/api/system/health
 # Should return 301 redirect to https://localhost:443/api/system/health
 ```
 
 **Certificate Verification:**
+
 ```bash
 openssl x509 -in certs/local-cert.pem -text -noout
 ```
@@ -261,25 +267,25 @@ docker compose exec api npm test
 
 Required runtime components currently used by this repository:
 
-| Component | Version / Source | Notes |
-| --- | --- | --- |
-| Node.js | `22-bookworm` image pinned by digest | Backend runtime |
-| Python | `3.11` via Debian Bookworm packages | Used by AI routes |
-| TensorFlow | `2.17.0` | Image classification runtime |
-| numpy | `1.26.4` | TensorFlow-compatible numerical runtime |
-| matplotlib | `3.9.2` | Required by `model/imageClassification.py` imports |
-| pandas | `2.2.3` | Required by `model/imageClassification.py` imports |
-| seaborn | `0.13.2` | Required by `model/imageClassification.py` imports |
-| scikit-learn | `1.5.2` | Required by `model/imageClassification.py` imports |
-| Pillow | `9.5.0` | Image preprocessing |
-| h5py | `3.10.0` | Keras model loading |
-| python-docx | `1.1.2` | Document-processing utilities |
-| build-essential | Debian package | Native build dependency for Python wheels |
+| Component       | Version / Source                     | Notes                                              |
+| --------------- | ------------------------------------ | -------------------------------------------------- |
+| Node.js         | `22-bookworm` image pinned by digest | Backend runtime                                    |
+| Python          | `3.11` via Debian Bookworm packages  | Used by AI routes                                  |
+| TensorFlow      | `2.17.0`                             | Image classification runtime                       |
+| numpy           | `1.26.4`                             | TensorFlow-compatible numerical runtime            |
+| matplotlib      | `3.9.2`                              | Required by `model/imageClassification.py` imports |
+| pandas          | `2.2.3`                              | Required by `model/imageClassification.py` imports |
+| seaborn         | `0.13.2`                             | Required by `model/imageClassification.py` imports |
+| scikit-learn    | `1.5.2`                              | Required by `model/imageClassification.py` imports |
+| Pillow          | `9.5.0`                              | Image preprocessing                                |
+| h5py            | `3.10.0`                             | Keras model loading                                |
+| python-docx     | `1.1.2`                              | Document-processing utilities                      |
+| build-essential | Debian package                       | Native build dependency for Python wheels          |
 
 Optional or troubleshooting-only runtime component:
 
-| Component | Notes |
-| --- | --- |
+| Component                         | Notes                                                                        |
+| --------------------------------- | ---------------------------------------------------------------------------- |
 | `INSTALL_PY_DEPS=false` build arg | Lets the image build without Python AI dependencies for troubleshooting only |
 
 ## Environment Validation

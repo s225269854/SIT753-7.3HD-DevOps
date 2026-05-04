@@ -1,6 +1,6 @@
-const { expect } = require("chai");
-const sinon = require("sinon");
-const proxyquire = require("proxyquire").noCallThru();
+const { expect } = require('chai');
+const sinon = require('sinon');
+const proxyquire = require('proxyquire').noCallThru();
 
 function createRes() {
   return {
@@ -17,7 +17,7 @@ function createRes() {
   };
 }
 
-describe("passwordController", () => {
+describe('passwordController', () => {
   let validationResultStub;
   let passwordResetService;
   let controller;
@@ -34,9 +34,9 @@ describe("passwordController", () => {
       resetPassword: sinon.stub(),
     };
 
-    controller = proxyquire("../controller/passwordController", {
-      "express-validator": { validationResult: validationResultStub },
-      "../services/passwordResetService": passwordResetService,
+    controller = proxyquire('../controller/passwordController', {
+      'express-validator': { validationResult: validationResultStub },
+      '../services/passwordResetService': passwordResetService,
     });
   });
 
@@ -44,17 +44,17 @@ describe("passwordController", () => {
     sinon.restore();
   });
 
-  it("returns the generic request-reset success envelope", async () => {
+  it('returns the generic request-reset success envelope', async () => {
     const req = {
-      body: { email: "user@example.com" },
-      ip: "127.0.0.1",
-      get: sinon.stub().returns("test-agent"),
+      body: { email: 'user@example.com' },
+      ip: '127.0.0.1',
+      get: sinon.stub().returns('test-agent'),
     };
     const res = createRes();
 
     passwordResetService.requestReset.resolves({
       success: true,
-      message: "If that email exists, a verification code was sent.",
+      message: 'If that email exists, a verification code was sent.',
     });
 
     await controller.requestReset(req, res);
@@ -64,14 +64,14 @@ describe("passwordController", () => {
     expect(passwordResetService.requestReset.calledOnce).to.equal(true);
   });
 
-  it("surfaces invalid or expired verification-code errors safely", async () => {
+  it('surfaces invalid or expired verification-code errors safely', async () => {
     const req = {
-      body: { email: "user@example.com", code: "123456" },
-      ip: "127.0.0.1",
-      get: sinon.stub().returns("test-agent"),
+      body: { email: 'user@example.com', code: '123456' },
+      ip: '127.0.0.1',
+      get: sinon.stub().returns('test-agent'),
     };
     const res = createRes();
-    const error = new Error("Verification code is invalid or has expired");
+    const error = new Error('Verification code is invalid or has expired');
     error.status = 401;
 
     passwordResetService.verifyCode.rejects(error);
@@ -79,48 +79,48 @@ describe("passwordController", () => {
     await controller.verifyCode(req, res);
 
     expect(res.statusCode).to.equal(401);
-    expect(res.body.error).to.equal("Verification code is invalid or has expired");
+    expect(res.body.error).to.equal('Verification code is invalid or has expired');
   });
 
-  it("returns a reset token when the verification code is valid", async () => {
+  it('returns a reset token when the verification code is valid', async () => {
     const req = {
-      body: { email: "user@example.com", code: "123456" },
-      ip: "127.0.0.1",
-      get: sinon.stub().returns("test-agent"),
+      body: { email: 'user@example.com', code: '123456' },
+      ip: '127.0.0.1',
+      get: sinon.stub().returns('test-agent'),
     };
     const res = createRes();
 
     passwordResetService.verifyCode.resolves({
       success: true,
-      message: "Verification code accepted.",
-      resetToken: "reset-token",
+      message: 'Verification code accepted.',
+      resetToken: 'reset-token',
       expiresIn: 900,
     });
 
     await controller.verifyCode(req, res);
 
     expect(res.statusCode).to.equal(200);
-    expect(res.body.resetToken).to.equal("reset-token");
+    expect(res.body.resetToken).to.equal('reset-token');
   });
 
-  it("resets the password after a valid token exchange", async () => {
+  it('resets the password after a valid token exchange', async () => {
     const req = {
       body: {
-        email: "user@example.com",
-        resetToken: "reset-token",
-        newPassword: "Stronger!1",
+        email: 'user@example.com',
+        resetToken: 'reset-token',
+        newPassword: 'Stronger!1',
       },
     };
     const res = createRes();
 
     passwordResetService.resetPassword.resolves({
       success: true,
-      message: "Password updated successfully.",
+      message: 'Password updated successfully.',
     });
 
     await controller.resetPassword(req, res);
 
     expect(res.statusCode).to.equal(200);
-    expect(res.body.message).to.equal("Password updated successfully.");
+    expect(res.body.message).to.equal('Password updated successfully.');
   });
 });

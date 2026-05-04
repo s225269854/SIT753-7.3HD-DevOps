@@ -10,7 +10,7 @@ async function predict(req, res) {
     if (isServiceError(error)) {
       return res.status(error.statusCode).json({
         error: error.message,
-        ...(error.details || {})
+        ...(error.details || {}),
       });
     }
 

@@ -7,12 +7,12 @@
  * delta plus an explanation tag.
  */
 
-const PROTEIN_GOOD_MIN = 15;  // grams
-const FIBER_GOOD_MIN = 5;      // grams
-const SODIUM_OK_MAX = 600;     // mg
-const SODIUM_HIGH = 1200;      // mg
-const SUGAR_OK_MAX = 15;       // g
-const SUGAR_HIGH = 30;         // g
+const PROTEIN_GOOD_MIN = 15; // grams
+const FIBER_GOOD_MIN = 5; // grams
+const SODIUM_OK_MAX = 600; // mg
+const SODIUM_HIGH = 1200; // mg
+const SUGAR_OK_MAX = 15; // g
+const SUGAR_HIGH = 30; // g
 const CALORIE_IDEAL_MIN = 300; // kcal per meal
 const CALORIE_IDEAL_MAX = 700; // kcal per meal
 
@@ -39,7 +39,11 @@ function evaluate(recipe) {
   if (protein != null) {
     if (protein >= PROTEIN_GOOD_MIN) {
       out.score += 6;
-      out.reasons.push({ tag: 'balanced_protein', message: `Delivers ${protein}g of protein — a strong hit toward a balanced meal.`, weight: 6 });
+      out.reasons.push({
+        tag: 'balanced_protein',
+        message: `Delivers ${protein}g of protein — a strong hit toward a balanced meal.`,
+        weight: 6,
+      });
     }
     out.breakdown.protein = protein;
   }
@@ -55,10 +59,18 @@ function evaluate(recipe) {
   if (sodium != null) {
     if (sodium <= SODIUM_OK_MAX) {
       out.score += 4;
-      out.reasons.push({ tag: 'balanced_sodium', message: `Sodium is within a typical per-meal range (${sodium}mg).`, weight: 4 });
+      out.reasons.push({
+        tag: 'balanced_sodium',
+        message: `Sodium is within a typical per-meal range (${sodium}mg).`,
+        weight: 4,
+      });
     } else if (sodium > SODIUM_HIGH) {
       out.score -= 6;
-      out.warnings.push({ tag: 'sodium_high', message: `Sodium ${sodium}mg is higher than most meal targets.`, severity: 'info' });
+      out.warnings.push({
+        tag: 'sodium_high',
+        message: `Sodium ${sodium}mg is higher than most meal targets.`,
+        severity: 'info',
+      });
     }
     out.breakdown.sodium = sodium;
   }
@@ -66,10 +78,18 @@ function evaluate(recipe) {
   if (sugar != null) {
     if (sugar <= SUGAR_OK_MAX) {
       out.score += 3;
-      out.reasons.push({ tag: 'balanced_sugar', message: `Sugar is moderate (${sugar}g).`, weight: 3 });
+      out.reasons.push({
+        tag: 'balanced_sugar',
+        message: `Sugar is moderate (${sugar}g).`,
+        weight: 3,
+      });
     } else if (sugar > SUGAR_HIGH) {
       out.score -= 5;
-      out.warnings.push({ tag: 'sugar_high', message: `Sugar ${sugar}g is on the high side.`, severity: 'info' });
+      out.warnings.push({
+        tag: 'sugar_high',
+        message: `Sugar ${sugar}g is on the high side.`,
+        severity: 'info',
+      });
     }
     out.breakdown.sugar = sugar;
   }
@@ -77,7 +97,11 @@ function evaluate(recipe) {
   if (calories != null) {
     if (calories >= CALORIE_IDEAL_MIN && calories <= CALORIE_IDEAL_MAX) {
       out.score += 4;
-      out.reasons.push({ tag: 'balanced_calories', message: `Calorie count (${calories} kcal) fits a typical main-meal window.`, weight: 4 });
+      out.reasons.push({
+        tag: 'balanced_calories',
+        message: `Calorie count (${calories} kcal) fits a typical main-meal window.`,
+        weight: 4,
+      });
     }
     out.breakdown.calories = calories;
   }
@@ -97,5 +121,5 @@ module.exports = {
   SUGAR_HIGH,
   CALORIE_IDEAL_MIN,
   CALORIE_IDEAL_MAX,
-  evaluate
+  evaluate,
 };

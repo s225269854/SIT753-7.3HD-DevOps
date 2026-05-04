@@ -1,8 +1,8 @@
 /**
  * ai/adapters/ExampleUsage.js
- * 
+ *
  * Example showing how controllers should use the AI adapter
- * 
+ *
  * BEFORE (Old Pattern - Direct calls to external services):
  * ```
  * const fetch = require('node-fetch');
@@ -11,7 +11,7 @@
  *   body: JSON.stringify({ query })
  * });
  * ```
- * 
+ *
  * AFTER (New Pattern - Through AIAdapter):
  * ```
  * const { getAIAdapter } = require('../../ai/adapters');
@@ -26,7 +26,7 @@
 
 /**
  * Example: Update chatbotController.js to use AIAdapter
- * 
+ *
  * OLD CODE:
  * ```javascript
  * const getChatResponse = async (req, res) => {
@@ -40,7 +40,7 @@
  *   res.json(result);
  * };
  * ```
- * 
+ *
  * NEW CODE:
  */
 async function getChatResponse_NEW(req, res) {
@@ -49,34 +49,34 @@ async function getChatResponse_NEW(req, res) {
 
   try {
     const aiAdapter = getAIAdapter();
-    
+
     const response = await aiAdapter.generateChatResponse(
-      { 
+      {
         query: user_input,
-        userId: user_id 
+        userId: user_id,
       },
-      { 
-        requestId: `chat_${Date.now()}_${user_id}` 
+      {
+        requestId: `chat_${Date.now()}_${user_id}`,
       }
     );
 
     if (!response.success) {
       return res.status(500).json({
         error: response.error,
-        msg: 'Failed to generate response'
+        msg: 'Failed to generate response',
       });
     }
 
     res.json({
       msg: response.data.message,
       success: true,
-      latency: response.latencyMs
+      latency: response.latencyMs,
     });
   } catch (error) {
     console.error('Error in getChatResponse:', error);
     res.status(500).json({
       error: error.message,
-      msg: 'Internal server error'
+      msg: 'Internal server error',
     });
   }
 }
@@ -87,7 +87,7 @@ async function getChatResponse_NEW(req, res) {
 
 /**
  * Example: Update medicalPredictionController.js
- * 
+ *
  * OLD CODE:
  * ```javascript
  * const result = await fetch("http://localhost:8000/ai-model/medical-report/retrieve", {
@@ -95,7 +95,7 @@ async function getChatResponse_NEW(req, res) {
  *   body: JSON.stringify({ userId, reportId })
  * });
  * ```
- * 
+ *
  * NEW CODE:
  */
 async function retrieveMedicalReport_NEW(req, res) {
@@ -104,28 +104,28 @@ async function retrieveMedicalReport_NEW(req, res) {
 
   try {
     const aiAdapter = getAIAdapter();
-    
+
     const response = await aiAdapter.retrieveMedicalReport(
-      { 
+      {
         userId: user_id,
-        reportId: report_id 
+        reportId: report_id,
       },
-      { 
-        timeout: 45000 // Longer timeout for complex reports
+      {
+        timeout: 45000, // Longer timeout for complex reports
       }
     );
 
     if (!response.success) {
       return res.status(500).json({
         error: response.error,
-        msg: 'Failed to retrieve report'
+        msg: 'Failed to retrieve report',
       });
     }
 
     res.json({
       msg: response.data.msg || 'Report retrieved successfully',
       success: true,
-      data: response.data
+      data: response.data,
     });
   } catch (error) {
     console.error('Error retrieving medical report:', error);
@@ -139,7 +139,7 @@ async function retrieveMedicalReport_NEW(req, res) {
 
 /**
  * Example: Update imageClassificationController.js
- * 
+ *
  * OLD CODE:
  * ```javascript
  * const result = await executePythonScript({
@@ -147,7 +147,7 @@ async function retrieveMedicalReport_NEW(req, res) {
  *   stdin: imageData
  * });
  * ```
- * 
+ *
  * NEW CODE:
  */
 async function classifyFoodImage_NEW(req, res) {
@@ -157,18 +157,15 @@ async function classifyFoodImage_NEW(req, res) {
   if (!req.file || !req.file.path) {
     return res.status(400).json({
       success: false,
-      error: 'No image uploaded.'
+      error: 'No image uploaded.',
     });
   }
 
   try {
     const imageData = await fs.promises.readFile(req.file.path);
     const aiAdapter = getAIAdapter();
-    
-    const response = await aiAdapter.classifyFoodImage(
-      { imageData },
-      { timeout: 60000 }
-    );
+
+    const response = await aiAdapter.classifyFoodImage({ imageData }, { timeout: 60000 });
 
     // Clean up uploaded file
     fs.unlink(req.file.path, (err) => {
@@ -178,7 +175,7 @@ async function classifyFoodImage_NEW(req, res) {
     if (!response.success) {
       return res.status(500).json({
         success: false,
-        error: response.error
+        error: response.error,
       });
     }
 
@@ -186,13 +183,13 @@ async function classifyFoodImage_NEW(req, res) {
       success: true,
       prediction: response.data.prediction,
       confidence: response.data.confidence,
-      nutritionInfo: response.data.nutritionInfo
+      nutritionInfo: response.data.nutritionInfo,
     });
   } catch (error) {
     console.error('Error classifying food image:', error);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 }
@@ -210,16 +207,16 @@ async function checkAIHealth(req, res) {
   try {
     const aiAdapter = getAIAdapter();
     const health = await aiAdapter.checkSystemHealth();
-    
+
     res.json({
       status: health.overallHealthy ? 'healthy' : 'degraded',
       timestamp: health.timestamp,
-      services: health.services
+      services: health.services,
     });
   } catch (error) {
     res.status(500).json({
       status: 'error',
-      error: error.message
+      error: error.message,
     });
   }
 }
@@ -228,5 +225,5 @@ module.exports = {
   getChatResponse_NEW,
   retrieveMedicalReport_NEW,
   classifyFoodImage_NEW,
-  checkAIHealth
+  checkAIHealth,
 };

@@ -1,6 +1,6 @@
-const { expect } = require("chai");
-const sinon = require("sinon");
-const proxyquire = require("proxyquire").noCallThru();
+const { expect } = require('chai');
+const sinon = require('sinon');
+const proxyquire = require('proxyquire').noCallThru();
 
 function createRes() {
   return {
@@ -17,7 +17,7 @@ function createRes() {
   };
 }
 
-describe("loginController resendMfa", () => {
+describe('loginController resendMfa', () => {
   let getUserCredentials;
   let addMfaToken;
   let invalidateMfaTokens;
@@ -35,19 +35,19 @@ describe("loginController resendMfa", () => {
     });
     transporter = { sendMail: sinon.stub().resolves() };
 
-    controller = proxyquire("../controller/loginController", {
-      "../model/getUserCredentials.js": getUserCredentials,
-      "../model/addMfaToken.js": {
+    controller = proxyquire('../controller/loginController', {
+      '../model/getUserCredentials.js': getUserCredentials,
+      '../model/addMfaToken.js': {
         addMfaToken,
         invalidateMfaTokens,
         verifyMfaToken: sinon.stub(),
       },
-      "express-validator": { validationResult: validationResultStub },
+      'express-validator': { validationResult: validationResultStub },
       nodemailer: {
         createTransport: sinon.stub().returns(transporter),
       },
-      "../Monitor_&_Logging/loginLogger": sinon.stub().resolves(),
-      "../dbConnection": {},
+      '../Monitor_&_Logging/loginLogger': sinon.stub().resolves(),
+      '../dbConnection': {},
     });
   });
 
@@ -55,15 +55,15 @@ describe("loginController resendMfa", () => {
     sinon.restore();
   });
 
-  it("resends a new MFA token for MFA-enabled accounts", async () => {
+  it('resends a new MFA token for MFA-enabled accounts', async () => {
     const req = {
-      body: { email: "mfa@example.com" },
+      body: { email: 'mfa@example.com' },
     };
     const res = createRes();
 
     getUserCredentials.resolves({
       user_id: 77,
-      email: "mfa@example.com",
+      email: 'mfa@example.com',
       mfa_enabled: true,
     });
 
@@ -75,21 +75,21 @@ describe("loginController resendMfa", () => {
     expect(addMfaToken.calledOnce).to.equal(true);
   });
 
-  it("rejects resend requests for accounts without MFA enabled", async () => {
+  it('rejects resend requests for accounts without MFA enabled', async () => {
     const req = {
-      body: { email: "plain@example.com" },
+      body: { email: 'plain@example.com' },
     };
     const res = createRes();
 
     getUserCredentials.resolves({
       user_id: 13,
-      email: "plain@example.com",
+      email: 'plain@example.com',
       mfa_enabled: false,
     });
 
     await controller.resendMfa(req, res);
 
     expect(res.statusCode).to.equal(404);
-    expect(res.body.error).to.equal("MFA is not enabled for this account");
+    expect(res.body.error).to.equal('MFA is not enabled for this account');
   });
 });

@@ -120,7 +120,10 @@ describe('apiResponse.validationError()', () => {
 
   it('includes the errors array', () => {
     const res = mockRes();
-    const errs = [{ field: 'email', message: 'invalid' }, { field: 'password', message: 'too short' }];
+    const errs = [
+      { field: 'email', message: 'invalid' },
+      { field: 'password', message: 'too short' },
+    ];
     validationError(res, errs);
     expect(lastBody(res).errors).toEqual(errs);
   });
@@ -173,9 +176,21 @@ describe('Contract shape invariants', () => {
 
   it('all helpers always set success as a boolean', () => {
     [
-      () => { const r = mockRes(); ok(r, null); return r; },
-      () => { const r = mockRes(); fail(r, 'x'); return r; },
-      () => { const r = mockRes(); validationError(r, []); return r; },
+      () => {
+        const r = mockRes();
+        ok(r, null);
+        return r;
+      },
+      () => {
+        const r = mockRes();
+        fail(r, 'x');
+        return r;
+      },
+      () => {
+        const r = mockRes();
+        validationError(r, []);
+        return r;
+      },
     ].forEach((fn) => {
       const res = fn();
       expect(typeof lastBody(res).success).toBe('boolean');
@@ -193,10 +208,16 @@ describe('loginController — response shape', () => {
       // Mock all heavy dependencies
       jest.doMock('../../dbConnection', () => ({ from: jest.fn().mockReturnThis() }));
       jest.doMock('../../model/getUserCredentials', () => jest.fn());
-      jest.doMock('../../model/addMfaToken', () => ({ addMfaToken: jest.fn(), verifyMfaToken: jest.fn() }));
+      jest.doMock('../../model/addMfaToken', () => ({
+        addMfaToken: jest.fn(),
+        verifyMfaToken: jest.fn(),
+      }));
       jest.doMock('../../Monitor_&_Logging/loginLogger', () => jest.fn());
       jest.doMock('../../services/securityEventService', () => ({ logSecurityEvent: jest.fn() }));
-      jest.doMock('../../services/securityLogger', () => ({ createLog: jest.fn(), log: jest.fn() }));
+      jest.doMock('../../services/securityLogger', () => ({
+        createLog: jest.fn(),
+        log: jest.fn(),
+      }));
       jest.doMock('../../utils/logger', () => ({ error: jest.fn(), info: jest.fn() }));
       jest.doMock('../../services/authService', () => ({}));
       jest.doMock('../../services/loginService', () => ({ sendFailedLoginAlert: jest.fn() }));

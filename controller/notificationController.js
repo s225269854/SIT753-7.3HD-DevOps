@@ -2,14 +2,13 @@ const supabase = require('../dbConnection.js');
 const { shared } = require('../services');
 const logger = require('../utils/logger');
 
-const {
-  createErrorResponse,
-  createSuccessResponse,
-  formatNotification,
-  formatNotifications
-} = shared.apiResponse;
+const { createErrorResponse, createSuccessResponse, formatNotification, formatNotifications } =
+  shared.apiResponse;
 
-function logAndRespondError(res, { logLabel, publicMessage, code, context = {}, statusCode = 500 }) {
+function logAndRespondError(
+  res,
+  { logLabel, publicMessage, code, context = {}, statusCode = 500 }
+) {
   logger.error(logLabel, context);
   return res.status(statusCode).json(createErrorResponse(publicMessage, code));
 }
@@ -20,10 +19,12 @@ function notFoundResponse(res, message, code = 'NOT_FOUND') {
 
 function mutationSuccess(res, statusCode, message, notification = null, meta = null) {
   const data = notification ? { notification: formatNotification(notification) } : null;
-  return res.status(statusCode).json(createSuccessResponse(data, {
-    message,
-    ...(meta || {})
-  }));
+  return res.status(statusCode).json(
+    createSuccessResponse(data, {
+      message,
+      ...(meta || {}),
+    })
+  );
 }
 
 async function createNotification(req, res) {
@@ -46,7 +47,7 @@ async function createNotification(req, res) {
       logLabel: 'Error creating notification',
       publicMessage: 'An error occurred while creating the notification',
       code: 'NOTIFICATION_CREATE_FAILED',
-      context: { error: error.message, user_id: req.body.user_id }
+      context: { error: error.message, user_id: req.body.user_id },
     });
   }
 }
@@ -86,23 +87,30 @@ async function getNotificationsByUserId(req, res) {
       throw countError;
     }
 
-    res.status(200).json(createSuccessResponse({
-      items: formatNotifications(data || [])
-    }, {
-      count: Array.isArray(data) ? data.length : 0,
-      unreadCount: count || 0
-    }));
+    res.status(200).json(
+      createSuccessResponse(
+        {
+          items: formatNotifications(data || []),
+        },
+        {
+          count: Array.isArray(data) ? data.length : 0,
+          unreadCount: count || 0,
+        }
+      )
+    );
   } catch (error) {
     logger.error('Error retrieving notifications', {
       error: error.message,
-      user_id: req.params.user_id || req.user?.userId
+      user_id: req.params.user_id || req.user?.userId,
     });
-    res.status(500).json(
-      createErrorResponse(
-        'An error occurred while retrieving notifications',
-        'NOTIFICATIONS_LOAD_FAILED'
-      )
-    );
+    res
+      .status(500)
+      .json(
+        createErrorResponse(
+          'An error occurred while retrieving notifications',
+          'NOTIFICATIONS_LOAD_FAILED'
+        )
+      );
   }
 }
 
@@ -126,7 +134,7 @@ async function updateNotificationStatusById(req, res) {
         logLabel: 'Error updating notification',
         publicMessage: 'Failed to update notification',
         code: 'NOTIFICATION_UPDATE_FAILED',
-        context: { error: error.message, notificationId: id }
+        context: { error: error.message, notificationId: id },
       });
     }
 
@@ -140,7 +148,7 @@ async function updateNotificationStatusById(req, res) {
       logLabel: 'Error updating notification',
       publicMessage: 'An error occurred while updating the notification',
       code: 'NOTIFICATION_UPDATE_FAILED',
-      context: { error: error.message, notificationId: req.params.id }
+      context: { error: error.message, notificationId: req.params.id },
     });
   }
 }
@@ -164,7 +172,7 @@ async function deleteNotificationById(req, res) {
         logLabel: 'Error deleting notification',
         publicMessage: 'Failed to delete notification',
         code: 'NOTIFICATION_DELETE_FAILED',
-        context: { error: error.message, notificationId: id }
+        context: { error: error.message, notificationId: id },
       });
     }
 
@@ -178,7 +186,7 @@ async function deleteNotificationById(req, res) {
       logLabel: 'Error deleting notification',
       publicMessage: 'An error occurred while deleting the notification',
       code: 'NOTIFICATION_DELETE_FAILED',
-      context: { error: error.message, notificationId: req.params.id }
+      context: { error: error.message, notificationId: req.params.id },
     });
   }
 }
@@ -199,21 +207,30 @@ async function markAllUnreadNotificationsAsRead(req, res) {
     }
 
     if (data.length === 0) {
-      return notFoundResponse(res, 'No unread notifications found for this user', 'NOTIFICATIONS_EMPTY');
+      return notFoundResponse(
+        res,
+        'No unread notifications found for this user',
+        'NOTIFICATIONS_EMPTY'
+      );
     }
 
-    return res.status(200).json(createSuccessResponse({
-      items: formatNotifications(data || [])
-    }, {
-      message: 'All unread notifications marked as read',
-      count: Array.isArray(data) ? data.length : 0
-    }));
+    return res.status(200).json(
+      createSuccessResponse(
+        {
+          items: formatNotifications(data || []),
+        },
+        {
+          message: 'All unread notifications marked as read',
+          count: Array.isArray(data) ? data.length : 0,
+        }
+      )
+    );
   } catch (error) {
     return logAndRespondError(res, {
       logLabel: 'Error marking notifications as read',
       publicMessage: 'An error occurred while marking notifications as read',
       code: 'NOTIFICATION_BULK_UPDATE_FAILED',
-      context: { error: error.message, user_id: req.params.user_id }
+      context: { error: error.message, user_id: req.params.user_id },
     });
   }
 }

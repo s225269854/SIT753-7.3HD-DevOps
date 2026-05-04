@@ -1,6 +1,6 @@
 /**
  * ai/interfaces/index.js
- * 
+ *
  * Export all AI client interfaces
  */
 
@@ -15,5 +15,5 @@ module.exports = {
   ChatbotAIClientInterface,
   MedicalPredictionAIClientInterface,
   ImageClassificationAIClientInterface,
-  RecommendationAIClientInterface
+  RecommendationAIClientInterface,
 };

@@ -24,11 +24,19 @@ async function getSecurityEvents(fromDate, toDate) {
     { data: rbacLogs, error: rbacError },
   ] = await Promise.all([
     supabase.from('auth_logs').select('*').gte('created_at', fromIso).lte('created_at', toIso),
-    supabase.from('brute_force_logs').select('*').gte('created_at', fromIso).lte('created_at', toIso),
+    supabase
+      .from('brute_force_logs')
+      .select('*')
+      .gte('created_at', fromIso)
+      .lte('created_at', toIso),
     supabase.from('user_session').select('*').gte('created_at', fromIso).lte('created_at', toIso),
     supabase.from('audit_logs').select('*').gte('created_at', fromIso).lte('created_at', toIso),
     supabase.from('error_logs').select('*').gte('created_at', fromIso).lte('created_at', toIso),
-    supabase.from('rbac_violation_logs').select('*').gte('created_at', fromIso).lte('created_at', toIso),
+    supabase
+      .from('rbac_violation_logs')
+      .select('*')
+      .gte('created_at', fromIso)
+      .lte('created_at', toIso),
   ]);
 
   // ===== 1) Login events from public.auth_logs =====
@@ -37,9 +45,7 @@ async function getSecurityEvents(fromDate, toDate) {
   } else if (authLogs && authLogs.length > 0) {
     for (const row of authLogs) {
       const isSuccess =
-        row.success === true ||
-        row.outcome === 'success' ||
-        row.status === 'success';
+        row.success === true || row.outcome === 'success' || row.status === 'success';
 
       events.push({
         ...SecurityEvent,
@@ -190,7 +196,7 @@ async function getSecurityEvents(fromDate, toDate) {
   // AUDIT LOGS → Security Events
   // =========================
   if (auditLogs) {
-    auditLogs.forEach(log => {
+    auditLogs.forEach((log) => {
       events.push({
         occurredAt: log.created_at,
         type: log.event_type || 'AUDIT_EVENT',
@@ -218,7 +224,7 @@ async function getSecurityEvents(fromDate, toDate) {
   // ERROR LOGS → Security Events
   // =========================
   if (errorLogs) {
-    errorLogs.forEach(log => {
+    errorLogs.forEach((log) => {
       events.push({
         occurredAt: log.created_at,
         type: log.error_type || 'SYSTEM_ERROR',
@@ -245,7 +251,7 @@ async function getSecurityEvents(fromDate, toDate) {
   // RBAC VIOLATIONS → Security Events
   // =========================
   if (rbacLogs) {
-    rbacLogs.forEach(log => {
+    rbacLogs.forEach((log) => {
       events.push({
         occurredAt: log.created_at,
         type: 'RBAC_VIOLATION',

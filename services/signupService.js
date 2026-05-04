@@ -44,7 +44,7 @@ class SignupService {
         contactNumber,
         address,
         ip: normalizedIp,
-        userAgent
+        userAgent,
       });
 
       await this.signupPublicTable({
@@ -55,14 +55,14 @@ class SignupService {
         contactNumber,
         address,
         ip: normalizedIp,
-        userAgent
+        userAgent,
       });
 
       return {
         statusCode: 201,
         body: {
-          message: 'User created successfully'
-        }
+          message: 'User created successfully',
+        },
       };
     } catch (error) {
       if (error instanceof ServiceError) {
@@ -77,15 +77,24 @@ class SignupService {
         details: {
           reason: 'Internal server error',
           error_message: error.message,
-          email: normalizedEmail
-        }
+          email: normalizedEmail,
+        },
       });
 
       throw new ServiceError(500, 'Internal server error');
     }
   }
 
-  async signupPublicTable({ userUuid, name, email, password, contactNumber, address, ip, userAgent }) {
+  async signupPublicTable({
+    userUuid,
+    name,
+    email,
+    password,
+    contactNumber,
+    address,
+    ip,
+    userAgent,
+  }) {
     const existingUsers = await getUser(email);
     if (existingUsers.length > 0) {
       await safeLog({
@@ -95,8 +104,8 @@ class SignupService {
         userAgent,
         details: {
           reason: 'User already exists',
-          email
-        }
+          email,
+        },
       });
 
       throw new ServiceError(400, 'User already exists');
@@ -110,7 +119,7 @@ class SignupService {
       eventType: 'SIGNUP_SUCCESS',
       ip,
       userAgent,
-      details: { email }
+      details: { email },
     });
   }
 
@@ -122,10 +131,10 @@ class SignupService {
         data: {
           name,
           contact_number: contactNumber || null,
-          address: address || null
+          address: address || null,
         },
-        emailRedirectTo: process.env.APP_ORIGIN ? `${process.env.APP_ORIGIN}/login` : undefined
-      }
+        emailRedirectTo: process.env.APP_ORIGIN ? `${process.env.APP_ORIGIN}/login` : undefined,
+      },
     });
 
     if (data?.session) {
@@ -141,7 +150,7 @@ class SignupService {
           eventType: 'EXISTING_USER',
           ip,
           userAgent,
-          details: { email }
+          details: { email },
         });
         throw new ServiceError(400, 'User already exists');
       }
@@ -158,7 +167,7 @@ class SignupService {
     if (data.session?.access_token) {
       try {
         const authed = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY, {
-          global: { headers: { Authorization: `Bearer ${data.session.access_token}` } }
+          global: { headers: { Authorization: `Bearer ${data.session.access_token}` } },
         });
 
         await authed.from('profiles').upsert(
@@ -167,7 +176,7 @@ class SignupService {
             email,
             name,
             contact_number: contactNumber || null,
-            address: address || null
+            address: address || null,
           },
           { onConflict: 'id' }
         );
@@ -178,7 +187,7 @@ class SignupService {
 
     return {
       user_uuid: userId,
-      message: 'User created successfully. Please check your email to verify your account.'
+      message: 'User created successfully. Please check your email to verify your account.',
     };
   }
 }

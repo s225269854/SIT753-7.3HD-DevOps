@@ -1,8 +1,8 @@
 /**
  * utils/logger.js
- * 
+ *
  * Centralized structured logging using Winston
- * 
+ *
  * Usage:
  *   const logger = require('../utils/logger');
  *   logger.info('User logged in', { userId: 123, email: 'user@example.com' });
@@ -30,12 +30,12 @@ const customFormat = winston.format.combine(
   // Custom printf for console (more readable)
   winston.format.printf(({ timestamp, level, message, requestId, userId, ...meta }) => {
     let baseLog = `${timestamp} [${level.toUpperCase()}]`;
-    
+
     if (requestId) baseLog += ` [REQ:${requestId}]`;
     if (userId) baseLog += ` [USER:${userId}]`;
-    
+
     baseLog += ` ${message}`;
-    
+
     // Add metadata if present
     if (Object.keys(meta).length > 0) {
       // Filter out the symbol used by winston
@@ -46,7 +46,7 @@ const customFormat = winston.format.combine(
         baseLog += ` ${JSON.stringify(cleanMeta)}`;
       }
     }
-    
+
     return baseLog;
   })
 );
@@ -59,7 +59,7 @@ const logger = winston.createLogger({
   format: customFormat,
   defaultMeta: {
     service: 'nutrihelp-api',
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
   },
   transports: [
     // Console output (always)
@@ -72,7 +72,7 @@ const logger = winston.createLogger({
           if (requestId) output += `(${requestId}) `;
           if (userId) output += `[${userId}] `;
           output += message;
-          
+
           if (Object.keys(meta).length > 0) {
             const cleanMeta = Object.fromEntries(
               Object.entries(meta).filter(([key]) => !key.startsWith('Symbol'))
@@ -83,7 +83,7 @@ const logger = winston.createLogger({
           }
           return output;
         })
-      )
+      ),
     }),
 
     // File logging - all logs
@@ -91,7 +91,7 @@ const logger = winston.createLogger({
       filename: path.join(logsDir, 'app.log'),
       maxsize: 10485760, // 10MB
       maxFiles: 5,
-      format: winston.format.json()
+      format: winston.format.json(),
     }),
 
     // File logging - errors only
@@ -100,19 +100,21 @@ const logger = winston.createLogger({
       level: 'error',
       maxsize: 10485760,
       maxFiles: 10,
-      format: winston.format.json()
+      format: winston.format.json(),
     }),
 
     // File logging - requests (if in production)
-    ...(process.env.NODE_ENV === 'production' ? [
-      new winston.transports.File({
-        filename: path.join(logsDir, 'requests.log'),
-        maxsize: 10485760,
-        maxFiles: 5,
-        format: winston.format.json()
-      })
-    ] : [])
-  ]
+    ...(process.env.NODE_ENV === 'production'
+      ? [
+          new winston.transports.File({
+            filename: path.join(logsDir, 'requests.log'),
+            maxsize: 10485760,
+            maxFiles: 5,
+            format: winston.format.json(),
+          }),
+        ]
+      : []),
+  ],
 });
 
 /**
@@ -132,9 +134,9 @@ logger.logError = (message, error, context = {}) => {
     error: {
       message: error?.message,
       code: error?.code,
-      stack: error?.stack
+      stack: error?.stack,
     },
-    ...context
+    ...context,
   });
 };
 
@@ -147,9 +149,9 @@ logger.logHttpRequest = (method, path, statusCode, duration, context = {}) => {
       method,
       path,
       statusCode,
-      duration: `${duration}ms`
+      duration: `${duration}ms`,
     },
-    ...context
+    ...context,
   });
 };
 

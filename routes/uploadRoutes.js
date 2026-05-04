@@ -1,10 +1,10 @@
 const express = require('express');
-const router = express.Router();   // 👈 define router first
+const router = express.Router(); // 👈 define router first
 
 const upload = require('../middleware/uploadMiddleware');
 const { uploadLimiter } = require('../rateLimiter');
 
-const { authenticateToken } = require("../middleware/authenticateToken");
+const { authenticateToken } = require('../middleware/authenticateToken');
 const authorizeRoles = require('../middleware/authorizeRoles');
 const {
   createBlockMiddleware,
@@ -38,7 +38,7 @@ router.post(
   '/upload',
   createBlockMiddleware(),
   authenticateToken,
-  authorizeRoles("admin"),   // 👈 use role name, not ID
+  authorizeRoles('admin'), // 👈 use role name, not ID
   uploadLimiter,
   secureUploadSingle('file'),
   async (req, res) => {

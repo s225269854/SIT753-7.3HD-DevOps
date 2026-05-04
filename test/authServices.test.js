@@ -23,7 +23,11 @@ describe('Auth services', () => {
 
   it('loginService rejects missing MFA fields before any integration work', async () => {
     try {
-      await loginService.loginMfa({ email: 'user@example.com', password: 'Secret123!', mfaToken: '' });
+      await loginService.loginMfa({
+        email: 'user@example.com',
+        password: 'Secret123!',
+        mfaToken: '',
+      });
       throw new Error('Expected loginService.loginMfa to throw');
     } catch (error) {
       expect(error).to.be.instanceOf(ServiceError);
@@ -41,13 +45,15 @@ describe('Auth services', () => {
         contactNumber: '',
         address: '',
         ip: '127.0.0.1',
-        userAgent: 'mocha'
+        userAgent: 'mocha',
       });
       throw new Error('Expected signupService.signup to throw');
     } catch (error) {
       expect(error).to.be.instanceOf(ServiceError);
       expect(error.statusCode).to.equal(400);
-      expect(error.message).to.equal('Password must be at least 8 characters and include uppercase, lowercase, number, and special character.');
+      expect(error.message).to.equal(
+        'Password must be at least 8 characters and include uppercase, lowercase, number, and special character.'
+      );
       expect(error.details).to.deep.equal({ code: 'WEAK_PASSWORD' });
     }
   });

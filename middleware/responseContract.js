@@ -18,12 +18,7 @@ const REQUIRED_FIELD = 'success';
  * Routes whose response shape is intentionally non-standard and should be
  * skipped (e.g. Swagger UI, metrics, static files).
  */
-const SKIP_PATHS = [
-  /^\/api-docs/,
-  /^\/api\/metrics/,
-  /^\/uploads\//,
-  /^\/$/,
-];
+const SKIP_PATHS = [/^\/api-docs/, /^\/api\/metrics/, /^\/uploads\//, /^\/$/];
 
 function shouldSkip(path) {
   return SKIP_PATHS.some((pattern) => pattern.test(path));

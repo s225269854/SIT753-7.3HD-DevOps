@@ -1,48 +1,48 @@
-const client = require("prom-client");
+const client = require('prom-client');
 
 // collect default system metrics (CPU, memory, etc.)
 client.collectDefaultMetrics();
 
 // ===== Metrics =====
 const httpRequestsTotal = new client.Counter({
-  name: "http_requests_total",
-  help: "Total number of requests",
-  labelNames: ["method", "route", "status"],
+  name: 'http_requests_total',
+  help: 'Total number of requests',
+  labelNames: ['method', 'route', 'status'],
 });
 
 const httpErrorsTotal = new client.Counter({
-  name: "http_errors_total",
-  help: "Total number of error responses",
+  name: 'http_errors_total',
+  help: 'Total number of error responses',
 });
 
 const httpRequestDuration = new client.Histogram({
-  name: "http_request_duration_seconds",
-  help: "Request duration in seconds",
-  labelNames: ["method", "route", "status"],
+  name: 'http_request_duration_seconds',
+  help: 'Request duration in seconds',
+  labelNames: ['method', 'route', 'status'],
 });
 
 const authInvalidTokenAttempts = new client.Counter({
-  name: "auth_invalid_token_attempts_total",
-  help: "Number of failed access token validations",
-  labelNames: ["route", "ip", "reason"],
+  name: 'auth_invalid_token_attempts_total',
+  help: 'Number of failed access token validations',
+  labelNames: ['route', 'ip', 'reason'],
 });
 
 const authRefreshRequests = new client.Counter({
-  name: "auth_refresh_requests_total",
-  help: "Number of token refresh requests",
-  labelNames: ["route", "status"],
+  name: 'auth_refresh_requests_total',
+  help: 'Number of token refresh requests',
+  labelNames: ['route', 'status'],
 });
 
 const sessionAuthenticatedRequests = new client.Counter({
-  name: "session_authenticated_requests_total",
-  help: "Number of authenticated session requests",
-  labelNames: ["userId", "route", "status"],
+  name: 'session_authenticated_requests_total',
+  help: 'Number of authenticated session requests',
+  labelNames: ['userId', 'route', 'status'],
 });
 
 const sessionSuspiciousEvents = new client.Counter({
-  name: "session_suspicious_events_total",
-  help: "Number of suspicious session events detected",
-  labelNames: ["userId", "event_type", "ip"],
+  name: 'session_suspicious_events_total',
+  help: 'Number of suspicious session events detected',
+  labelNames: ['userId', 'event_type', 'ip'],
 });
 
 const WINDOW_MS = 60 * 1000;
@@ -54,7 +54,7 @@ const authFailureBuckets = new Map();
 const refreshRequestBuckets = new Map();
 const sessionRequestBuckets = new Map();
 
-const sanitizeLabel = (value, fallback = "unknown") => {
+const sanitizeLabel = (value, fallback = 'unknown') => {
   if (!value) return fallback;
   return String(value).slice(0, 100);
 };
@@ -97,15 +97,17 @@ const recordAuthInvalidTokenAttempt = ({ route, ip, reason }) => {
 
   if (failures === AUTH_INVALID_THRESHOLD) {
     sessionSuspiciousEvents.inc({
-      userId: "anonymous",
-      event_type: "invalid_token_flood",
+      userId: 'anonymous',
+      event_type: 'invalid_token_flood',
       ip: cleanIp,
     });
-    console.warn(`Suspicious invalid token activity detected from ${cleanIp}. Route=${cleanRoute}, reason=${cleanReason}`);
+    console.warn(
+      `Suspicious invalid token activity detected from ${cleanIp}. Route=${cleanRoute}, reason=${cleanReason}`
+    );
   }
 };
 
-const recordRefreshRequest = ({ userId = "anonymous", route, status, ip }) => {
+const recordRefreshRequest = ({ userId = 'anonymous', route, status, ip }) => {
   const cleanRoute = sanitizeLabel(route);
   const cleanStatus = String(status);
 
@@ -122,7 +124,7 @@ const recordRefreshRequest = ({ userId = "anonymous", route, status, ip }) => {
     if (failures === REFRESH_REQUEST_THRESHOLD) {
       sessionSuspiciousEvents.inc({
         userId: sanitizeLabel(userId),
-        event_type: "refresh_failures",
+        event_type: 'refresh_failures',
         ip: sanitizeLabel(ip),
       });
       console.warn(`Repeated refresh failures for user=${userId} from ip=${ip}`);
@@ -130,11 +132,11 @@ const recordRefreshRequest = ({ userId = "anonymous", route, status, ip }) => {
   }
 };
 
-const recordAuthenticatedSession = ({ userId = "anonymous", route, sessionId, ip, status }) => {
+const recordAuthenticatedSession = ({ userId = 'anonymous', route, sessionId, ip, status }) => {
   const cleanUserId = sanitizeLabel(userId);
   const cleanRoute = sanitizeLabel(route);
   const cleanIp = sanitizeLabel(ip);
-  const cleanSessionId = sanitizeLabel(sessionId || "no-session");
+  const cleanSessionId = sanitizeLabel(sessionId || 'no-session');
   const cleanStatus = String(status);
 
   sessionAuthenticatedRequests.inc({
@@ -150,10 +152,12 @@ const recordAuthenticatedSession = ({ userId = "anonymous", route, sessionId, ip
   if (count === SESSION_REQUEST_THRESHOLD) {
     sessionSuspiciousEvents.inc({
       userId: cleanUserId,
-      event_type: "high_request_velocity",
+      event_type: 'high_request_velocity',
       ip: cleanIp,
     });
-    console.warn(`High session request velocity detected for user=${cleanUserId} session=${cleanSessionId} route=${cleanRoute}`);
+    console.warn(
+      `High session request velocity detected for user=${cleanUserId} session=${cleanSessionId} route=${cleanRoute}`
+    );
   }
 };
 
@@ -161,7 +165,7 @@ const recordAuthenticatedSession = ({ userId = "anonymous", route, sessionId, ip
 const metricsMiddleware = (req, res, next) => {
   const end = httpRequestDuration.startTimer();
 
-  res.on("finish", () => {
+  res.on('finish', () => {
     const route = req.route?.path || req.path;
 
     httpRequestsTotal.inc({
@@ -186,7 +190,7 @@ const metricsMiddleware = (req, res, next) => {
 
 // ===== Metrics endpoint handler =====
 const metricsEndpoint = async (req, res) => {
-  res.set("Content-Type", client.register.contentType);
+  res.set('Content-Type', client.register.contentType);
   res.end(await client.register.metrics());
 };
 

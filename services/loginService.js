@@ -12,8 +12,8 @@ const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: process.env.GMAIL_USER,
-    pass: process.env.GMAIL_APP_PASSWORD
-  }
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
 });
 
 async function sendOtpEmail(email, token) {
@@ -30,7 +30,7 @@ async function sendOtpEmail(email, token) {
         <p>If you did not request this, please ignore this email.</p>
         <br/>
         <p>- NutriHelp Security Team</p>
-      `
+      `,
     });
   } catch (error) {
     console.error('Error sending OTP email:', error.message);
@@ -50,7 +50,7 @@ async function sendFailedLoginAlert(email, ip) {
         <p>If this wasn't you, please ignore this message. If you're concerned, consider resetting your password or contacting support.</p>
         <br/>
         <p>- NutriHelp Security Team</p>
-      `
+      `,
     });
   } catch (error) {
     console.error('Failed to send alert email:', error.message);
@@ -68,7 +68,7 @@ function buildJwt(user) {
       userId: user.user_id,
       email: user.email,
       role: user.user_roles?.role_name || 'unknown',
-      type: 'access'
+      type: 'access',
     },
     process.env.JWT_TOKEN,
     { expiresIn: '1h' }
@@ -76,12 +76,14 @@ function buildJwt(user) {
 }
 
 async function recordBruteForceAttempt(email, ip, success) {
-  await supabase.from('brute_force_logs').insert([{
-    email,
-    ip_address: ip || null,
-    success,
-    created_at: new Date().toISOString()
-  }]);
+  await supabase.from('brute_force_logs').insert([
+    {
+      email,
+      ip_address: ip || null,
+      success,
+      created_at: new Date().toISOString(),
+    },
+  ]);
 }
 
 async function getRecentFailureCount(email) {
@@ -107,7 +109,10 @@ class LoginService {
     const failureCount = await getRecentFailureCount(normalizedEmail);
 
     if (failureCount >= 10) {
-      throw new ServiceError(429, '❌ Too many failed login attempts. Please try again after 10 minutes.');
+      throw new ServiceError(
+        429,
+        '❌ Too many failed login attempts. Please try again after 10 minutes.'
+      );
     }
 
     const user = await getUserCredentials(normalizedEmail);
@@ -123,9 +128,13 @@ class LoginService {
       await recordBruteForceAttempt(normalizedEmail, normalizedIp, false);
 
       if (failureCount === 4) {
-        throw new ServiceError(429, '⚠ You have one attempt left before your account is temporarily locked.', {
-          warningOnly: true
-        });
+        throw new ServiceError(
+          429,
+          '⚠ You have one attempt left before your account is temporarily locked.',
+          {
+            warningOnly: true,
+          }
+        );
       }
 
       await sendFailedLoginAlert(normalizedEmail, normalizedIp);
@@ -133,7 +142,9 @@ class LoginService {
     }
 
     await recordBruteForceAttempt(normalizedEmail, normalizedIp, true);
-    await supabase.from('brute_force_logs').delete()
+    await supabase
+      .from('brute_force_logs')
+      .delete()
       .eq('email', normalizedEmail)
       .eq('success', false);
 
@@ -144,8 +155,8 @@ class LoginService {
       return {
         statusCode: 202,
         body: {
-          message: 'An MFA Token has been sent to your email address'
-        }
+          message: 'An MFA Token has been sent to your email address',
+        },
       };
     }
 
@@ -153,15 +164,15 @@ class LoginService {
       userId: user.user_id,
       eventType: 'LOGIN_SUCCESS',
       ip: normalizedIp,
-      userAgent
+      userAgent,
     });
 
     return {
       statusCode: 200,
       body: {
         user,
-        token: buildJwt(user)
-      }
+        token: buildJwt(user),
+      },
     };
   }
 
@@ -191,8 +202,8 @@ class LoginService {
       statusCode: 200,
       body: {
         user,
-        token: buildJwt(user)
-      }
+        token: buildJwt(user),
+      },
     };
   }
 }

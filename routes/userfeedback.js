@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 const { contentAndSupport } = require('../controller');
 const { feedbackValidation } = require('../validators/feedbackValidator.js');
@@ -8,7 +8,7 @@ const { formLimiter } = require('../middleware/rateLimiter'); // ✅ rate limite
 const { feedback: controller } = contentAndSupport;
 
 router.post('/', formLimiter, feedbackValidation, validate, (req, res) => {
-    controller.userfeedback(req, res);
+  controller.userfeedback(req, res);
 });
 
 module.exports = router;

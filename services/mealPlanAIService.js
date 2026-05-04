@@ -110,7 +110,10 @@ async function generateMealPlan(filters) {
   }
 
   // Strip markdown fences and any surrounding text, then extract the JSON object
-  let cleaned = rawText.replace(/```json\s*/gi, '').replace(/```/g, '').trim();
+  let cleaned = rawText
+    .replace(/```json\s*/gi, '')
+    .replace(/```/g, '')
+    .trim();
 
   // If the model added explanation text, pull out the first { ... } block
   const jsonMatch = cleaned.match(/\{[\s\S]*\}/);

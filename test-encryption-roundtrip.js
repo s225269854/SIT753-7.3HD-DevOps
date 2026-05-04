@@ -22,7 +22,7 @@ async function testEncryptionRoundTrip() {
   const testData = {
     string: 'Hello, World!',
     object: { user: 'test@example.com', id: 123 },
-    sensitive: 'Sensitive contact number: +1-555-0123'
+    sensitive: 'Sensitive contact number: +1-555-0123',
   };
 
   for (const [key, data] of Object.entries(testData)) {
@@ -125,7 +125,10 @@ async function main() {
   console.log('Environment:');
   console.log('  ENCRYPTION_KEY_SOURCE:', process.env.ENCRYPTION_KEY_SOURCE || 'env (default)');
   console.log('  ENCRYPTION_VAULT_RPC:', process.env.ENCRYPTION_VAULT_RPC || '(not set)');
-  console.log('  ENCRYPTION_KEY_ENV_NAME:', process.env.ENCRYPTION_KEY_ENV_NAME || 'ENCRYPTION_KEY');
+  console.log(
+    '  ENCRYPTION_KEY_ENV_NAME:',
+    process.env.ENCRYPTION_KEY_ENV_NAME || 'ENCRYPTION_KEY'
+  );
   console.log('  ENCRYPTION_KEY_VERSION:', process.env.ENCRYPTION_KEY_VERSION || 'v1');
   console.log('');
 
@@ -157,7 +160,7 @@ process.on('unhandledRejection', (reason, promise) => {
 });
 
 if (require.main === module) {
-  main().catch(error => {
+  main().catch((error) => {
     console.error('Test execution failed:', error);
     process.exit(1);
   });

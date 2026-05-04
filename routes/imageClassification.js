@@ -16,8 +16,11 @@ const path = require('path');
 const multer = require('multer');
 
 const predictionController = require('../controller/imageClassificationController.js');
-const { validateImageUpload, MAX_SIZE_BYTES, ALLOWED_MIME_TYPES } =
-  require('../validators/imageValidator.js');
+const {
+  validateImageUpload,
+  MAX_SIZE_BYTES,
+  ALLOWED_MIME_TYPES,
+} = require('../validators/imageValidator.js');
 const { validationError, fail } = require('../utils/apiResponse');
 const { msg } = require('../utils/messages');
 
@@ -48,14 +51,10 @@ function handleUpload(req, res, next) {
     if (!err) return next();
 
     if (err.code === 'LIMIT_FILE_SIZE') {
-      return validationError(res, [
-        { field: 'image', message: msg('image.too_large') },
-      ]);
+      return validationError(res, [{ field: 'image', message: msg('image.too_large') }]);
     }
     if (err.code === 'INVALID_MIME') {
-      return validationError(res, [
-        { field: 'image', message: msg('image.invalid_type') },
-      ]);
+      return validationError(res, [{ field: 'image', message: msg('image.invalid_type') }]);
     }
     return fail(res, msg('image.no_file'), 400, 'UPLOAD_FAILED');
   });

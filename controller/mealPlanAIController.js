@@ -6,22 +6,45 @@ const generateAIMealPlan = async (req, res) => {
     const dietType = typeof req.body.dietType === 'string' ? req.body.dietType : 'balanced';
     const goal = typeof req.body.goal === 'string' ? req.body.goal : 'maintain weight';
     const allergies = Array.isArray(req.body.allergies) ? req.body.allergies : [];
-    const calorieTarget = typeof req.body.calorieTarget === 'number' ? req.body.calorieTarget : 1800;
+    const calorieTarget =
+      typeof req.body.calorieTarget === 'number' ? req.body.calorieTarget : 1800;
     const cuisine = typeof req.body.cuisine === 'string' ? req.body.cuisine : 'any';
-    const healthConditions = Array.isArray(req.body.healthConditions) ? req.body.healthConditions : [];
-    const mealTexture = ['regular', 'soft', 'pureed'].includes(req.body.mealTexture) ? req.body.mealTexture : 'regular';
-    const mobilityLevel = ['sedentary', 'lightly_active', 'moderately_active'].includes(req.body.mobilityLevel) ? req.body.mobilityLevel : 'sedentary';
-    const cookingComplexity = ['simple', 'moderate', 'complex'].includes(req.body.cookingComplexity) ? req.body.cookingComplexity : 'simple';
-    const portionSize = ['small', 'medium', 'large'].includes(req.body.portionSize) ? req.body.portionSize : 'medium';
-    const additionalNotes = typeof req.body.additionalNotes === 'string' ? req.body.additionalNotes.slice(0, 300) : '';
+    const healthConditions = Array.isArray(req.body.healthConditions)
+      ? req.body.healthConditions
+      : [];
+    const mealTexture = ['regular', 'soft', 'pureed'].includes(req.body.mealTexture)
+      ? req.body.mealTexture
+      : 'regular';
+    const mobilityLevel = ['sedentary', 'lightly_active', 'moderately_active'].includes(
+      req.body.mobilityLevel
+    )
+      ? req.body.mobilityLevel
+      : 'sedentary';
+    const cookingComplexity = ['simple', 'moderate', 'complex'].includes(req.body.cookingComplexity)
+      ? req.body.cookingComplexity
+      : 'simple';
+    const portionSize = ['small', 'medium', 'large'].includes(req.body.portionSize)
+      ? req.body.portionSize
+      : 'medium';
+    const additionalNotes =
+      typeof req.body.additionalNotes === 'string' ? req.body.additionalNotes.slice(0, 300) : '';
 
     if (calorieTarget < 500 || calorieTarget > 5000) {
       return res.status(400).json({ error: 'calorieTarget must be between 500 and 5000' });
     }
 
     const filters = {
-      dietType, goal, allergies, calorieTarget, cuisine,
-      healthConditions, mealTexture, mobilityLevel, cookingComplexity, portionSize, additionalNotes,
+      dietType,
+      goal,
+      allergies,
+      calorieTarget,
+      cuisine,
+      healthConditions,
+      mealTexture,
+      mobilityLevel,
+      cookingComplexity,
+      portionSize,
+      additionalNotes,
     };
 
     const { parsed, aiModelUsed } = await generateMealPlan(filters);

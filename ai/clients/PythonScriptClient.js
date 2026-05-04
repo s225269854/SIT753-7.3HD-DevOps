@@ -1,6 +1,6 @@
 /**
  * PythonScriptClient.js
- * 
+ *
  * Wrapper for Python-based image classification and prediction models.
  * Executes Python scripts locally and handles input/output serialization.
  */
@@ -29,12 +29,12 @@ class PythonImageClassificationClient extends ImageClassificationAIClientInterfa
 
     try {
       const scriptPath = path.join(this.modelDirectory, scriptName);
-      
+
       const result = await executePythonScript({
         scriptPath,
         stdin: inputData,
         timeout: options.timeout || this.timeout,
-        ...options
+        ...options,
       });
 
       const latencyMs = Date.now() - startTime;
@@ -47,14 +47,14 @@ class PythonImageClassificationClient extends ImageClassificationAIClientInterfa
         success: true,
         data: result.data,
         latencyMs,
-        warnings: result.warnings || []
+        warnings: result.warnings || [],
       };
     } catch (error) {
       const latencyMs = Date.now() - startTime;
       throw {
         success: false,
         error: error.message || String(error),
-        latencyMs
+        latencyMs,
       };
     }
   }
@@ -81,9 +81,9 @@ class PythonImageClassificationClient extends ImageClassificationAIClientInterfa
         metadata: {
           source: 'python_local',
           model: 'food_classification',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
-        warnings: result.warnings
+        warnings: result.warnings,
       });
     } catch (error) {
       return this.errorResponse(error, 'classifyFoodImage');
@@ -111,9 +111,9 @@ class PythonImageClassificationClient extends ImageClassificationAIClientInterfa
         latencyMs: result.latencyMs,
         metadata: {
           source: 'python_local',
-          model: 'recipe_classification'
+          model: 'recipe_classification',
         },
-        warnings: result.warnings
+        warnings: result.warnings,
       });
     } catch (error) {
       return this.errorResponse(error, 'classifyRecipeImage');
@@ -141,8 +141,8 @@ class PythonImageClassificationClient extends ImageClassificationAIClientInterfa
         latencyMs: result.latencyMs,
         metadata: {
           source: 'python_local',
-          model: 'barcode_scanner'
-        }
+          model: 'barcode_scanner',
+        },
       });
     } catch (error) {
       return this.errorResponse(error, 'scanBarcode');
@@ -170,8 +170,8 @@ class PythonImageClassificationClient extends ImageClassificationAIClientInterfa
         latencyMs: result.latencyMs,
         metadata: {
           source: 'python_local',
-          model: 'nutrition_extraction'
-        }
+          model: 'nutrition_extraction',
+        },
       });
     } catch (error) {
       return this.errorResponse(error, 'extractNutritionLabel');
@@ -195,11 +195,11 @@ class PythonImageClassificationClient extends ImageClassificationAIClientInterfa
       type: 'python_local',
       pythonCommand: this.pythonCommand,
       modelDirectory: this.modelDirectory,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
 
 module.exports = {
-  PythonImageClassificationClient
+  PythonImageClassificationClient,
 };

@@ -28,7 +28,7 @@ function initService(name) {
       timeouts: 0,
       fallbacks: 0,
       totalDurationMs: 0,
-      recentErrors: [],       // last 20 errors
+      recentErrors: [], // last 20 errors
       lastCalledAt: null,
       lastSuccessAt: null,
       lastFailureAt: null,
@@ -156,8 +156,8 @@ function buildExplainability(serviceName, result, durationMs) {
 // ─── Circuit breaker state ────────────────────────────────────────────────
 
 const circuitState = {};
-const CIRCUIT_FAILURE_THRESHOLD = 5;   // open after N consecutive failures
-const CIRCUIT_RESET_MS = 60_000;        // try again after 60s
+const CIRCUIT_FAILURE_THRESHOLD = 5; // open after N consecutive failures
+const CIRCUIT_RESET_MS = 60_000; // try again after 60s
 
 function isCircuitOpen(serviceName) {
   const c = circuitState[serviceName];
@@ -191,7 +191,9 @@ function recordCircuit(serviceName, succeeded) {
     if (c.consecutiveFailures >= CIRCUIT_FAILURE_THRESHOLD) {
       c.state = 'open';
       c.openedAt = Date.now();
-      logger.warn(`[AIMonitor] Circuit OPEN for ${serviceName} after ${c.consecutiveFailures} consecutive failures`);
+      logger.warn(
+        `[AIMonitor] Circuit OPEN for ${serviceName} after ${c.consecutiveFailures} consecutive failures`
+      );
     }
   }
 }

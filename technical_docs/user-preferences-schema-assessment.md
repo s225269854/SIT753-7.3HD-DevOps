@@ -39,11 +39,11 @@ Confirmed missing table:
 
 There are already multiple user identity shapes in the schema:
 
-| Table | User key shape | Notes |
-| --- | --- | --- |
-| `users` | `user_id bigint` | This is the user table used by the Node API and auth flows in this repo. |
-| `user_profiles` | `id uuid`, `user_id uuid` | Separate identity model from `users.user_id bigint`. |
-| `user_security_settings` | `user_id uuid` | Appears to align with the UUID-based profile/security subsystem, not the bigint `users` table. |
+| Table                    | User key shape            | Notes                                                                                          |
+| ------------------------ | ------------------------- | ---------------------------------------------------------------------------------------------- |
+| `users`                  | `user_id bigint`          | This is the user table used by the Node API and auth flows in this repo.                       |
+| `user_profiles`          | `id uuid`, `user_id uuid` | Separate identity model from `users.user_id bigint`.                                           |
+| `user_security_settings` | `user_id uuid`            | Appears to align with the UUID-based profile/security subsystem, not the bigint `users` table. |
 
 Implication:
 
@@ -53,29 +53,29 @@ Implication:
 
 ### Preference / Settings Data by Table
 
-| Concern | Existing location(s) | Shape today | Assessment |
-| --- | --- | --- | --- |
-| Dietary requirements | `user_dietary_requirements` | Join table to `dietary_requirements(id, name)` | Good normalized source for backend filtering and recommendation logic. |
-| Allergies | `user_allergies` | Join table to `allergies(id, name)` plus encrypted fields | Good normalized source for canonical allergy membership. |
-| Health conditions | `user_health_conditions` | Join table to `health_conditions` | Good normalized source for canonical condition membership. |
-| Dislikes | `user_dislikes` | Join table to dislike catalog | Good normalized source for canonical dislikes. |
-| Cooking methods | `user_cooking_methods` | Join table | Good normalized source. |
-| Spice levels | `user_spice_levels` | Join table | Good normalized source. |
-| Basic UI settings | `users.theme`, `users.language`, `users.font_size` | Flat columns | Already exists and overlaps with `ui_settings` in the new table. |
-| Notification settings | `users.notification_preferences`, `users.notification_email`, `users.notification_push` | Flat JSON / booleans | Already exists and overlaps with `notification_preferences` in the new table. |
-| Legacy personal preference profile | `user_preferences` | Flat demographic and preference columns like `dietary_preference`, `health_goals` | Older broad table, partially overlaps conceptually but not structurally. |
-| UUID-side profile preferences | `user_profiles.dietary_preferences`, `user_profiles.allergies`, `user_profiles.medical_conditions` | Profile-level denormalized fields | Overlaps semantically, but belongs to a different identity model. |
-| New structured clinical context | Proposed `user_preference_states.health_context` | JSONB for allergy metadata, chronic condition metadata, medications | New capability not well modeled elsewhere. |
+| Concern                            | Existing location(s)                                                                               | Shape today                                                                       | Assessment                                                                    |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Dietary requirements               | `user_dietary_requirements`                                                                        | Join table to `dietary_requirements(id, name)`                                    | Good normalized source for backend filtering and recommendation logic.        |
+| Allergies                          | `user_allergies`                                                                                   | Join table to `allergies(id, name)` plus encrypted fields                         | Good normalized source for canonical allergy membership.                      |
+| Health conditions                  | `user_health_conditions`                                                                           | Join table to `health_conditions`                                                 | Good normalized source for canonical condition membership.                    |
+| Dislikes                           | `user_dislikes`                                                                                    | Join table to dislike catalog                                                     | Good normalized source for canonical dislikes.                                |
+| Cooking methods                    | `user_cooking_methods`                                                                             | Join table                                                                        | Good normalized source.                                                       |
+| Spice levels                       | `user_spice_levels`                                                                                | Join table                                                                        | Good normalized source.                                                       |
+| Basic UI settings                  | `users.theme`, `users.language`, `users.font_size`                                                 | Flat columns                                                                      | Already exists and overlaps with `ui_settings` in the new table.              |
+| Notification settings              | `users.notification_preferences`, `users.notification_email`, `users.notification_push`            | Flat JSON / booleans                                                              | Already exists and overlaps with `notification_preferences` in the new table. |
+| Legacy personal preference profile | `user_preferences`                                                                                 | Flat demographic and preference columns like `dietary_preference`, `health_goals` | Older broad table, partially overlaps conceptually but not structurally.      |
+| UUID-side profile preferences      | `user_profiles.dietary_preferences`, `user_profiles.allergies`, `user_profiles.medical_conditions` | Profile-level denormalized fields                                                 | Overlaps semantically, but belongs to a different identity model.             |
+| New structured clinical context    | Proposed `user_preference_states.health_context`                                                   | JSONB for allergy metadata, chronic condition metadata, medications               | New capability not well modeled elsewhere.                                    |
 
 ### Duplicate / Overlap Matrix
 
-| New field | Already represented elsewhere? | Recommendation |
-| --- | --- | --- |
-| `health_context.allergies[].referenceId` | Yes, via `user_allergies` | Keep join table canonical for membership; use JSON only for metadata such as severity and notes. |
-| `health_context.chronic_conditions[].referenceId` | Yes, via `user_health_conditions` | Keep join table canonical for membership; use JSON only for metadata such as status and notes. |
-| `health_context.medications[]` | No strong normalized equivalent found | Safe to keep in the new table. |
-| `notification_preferences` | Yes, `users.notification_preferences` and related flags | Do not duplicate canonically in two places. Choose one owner. |
-| `ui_settings.language/theme/font_size` | Yes, `users.language`, `users.theme`, `users.font_size` | Do not duplicate canonically in two places. Choose one owner. |
+| New field                                         | Already represented elsewhere?                          | Recommendation                                                                                   |
+| ------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `health_context.allergies[].referenceId`          | Yes, via `user_allergies`                               | Keep join table canonical for membership; use JSON only for metadata such as severity and notes. |
+| `health_context.chronic_conditions[].referenceId` | Yes, via `user_health_conditions`                       | Keep join table canonical for membership; use JSON only for metadata such as status and notes.   |
+| `health_context.medications[]`                    | No strong normalized equivalent found                   | Safe to keep in the new table.                                                                   |
+| `notification_preferences`                        | Yes, `users.notification_preferences` and related flags | Do not duplicate canonically in two places. Choose one owner.                                    |
+| `ui_settings.language/theme/font_size`            | Yes, `users.language`, `users.theme`, `users.font_size` | Do not duplicate canonically in two places. Choose one owner.                                    |
 
 ## Code Impact in This Branch
 
@@ -130,19 +130,19 @@ Risk is high.
 
 Use the new table, but only for data that genuinely needs structured JSON or does not already have a clean normalized home.
 
-| Concern | Recommended source of truth |
-| --- | --- |
-| Dietary requirement membership | `user_dietary_requirements` |
-| Allergy membership | `user_allergies` |
-| Health condition membership | `user_health_conditions` |
-| Dislikes | `user_dislikes` |
-| Cooking methods | `user_cooking_methods` |
-| Spice levels | `user_spice_levels` |
-| Structured allergy metadata (`severity`, `notes`) | `user_preference_states.health_context` |
-| Structured condition metadata (`status`, `notes`) | `user_preference_states.health_context` |
-| Medications | `user_preference_states.health_context` |
-| Notification preferences | `users.notification_preferences` or `user_preference_states.notification_preferences`, but not both |
-| UI settings (`theme`, `language`, `font_size`) | `users` or `user_preference_states.ui_settings`, but not both |
+| Concern                                           | Recommended source of truth                                                                         |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Dietary requirement membership                    | `user_dietary_requirements`                                                                         |
+| Allergy membership                                | `user_allergies`                                                                                    |
+| Health condition membership                       | `user_health_conditions`                                                                            |
+| Dislikes                                          | `user_dislikes`                                                                                     |
+| Cooking methods                                   | `user_cooking_methods`                                                                              |
+| Spice levels                                      | `user_spice_levels`                                                                                 |
+| Structured allergy metadata (`severity`, `notes`) | `user_preference_states.health_context`                                                             |
+| Structured condition metadata (`status`, `notes`) | `user_preference_states.health_context`                                                             |
+| Medications                                       | `user_preference_states.health_context`                                                             |
+| Notification preferences                          | `users.notification_preferences` or `user_preference_states.notification_preferences`, but not both |
+| UI settings (`theme`, `language`, `font_size`)    | `users` or `user_preference_states.ui_settings`, but not both                                       |
 
 ### Lowest-risk practical choice for this repo
 

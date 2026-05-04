@@ -1,5 +1,5 @@
-const { expect } = require("chai");
-const proxyquire = require("proxyquire").noCallThru();
+const { expect } = require('chai');
+const proxyquire = require('proxyquire').noCallThru();
 
 function createSupabaseStub(initialUsers = []) {
   const users = initialUsers.map((user) => ({ ...user }));
@@ -55,13 +55,13 @@ function createSupabaseStub(initialUsers = []) {
     }
 
     function execute() {
-      if (table === "users") {
+      if (table === 'users') {
         if (state.insertValues) {
           const value = Array.isArray(state.insertValues)
             ? state.insertValues[0]
             : state.insertValues;
           users.push({ ...value });
-          return { data: value, error: null, status: 201, statusText: "Created" };
+          return { data: value, error: null, status: 201, statusText: 'Created' };
         }
 
         if (state.updateValues) {
@@ -70,23 +70,23 @@ function createSupabaseStub(initialUsers = []) {
               Object.assign(user, state.updateValues);
             }
           });
-          return { data: null, error: null, status: 200, statusText: "OK" };
+          return { data: null, error: null, status: 200, statusText: 'OK' };
         }
 
         const found = users.filter(matchFilters);
         if (state.single) {
           return {
             data: found[0] || null,
-            error: found[0] ? null : { code: "PGRST116" },
+            error: found[0] ? null : { code: 'PGRST116' },
             status: found[0] ? 200 : 406,
-            statusText: found[0] ? "OK" : "Not Acceptable",
+            statusText: found[0] ? 'OK' : 'Not Acceptable',
           };
         }
 
-        return { data: found, error: null, status: 200, statusText: "OK" };
+        return { data: found, error: null, status: 200, statusText: 'OK' };
       }
 
-      if (table === "password_reset_tokens") {
+      if (table === 'password_reset_tokens') {
         if (state.insertValues) {
           const value = Array.isArray(state.insertValues)
             ? state.insertValues[0]
@@ -95,7 +95,7 @@ function createSupabaseStub(initialUsers = []) {
             id: tokens.length + 1,
             ...value,
           });
-          return { data: null, error: null, status: 201, statusText: "Created" };
+          return { data: null, error: null, status: 201, statusText: 'Created' };
         }
 
         if (state.updateValues) {
@@ -104,14 +104,14 @@ function createSupabaseStub(initialUsers = []) {
               Object.assign(token, state.updateValues);
             }
           });
-          return { data: null, error: null, status: 200, statusText: "OK" };
+          return { data: null, error: null, status: 200, statusText: 'OK' };
         }
 
         let found = tokens.filter(matchFilters);
-        if (typeof state.limit === "number") {
+        if (typeof state.limit === 'number') {
           found = found.slice(0, state.limit);
         }
-        return { data: found, error: null, status: 200, statusText: "OK" };
+        return { data: found, error: null, status: 200, statusText: 'OK' };
       }
 
       throw new Error(`Unsupported table ${table}`);
@@ -129,30 +129,30 @@ function createSupabaseStub(initialUsers = []) {
   };
 }
 
-describe("passwordResetService", () => {
+describe('passwordResetService', () => {
   beforeEach(() => {
-    process.env.GMAIL_USER = "mailer@test.local";
-    process.env.GMAIL_APP_PASSWORD = "test-app-password";
+    process.env.GMAIL_USER = 'mailer@test.local';
+    process.env.GMAIL_APP_PASSWORD = 'test-app-password';
   });
 
-  it("completes request, verify, and reset flow", async () => {
+  it('completes request, verify, and reset flow', async () => {
     const supabase = createSupabaseStub([
       {
         user_id: 1,
-        email: "user@example.com",
-        name: "User",
-        password: "old-hash",
+        email: 'user@example.com',
+        name: 'User',
+        password: 'old-hash',
       },
     ]);
     let sentCode = null;
 
-    const service = proxyquire("../services/passwordResetService", {
-      "../dbConnection": supabase,
+    const service = proxyquire('../services/passwordResetService', {
+      '../dbConnection': supabase,
       nodemailer: {
         createTransport: () => ({
           sendMail: async (payload) => {
             sentCode = String(payload.text).match(/code is (\d{6})/)[1];
-            return { response: "ok" };
+            return { response: 'ok' };
           },
         }),
       },
@@ -161,39 +161,39 @@ describe("passwordResetService", () => {
       },
     });
 
-    const request = await service.requestReset("user@example.com", {
-      ip: "127.0.0.1",
-      userAgent: "test-agent",
+    const request = await service.requestReset('user@example.com', {
+      ip: '127.0.0.1',
+      userAgent: 'test-agent',
     });
-    const verification = await service.verifyCode("user@example.com", sentCode);
+    const verification = await service.verifyCode('user@example.com', sentCode);
     const reset = await service.resetPassword({
-      email: "user@example.com",
+      email: 'user@example.com',
       resetToken: verification.resetToken,
-      newPassword: "Stronger!123",
+      newPassword: 'Stronger!123',
     });
 
     expect(request.success).to.equal(true);
     expect(verification.success).to.equal(true);
-    expect(verification.resetToken).to.be.a("string");
+    expect(verification.resetToken).to.be.a('string');
     expect(reset.success).to.equal(true);
-    expect(supabase.__users[0].password).to.equal("hashed:Stronger!123");
+    expect(supabase.__users[0].password).to.equal('hashed:Stronger!123');
   });
 
-  it("rejects invalid verification codes", async () => {
+  it('rejects invalid verification codes', async () => {
     const supabase = createSupabaseStub([
       {
         user_id: 1,
-        email: "user@example.com",
-        name: "User",
-        password: "old-hash",
+        email: 'user@example.com',
+        name: 'User',
+        password: 'old-hash',
       },
     ]);
 
-    const service = proxyquire("../services/passwordResetService", {
-      "../dbConnection": supabase,
+    const service = proxyquire('../services/passwordResetService', {
+      '../dbConnection': supabase,
       nodemailer: {
         createTransport: () => ({
-          sendMail: async () => ({ response: "ok" }),
+          sendMail: async () => ({ response: 'ok' }),
         }),
       },
       bcryptjs: {
@@ -201,34 +201,34 @@ describe("passwordResetService", () => {
       },
     });
 
-    await service.requestReset("user@example.com");
+    await service.requestReset('user@example.com');
 
     try {
-      await service.verifyCode("user@example.com", "000000");
-      throw new Error("Expected invalid code error");
+      await service.verifyCode('user@example.com', '000000');
+      throw new Error('Expected invalid code error');
     } catch (error) {
-      expect(error.message).to.equal("Verification code is invalid or has expired");
+      expect(error.message).to.equal('Verification code is invalid or has expired');
     }
   });
 
-  it("rejects expired verification codes", async () => {
+  it('rejects expired verification codes', async () => {
     const supabase = createSupabaseStub([
       {
         user_id: 1,
-        email: "user@example.com",
-        name: "User",
-        password: "old-hash",
+        email: 'user@example.com',
+        name: 'User',
+        password: 'old-hash',
       },
     ]);
     let sentCode = null;
 
-    const service = proxyquire("../services/passwordResetService", {
-      "../dbConnection": supabase,
+    const service = proxyquire('../services/passwordResetService', {
+      '../dbConnection': supabase,
       nodemailer: {
         createTransport: () => ({
           sendMail: async (payload) => {
             sentCode = String(payload.text).match(/code is (\d{6})/)[1];
-            return { response: "ok" };
+            return { response: 'ok' };
           },
         }),
       },
@@ -237,14 +237,14 @@ describe("passwordResetService", () => {
       },
     });
 
-    await service.requestReset("user@example.com");
+    await service.requestReset('user@example.com');
     supabase.__tokens[0].expires_at = new Date(Date.now() - 60_000).toISOString();
 
     try {
-      await service.verifyCode("user@example.com", sentCode);
-      throw new Error("Expected expired code error");
+      await service.verifyCode('user@example.com', sentCode);
+      throw new Error('Expected expired code error');
     } catch (error) {
-      expect(error.message).to.equal("Verification code is invalid or has expired");
+      expect(error.message).to.equal('Verification code is invalid or has expired');
     }
   });
 });

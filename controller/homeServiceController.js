@@ -1,11 +1,11 @@
-const supabase = require("../dbConnection.js");
+const supabase = require('../dbConnection.js');
 const logger = require('../utils/logger');
 const {
   createServiceModel,
   updateServiceModel,
   deleteServiceModel,
   addSubscribeModel,
-} = require("../model/nutrihelpService.js");
+} = require('../model/nutrihelpService.js');
 /**
  * Get Nutrihelp Services
  * @param {Request} req - Express request object
@@ -14,20 +14,18 @@ const {
 const getServiceContents = async (req, res) => {
   try {
     const { data, error } = await supabase
-      .from("nutrihelp_services")
-      .select("title, description, image");
+      .from('nutrihelp_services')
+      .select('title, description, image');
 
     if (error) {
       logger.error('Error getting service contents', { error: error.message });
-      return res.status(500).json({ error: "Failed to get service contents" });
+      return res.status(500).json({ error: 'Failed to get service contents' });
     }
 
-    return res
-      .status(200)
-      .json({ message: "Get service contents successfully", data });
+    return res.status(200).json({ message: 'Get service contents successfully', data });
   } catch (error) {
     logger.error('Internal server error in getServiceContents', { error: error.message });
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -38,21 +36,21 @@ const getServiceContentsPage = async (req, res) => {
     const pageSize = parseInt(req.query.pageSize, 10) || 10;
     const from = (page - 1) * pageSize;
     const to = from + pageSize - 1;
-    const search = req.query.search || "";
-    const onlineOnly = req.query.online === "true";
+    const search = req.query.search || '';
+    const onlineOnly = req.query.online === 'true';
 
     // Build Supabase query
     let query = supabase
-      .from("nutrihelp_services")
-      .select("id, title, description, image, online, created_at, updated_at", {
-        count: "exact",
+      .from('nutrihelp_services')
+      .select('id, title, description, image, online, created_at, updated_at', {
+        count: 'exact',
       })
-      .order("created_at", { ascending: false })
+      .order('created_at', { ascending: false })
       .range(from, to);
 
     // Filter by online if requested
     if (onlineOnly) {
-      query = query.eq("online", true);
+      query = query.eq('online', true);
     }
 
     // Search by title or description
@@ -64,11 +62,11 @@ const getServiceContentsPage = async (req, res) => {
 
     if (error) {
       logger.error('Error getting service contents', { error: error.message });
-      return res.status(500).json({ error: "Failed to get service contents" });
+      return res.status(500).json({ error: 'Failed to get service contents' });
     }
 
     return res.status(200).json({
-      message: "Service contents fetched successfully",
+      message: 'Service contents fetched successfully',
       page,
       pageSize,
       total: count,
@@ -77,7 +75,7 @@ const getServiceContentsPage = async (req, res) => {
     });
   } catch (error) {
     logger.error('Internal server error in getServiceContentsPage', { error: error.message });
-    return res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
 
@@ -86,7 +84,7 @@ const createService = async (req, res) => {
     const { title, description, image, online = false } = req.body;
 
     if (!title || !description || !image) {
-      return res.status(400).json({ error: "Missing required fields" });
+      return res.status(400).json({ error: 'Missing required fields' });
     }
 
     const service = await createServiceModel({
@@ -97,7 +95,7 @@ const createService = async (req, res) => {
     });
 
     res.status(201).json({
-      message: "Service created successfully",
+      message: 'Service created successfully',
       data: service,
     });
   } catch (error) {
@@ -112,7 +110,7 @@ const updateService = async (req, res) => {
     const { title, description, image, online } = req.body;
 
     if (!id) {
-      return res.status(400).json({ error: "Service ID is required" });
+      return res.status(400).json({ error: 'Service ID is required' });
     }
 
     const service = await updateServiceModel(id, {
@@ -123,7 +121,7 @@ const updateService = async (req, res) => {
     });
 
     res.status(200).json({
-      message: "Service updated successfully",
+      message: 'Service updated successfully',
       data: service,
     });
   } catch (error) {
@@ -137,13 +135,13 @@ const deleteService = async (req, res) => {
     const { id } = req.params;
 
     if (!id) {
-      return res.status(400).json({ error: "Service ID is required" });
+      return res.status(400).json({ error: 'Service ID is required' });
     }
 
     await deleteServiceModel(id);
 
     res.status(200).json({
-      message: "Service deleted successfully",
+      message: 'Service deleted successfully',
     });
   } catch (error) {
     logger.error('Error deleting service', { error: error.message, serviceId: req.params.id });
@@ -156,15 +154,15 @@ const addSubscribe = async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({ error: "Missing required fields" });
+      return res.status(400).json({ error: 'Missing required fields' });
     }
 
     const subscribe = await addSubscribeModel({
-      email
+      email,
     });
 
     res.status(201).json({
-      message: "subscribe created successfully",
+      message: 'subscribe created successfully',
       data: subscribe,
     });
   } catch (error) {

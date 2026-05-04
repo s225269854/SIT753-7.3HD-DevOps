@@ -17,7 +17,7 @@ describe('User Profile Service', () => {
         registration_date: '2025-01-01T00:00:00.000Z',
         last_login: '2026-04-01T00:00:00.000Z',
         mfa_enabled: true,
-        user_roles: { role_name: 'user' }
+        user_roles: { role_name: 'user' },
       }),
       '../model/fetchUserPreferences': async () => ({
         dietary_requirements: [{ id: 1, name: 'High Protein' }],
@@ -26,9 +26,9 @@ describe('User Profile Service', () => {
         dislikes: [],
         health_conditions: [{ id: 4, name: 'Diabetes' }],
         spice_levels: [],
-        cooking_methods: [{ id: 8, name: 'Grilled' }]
+        cooking_methods: [{ id: 8, name: 'Grilled' }],
       }),
-      '../model/updateUserProfile': {}
+      '../model/updateUserProfile': {},
     });
 
     const result = await service.getCanonicalProfile({ userId: 7 });
@@ -50,7 +50,7 @@ describe('User Profile Service', () => {
         mfaEnabled: true,
         accountStatus: 'active',
         registrationDate: '2025-01-01T00:00:00.000Z',
-        lastLogin: '2026-04-01T00:00:00.000Z'
+        lastLogin: '2026-04-01T00:00:00.000Z',
       },
       preferenceSummary: {
         dietaryRequirements: ['high protein'],
@@ -60,8 +60,8 @@ describe('User Profile Service', () => {
         healthConditions: ['diabetes'],
         spiceLevels: [],
         cookingMethods: ['grilled'],
-        hasPreferences: true
-      }
+        hasPreferences: true,
+      },
     });
   });
 
@@ -77,7 +77,7 @@ describe('User Profile Service', () => {
       image_url: null,
       mfa_enabled: false,
       account_status: 'active',
-      user_roles: { role_name: 'user' }
+      user_roles: { role_name: 'user' },
     });
 
     const service = proxyquire('../services/userProfileService', {
@@ -85,11 +85,11 @@ describe('User Profile Service', () => {
         user_id: 12,
         email: 'legacy@example.com',
         name: 'legacy',
-        user_roles: { role_name: 'user' }
+        user_roles: { role_name: 'user' },
       }),
       '../model/updateUserProfile': {
         updateUser,
-        saveImage: async () => 'https://cdn.example.com/new.png'
+        saveImage: async () => 'https://cdn.example.com/new.png',
       },
       '../model/fetchUserPreferences': async () => ({
         dietary_requirements: [],
@@ -98,8 +98,8 @@ describe('User Profile Service', () => {
         dislikes: [],
         health_conditions: [],
         spice_levels: [],
-        cooking_methods: []
-      })
+        cooking_methods: [],
+      }),
     });
 
     const result = await service.updateCanonicalProfile({
@@ -110,8 +110,8 @@ describe('User Profile Service', () => {
         last_name: 'User',
         contact_number: '12345',
         address: 'Geelong',
-        user_image: 'base64-image'
-      }
+        user_image: 'base64-image',
+      },
     });
 
     expect(result.profile).to.deep.include({
@@ -120,7 +120,7 @@ describe('User Profile Service', () => {
       lastName: 'User',
       contactNumber: '12345',
       address: 'Geelong',
-      imageUrl: 'https://cdn.example.com/new.png'
+      imageUrl: 'https://cdn.example.com/new.png',
     });
     expect(result.meta).to.deep.equal({ updatedBy: 12 });
   });

@@ -203,7 +203,10 @@ describe('responseContract middleware', () => {
   function buildRes(path = '/api/test') {
     const jsonCalls = [];
     const res = {
-      json: jest.fn((body) => { jsonCalls.push(body); return res; }),
+      json: jest.fn((body) => {
+        jsonCalls.push(body);
+        return res;
+      }),
       status: jest.fn().mockReturnThis(),
       statusCode: 200,
     };

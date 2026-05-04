@@ -52,7 +52,10 @@ describe('buildStructuredHealthContext', () => {
 
   it('merges DB-sourced allergies with health_context severity details', () => {
     const raw = makeRawPrefs({
-      allergies: [{ id: 1, name: 'Peanuts' }, { id: 2, name: 'Shellfish' }],
+      allergies: [
+        { id: 1, name: 'Peanuts' },
+        { id: 2, name: 'Shellfish' },
+      ],
       health_context: {
         allergies: [
           { referenceId: 1, name: 'Peanuts', severity: 'severe', notes: 'Carries EpiPen' },
@@ -97,7 +100,10 @@ describe('buildStructuredHealthContext', () => {
 
   it('deduplicates allergyNames in normalized_summary', () => {
     const raw = makeRawPrefs({
-      allergies: [{ id: 1, name: 'milk' }, { id: 2, name: 'Milk' }],
+      allergies: [
+        { id: 1, name: 'milk' },
+        { id: 2, name: 'Milk' },
+      ],
       health_context: {
         allergies: [
           { referenceId: 1, name: 'milk', severity: 'mild', notes: null },
@@ -151,7 +157,12 @@ describe('buildStructuredHealthContext', () => {
           {
             name: 'Metformin',
             dosage: { amount: '500', unit: 'mg' },
-            frequency: { timesPerDay: 2, interval: null, schedule: ['morning', 'evening'], asNeeded: false },
+            frequency: {
+              timesPerDay: 2,
+              interval: null,
+              schedule: ['morning', 'evening'],
+              asNeeded: false,
+            },
             purpose: 'Blood sugar control',
             notes: null,
             active: true,

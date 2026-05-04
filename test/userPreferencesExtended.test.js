@@ -43,7 +43,12 @@ const VALID_HEALTH_CONTEXT = {
     {
       name: 'Metformin',
       dosage: { amount: '500', unit: 'mg' },
-      frequency: { timesPerDay: 2, interval: null, schedule: ['morning', 'evening'], asNeeded: false },
+      frequency: {
+        timesPerDay: 2,
+        interval: null,
+        schedule: ['morning', 'evening'],
+        asNeeded: false,
+      },
       purpose: 'Blood sugar control',
       notes: null,
       active: true,

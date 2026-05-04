@@ -14,19 +14,17 @@ async function addMfaToken(userId, token) {
       .eq('user_id', parsedUserId)
       .eq('is_used', false);
 
-    const { data, error } = await supabase
-      .from('mfatokens')
-      .insert({
-        user_id: parsedUserId,
-        token,
-        expiry: expiryDate.toISOString(),
-        is_used: false
-      });
+    const { data, error } = await supabase.from('mfatokens').insert({
+      user_id: parsedUserId,
+      token,
+      expiry: expiryDate.toISOString(),
+      is_used: false,
+    });
 
     if (error) throw error;
     return data;
   } catch (error) {
-    console.error("Error adding MFA token:", error);
+    console.error('Error adding MFA token:', error);
     throw error;
   }
 }
@@ -36,15 +34,15 @@ async function invalidateMfaTokens(userId) {
     const parsedUserId = parseInt(userId, 10);
 
     const { error } = await supabase
-      .from("mfatokens")
+      .from('mfatokens')
       .update({ is_used: true })
-      .eq("user_id", parsedUserId)
-      .eq("is_used", false);
+      .eq('user_id', parsedUserId)
+      .eq('is_used', false);
 
     if (error) throw error;
     return true;
   } catch (error) {
-    console.error("Error invalidating MFA tokens:", error);
+    console.error('Error invalidating MFA tokens:', error);
     throw error;
   }
 }
@@ -67,7 +65,7 @@ async function verifyMfaToken(userId, token) {
 
     const mfaToken = data?.[0];
     if (!mfaToken) {
-      console.log("❌ No valid token found for user:", parsedUserId, "token:", token);
+      console.log('❌ No valid token found for user:', parsedUserId, 'token:', token);
       return false;
     }
 
@@ -75,20 +73,17 @@ async function verifyMfaToken(userId, token) {
     const now = new Date();
     const expiryDate = new Date(mfaToken.expiry);
     if (now > expiryDate) {
-      console.log("❌ Token expired. Expiry:", expiryDate, "Now:", now);
+      console.log('❌ Token expired. Expiry:', expiryDate, 'Now:', now);
       return false;
     }
 
     // Mark token as used
-    await supabase
-      .from('mfatokens')
-      .update({ is_used: true })
-      .eq('id', mfaToken.id);
+    await supabase.from('mfatokens').update({ is_used: true }).eq('id', mfaToken.id);
 
-    console.log("✅ Token validated successfully for user:", parsedUserId);
+    console.log('✅ Token validated successfully for user:', parsedUserId);
     return true;
   } catch (error) {
-    console.error("Error verifying MFA token:", error);
+    console.error('Error verifying MFA token:', error);
     throw error;
   }
 }

@@ -1,6 +1,6 @@
 /**
  * RecommendationAIClientInterface.js
- * 
+ *
  * Interface for recommendation AI services.
  * Handles recipe recommendations and personalized suggestions.
  */

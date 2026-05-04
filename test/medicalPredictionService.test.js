@@ -1,7 +1,10 @@
 const { expect } = require('chai');
 
 const { ServiceError } = require('../services/serviceError');
-const { MedicalPredictionService, encodeMedicalSurvey } = require('../services/medicalPredictionService');
+const {
+  MedicalPredictionService,
+  encodeMedicalSurvey,
+} = require('../services/medicalPredictionService');
 
 describe('Medical prediction service', () => {
   it('encodes mixed survey inputs into the AI payload format', () => {
@@ -21,7 +24,7 @@ describe('Medical prediction service', () => {
       FAF: '1',
       TUE: '4',
       CALC: '1',
-      MTRANS: 'bus'
+      MTRANS: 'bus',
     });
 
     expect(encoded).to.deep.equal({
@@ -40,7 +43,7 @@ describe('Medical prediction service', () => {
       FAF: 1,
       TUE: 4,
       CALC: 1,
-      MTRANS: 'Public_Transportation'
+      MTRANS: 'Public_Transportation',
     });
   });
 
@@ -49,12 +52,13 @@ describe('Medical prediction service', () => {
     const fetchStub = async () => ({
       ok: true,
       status: 200,
-      text: async () => JSON.stringify({
-        medical_report: {
-          bmi: 27.5,
-          obesity_prediction: { obesity_level: 'Overweight' }
-        }
-      })
+      text: async () =>
+        JSON.stringify({
+          medical_report: {
+            bmi: 27.5,
+            obesity_prediction: { obesity_level: 'Overweight' },
+          },
+        }),
     });
 
     const result = await service.predict({ Gender: 'female' }, { fetch: fetchStub });
@@ -65,9 +69,9 @@ describe('Medical prediction service', () => {
         survey_id: null,
         medical_report: {
           bmi: 27.5,
-          obesity_prediction: { obesity_level: 'Overweight' }
-        }
-      }
+          obesity_prediction: { obesity_level: 'Overweight' },
+        },
+      },
     });
   });
 
@@ -76,7 +80,7 @@ describe('Medical prediction service', () => {
     const fetchStub = async () => ({
       ok: false,
       status: 422,
-      text: async () => JSON.stringify({ detail: 'Bad payload' })
+      text: async () => JSON.stringify({ detail: 'Bad payload' }),
     });
 
     try {

@@ -16,7 +16,7 @@ describe('AI Controllers', () => {
       json(payload) {
         this.payload = payload;
         return this;
-      }
+      },
     };
   }
 
@@ -47,7 +47,7 @@ describe('AI Controllers', () => {
           uncertain: false,
           source: 'ai',
           fallbackUsed: false,
-          alternatives: []
+          alternatives: [],
         },
         explainability: {
           service: 'image_classification',
@@ -60,16 +60,16 @@ describe('AI Controllers', () => {
           confidenceThreshold: 0.6,
           warnings: [],
           generatedAt: new Date().toISOString(),
-          contractVersion: 'v1'
-        }
-      }
+          contractVersion: 'v1',
+        },
+      },
     });
 
     const readFileStub = sinon.stub(fs.promises, 'readFile').resolves(Buffer.from('image-data'));
     stubFileCleanup();
 
     const controller = proxyquire('../controller/imageClassificationController', {
-      '../services/imageClassificationGateway': { classify }
+      '../services/imageClassificationGateway': { classify },
     });
 
     const req = { file: { path: 'uploads/test.png' } };
@@ -91,14 +91,14 @@ describe('AI Controllers', () => {
       ok: false,
       httpStatus: 503,
       code: 'AI_SERVICE_UNAVAILABLE',
-      error: 'Image classification is temporarily unavailable. Please try again.'
+      error: 'Image classification is temporarily unavailable. Please try again.',
     });
 
     sinon.stub(fs.promises, 'readFile').resolves(Buffer.from('image-data'));
     stubFileCleanup();
 
     const controller = proxyquire('../controller/imageClassificationController', {
-      '../services/imageClassificationGateway': { classify }
+      '../services/imageClassificationGateway': { classify },
     });
 
     const req = { file: { path: 'uploads/test.png' } };
@@ -118,7 +118,7 @@ describe('AI Controllers', () => {
     stubFileCleanup();
 
     const controller = proxyquire('../controller/imageClassificationController', {
-      '../services/imageClassificationGateway': { classify }
+      '../services/imageClassificationGateway': { classify },
     });
 
     const req = {};
@@ -138,21 +138,21 @@ describe('AI Controllers', () => {
       prediction: null,
       confidence: null,
       error: 'AI script timed out after 30000ms',
-      timedOut: true
+      timedOut: true,
     });
 
     sinon.stub(fs, 'existsSync').returns(true);
     stubFileCleanup();
 
     const controller = proxyquire('../controller/recipeImageClassificationController', {
-      '../services/aiExecutionService': { executePythonScript }
+      '../services/aiExecutionService': { executePythonScript },
     });
 
     const req = {
       file: {
         path: 'uploads/temp/test.png',
-        originalname: 'test.png'
-      }
+        originalname: 'test.png',
+      },
     };
     const res = createResponseMock();
 
@@ -161,14 +161,14 @@ describe('AI Controllers', () => {
     expect(executePythonScript.calledOnce).to.equal(true);
     expect(executePythonScript.firstCall.args[0].args).to.deep.equal([
       'uploads/temp/test.png',
-      'test.png'
+      'test.png',
     ]);
     expect(res.statusCode).to.equal(504);
     expect(res.payload).to.deep.equal({
       success: false,
       prediction: null,
       confidence: null,
-      error: 'AI script timed out after 30000ms'
+      error: 'AI script timed out after 30000ms',
     });
   });
 
@@ -181,23 +181,23 @@ describe('AI Controllers', () => {
       metadata: {
         classifier_type: 'heuristic',
         decision_source: 'deterministic_fallback',
-        model_used: false
+        model_used: false,
       },
-      warnings: ['low_confidence_fallback', 'heuristic_prediction']
+      warnings: ['low_confidence_fallback', 'heuristic_prediction'],
     });
 
     sinon.stub(fs, 'existsSync').returns(true);
     stubFileCleanup();
 
     const controller = proxyquire('../controller/recipeImageClassificationController', {
-      '../services/aiExecutionService': { executePythonScript }
+      '../services/aiExecutionService': { executePythonScript },
     });
 
     const req = {
       file: {
         path: 'uploads/temp/test.png',
-        originalname: 'test.png'
-      }
+        originalname: 'test.png',
+      },
     };
     const res = createResponseMock();
 
@@ -206,7 +206,7 @@ describe('AI Controllers', () => {
     expect(executePythonScript.calledOnce).to.equal(true);
     expect(executePythonScript.firstCall.args[0].args).to.deep.equal([
       'uploads/temp/test.png',
-      'test.png'
+      'test.png',
     ]);
     expect(res.statusCode).to.equal(200);
     expect(res.payload).to.deep.equal({
@@ -217,9 +217,9 @@ describe('AI Controllers', () => {
       metadata: {
         classifier_type: 'heuristic',
         decision_source: 'deterministic_fallback',
-        model_used: false
+        model_used: false,
       },
-      warnings: ['low_confidence_fallback', 'heuristic_prediction']
+      warnings: ['low_confidence_fallback', 'heuristic_prediction'],
     });
   });
 });

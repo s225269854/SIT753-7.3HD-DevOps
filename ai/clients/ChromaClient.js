@@ -1,9 +1,9 @@
 /**
  * ChromaClient.js
- * 
+ *
  * Template for Chroma vector database integration for RAG-based recommendations.
  * This is a placeholder for future implementation when Chroma integration is stabilized.
- * 
+ *
  * SPRINT 2 MIGRATION: Will provide semantic search and retrieval for RAG pipeline.
  */
 
@@ -11,7 +11,7 @@ const RecommendationAIClientInterface = require('../interfaces/RecommendationAIC
 
 /**
  * Chroma AI Client - uses Chroma for vector-based semantic search
- * 
+ *
  * Future implementation should:
  * - Connect to Chroma database (local or hosted)
  * - Manage recipe embeddings and vector similarity search
@@ -25,12 +25,12 @@ class ChromaRecommendationClient extends RecommendationAIClientInterface {
     this.chromaUrl = config.chromaUrl || process.env.CHROMA_URL || 'http://localhost:8000';
     this.chromaCollectionName = config.collectionName || 'recipes';
     this.embeddingModel = config.embeddingModel || 'sentence-transformers/all-MiniLM-L6-v2';
-    
+
     // Collections for different recommendation types
     this.collections = {
       recipes: 'recipe_vectors',
       healthPlans: 'health_plan_vectors',
-      mealPlans: 'meal_plan_vectors'
+      mealPlans: 'meal_plan_vectors',
     };
   }
 
@@ -41,7 +41,7 @@ class ChromaRecommendationClient extends RecommendationAIClientInterface {
     // 3. Filter by dietary restrictions
     // 4. Rank by relevance
     // 5. Return standardized response
-    
+
     return this.errorResponse(
       new Error('ChromaRecommendationClient not yet implemented'),
       'recommendRecipes'
@@ -85,11 +85,11 @@ class ChromaRecommendationClient extends RecommendationAIClientInterface {
       chromaUrl: this.chromaUrl,
       embeddingModel: this.embeddingModel,
       collections: this.collections,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
 
 module.exports = {
-  ChromaRecommendationClient
+  ChromaRecommendationClient,
 };

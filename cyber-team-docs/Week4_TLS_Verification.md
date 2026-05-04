@@ -92,7 +92,7 @@ curl -k https://localhost:443/api/health
 Expected result:
 
 ```json
-{"status":"ok","tls":"1.3 enforced"}
+{ "status": "ok", "tls": "1.3 enforced" }
 ```
 
 ## PR Evidence Checklist

@@ -24,7 +24,7 @@ const CONTRACT_VERSION = 'recommendation-scoring-v2';
 function scoreRecipe(recipe, context = {}) {
   // ---- Layer 1: hard safety filter ---------------------------------------
   const allergyResult = allergyFilter.evaluate(recipe, {
-    allergies: context.allergies
+    allergies: context.allergies,
   });
 
   if (allergyResult.blocked) {
@@ -39,25 +39,27 @@ function scoreRecipe(recipe, context = {}) {
       severity: allergyResult.severity,
       explanation: reasonBuilder.buildExplanation({
         reasons: [],
-        warnings: [{
-          tag: 'allergy_blocked',
-          message: `Hidden from your list — matches allergy: ${allergyResult.blockers.join(', ')}.`,
-          severity: 'high'
-        }],
+        warnings: [
+          {
+            tag: 'allergy_blocked',
+            message: `Hidden from your list — matches allergy: ${allergyResult.blockers.join(', ')}.`,
+            severity: 'high',
+          },
+        ],
         safetyNotes: allergyResult.notes.map((message) => ({
           tag: 'allergy_blocked',
           message,
           severity: 'high',
-          disclaimer: true
+          disclaimer: true,
         })),
-        fallback: 'Hidden for allergy safety.'
+        fallback: 'Hidden for allergy safety.',
       }),
       metadata: {
         cuisineId: recipe.cuisine_id,
         cookingMethodId: recipe.cooking_method_id,
         strategy: STRATEGY_ID,
-        nutrition: nutritionBalance.evaluate(recipe).breakdown
-      }
+        nutrition: nutritionBalance.evaluate(recipe).breakdown,
+      },
     };
   }
 
@@ -70,17 +72,17 @@ function scoreRecipe(recipe, context = {}) {
     recentRecipeIds: context.recentRecipeIds,
     dislikes: context.dislikes,
     dietaryRequirements: context.dietaryRequirements,
-    goalState: context.goalState
+    goalState: context.goalState,
   });
 
   // ---- Layer 3: condition alignment -------------------------------------
   const conditionResult = conditionAdjuster.evaluate(recipe, {
-    conditionNames: context.conditionNames
+    conditionNames: context.conditionNames,
   });
 
   // ---- Layer 4: medication guards ---------------------------------------
   const medResult = medicationGuard.evaluate(recipe, {
-    medications: context.medications
+    medications: context.medications,
   });
 
   // ---- Layer 5: nutritional balance -------------------------------------
@@ -102,26 +104,27 @@ function scoreRecipe(recipe, context = {}) {
       if (note?.severity === 'high') return total - 6;
       if (note?.severity === 'warn') return total - 3;
       return total;
-    }, 0)
+    }, 0),
   };
 
-  const score = subtotals.preference
-    + subtotals.condition
-    + subtotals.nutrition
-    + subtotals.aiSignal
-    + subtotals.medicationPenalty;
+  const score =
+    subtotals.preference +
+    subtotals.condition +
+    subtotals.nutrition +
+    subtotals.aiSignal +
+    subtotals.medicationPenalty;
 
   const explanation = reasonBuilder.buildExplanation({
     reasons: totalReasons,
     warnings: totalWarnings,
     safetyNotes: totalSafetyNotes,
-    fallback: 'Balanced choice based on available nutrition data.'
+    fallback: 'Balanced choice based on available nutrition data.',
   });
 
   const safetyLevel = reasonBuilder.decideSafetyLevel({
     blocked: false,
     warnings: totalWarnings,
-    safetyNotes: totalSafetyNotes
+    safetyNotes: totalSafetyNotes,
   });
 
   return {
@@ -145,8 +148,8 @@ function scoreRecipe(recipe, context = {}) {
       aiSource: context.aiSource || 'none',
       aiApplied: (context.aiSource && context.aiSource !== 'none') || false,
       fallbackUsed: context.aiFallbackUsed === true,
-      adapterFailed: context.aiAdapterFailed === true
-    }
+      adapterFailed: context.aiAdapterFailed === true,
+    },
   };
 }
 
@@ -164,12 +167,10 @@ function rankRecipes(recipes, context = {}, { maxResults = 5 } = {}) {
       title: r.title,
       reason: r.reasonCode,
       blockers: r.blockers,
-      severity: r.severity
+      severity: r.severity,
     }));
 
-  const visible = scored
-    .filter((r) => !r.blocked)
-    .sort((a, b) => b.score - a.score);
+  const visible = scored.filter((r) => !r.blocked).sort((a, b) => b.score - a.score);
 
   const recommendations = visible
     .slice(0, maxResults)
@@ -183,13 +184,13 @@ function rankRecipes(recipes, context = {}, { maxResults = 5 } = {}) {
       title: r.title,
       safetyLevel: r.safetyLevel,
       warnings: r.explanation.warnings,
-      safetyNotes: r.explanation.safetyNotes
+      safetyNotes: r.explanation.safetyNotes,
     }));
 
   return {
     recommendations,
     blockedRecipes,
-    downgradedRecipes
+    downgradedRecipes,
   };
 }
 
@@ -197,5 +198,5 @@ module.exports = {
   STRATEGY_ID,
   CONTRACT_VERSION,
   scoreRecipe,
-  rankRecipes
+  rankRecipes,
 };

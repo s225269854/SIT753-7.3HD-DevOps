@@ -18,7 +18,7 @@ const {
   errorLogger,
   responseTimeLogger,
   uncaughtExceptionHandler,
-  unhandledRejectionHandler
+  unhandledRejectionHandler,
 } = require('./middleware/errorLogger');
 
 const helmet = require('helmet');
@@ -90,25 +90,27 @@ app.use(localeMiddleware);
 app.use(responseContractMiddleware);
 
 // CORS (whitelist-ish)
-app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) {
-      return callback(null, true);
-    }
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) {
+        return callback(null, true);
+      }
 
-    if (
-      origin.startsWith('http://localhost') ||
-      origin.startsWith('http://127.0.0.1') ||
-      origin.startsWith('chrome-extension://eggdlmopfankeonchoflhfoglaakobma') ||
-      origin.startsWith('https://apifox.cn-hangzhou.log.aliyuncs.com')
-    ) {
-      callback(null, true);
-    } else {
-      callback(new Error(`CORS blocked: ${origin}`));
-    }
-  },
-  credentials: true,
-}));
+      if (
+        origin.startsWith('http://localhost') ||
+        origin.startsWith('http://127.0.0.1') ||
+        origin.startsWith('chrome-extension://eggdlmopfankeonchoflhfoglaakobma') ||
+        origin.startsWith('https://apifox.cn-hangzhou.log.aliyuncs.com')
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS blocked: ${origin}`));
+      }
+    },
+    credentials: true,
+  })
+);
 app.options('*', cors({ origin: FRONTEND_ORIGIN, credentials: true }));
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Credentials', 'true');
@@ -117,23 +119,25 @@ app.use((req, res, next) => {
 app.set('trust proxy', 1);
 
 // Security headers
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
-      styleSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
-      objectSrc: ["'none'"],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
+        objectSrc: ["'none'"],
+      },
     },
-  },
-  crossOriginEmbedderPolicy: true,
-  hsts: {
-    maxAge: 63072000,
-    includeSubDomains: true,
-    preload: true,
-  },
-  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
-}));
+    crossOriginEmbedderPolicy: true,
+    hsts: {
+      maxAge: 63072000,
+      includeSubDomains: true,
+      preload: true,
+    },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+  })
+);
 
 // Rate limiter
 const limiter = rateLimit({
@@ -151,7 +155,10 @@ try {
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
   console.log('📚 Swagger loaded successfully');
 } catch (e) {
-  console.warn('⚠️  Swagger YAML failed to parse — /api-docs disabled:', String(e.message).split('\n')[0]);
+  console.warn(
+    '⚠️  Swagger YAML failed to parse — /api-docs disabled:',
+    String(e.message).split('\n')[0]
+  );
 }
 
 app.use(responseTimeLogger);
@@ -232,7 +239,9 @@ function createHttpsServer() {
       process.exit(1);
     }
     console.warn('⚠️  TLS certs not found — falling back to HTTP for local development.');
-    console.warn(`   Generate certs with: openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout certs/local-key.pem -out certs/local-cert.pem -subj "//CN=localhost"`);
+    console.warn(
+      `   Generate certs with: openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout certs/local-key.pem -out certs/local-cert.pem -subj "//CN=localhost"`
+    );
     return null;
   }
 }
@@ -282,4 +291,3 @@ activeServer.listen(activePort, async () => {
     exec(`start ${proto}://localhost:${activePort}/api-docs`);
   }
 });
-

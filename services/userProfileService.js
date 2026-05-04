@@ -25,14 +25,19 @@ function normalizeEmail(value) {
 
 function normalizeNameList(items) {
   const source = Array.isArray(items) ? items : [];
-  return [...new Set(source
-    .map((item) => {
-      if (!item) return null;
-      if (typeof item === 'string') return item.trim().toLowerCase();
-      if (typeof item === 'object' && item.name != null) return String(item.name).trim().toLowerCase();
-      return null;
-    })
-    .filter(Boolean))];
+  return [
+    ...new Set(
+      source
+        .map((item) => {
+          if (!item) return null;
+          if (typeof item === 'string') return item.trim().toLowerCase();
+          if (typeof item === 'object' && item.name != null)
+            return String(item.name).trim().toLowerCase();
+          return null;
+        })
+        .filter(Boolean)
+    ),
+  ];
 }
 
 function toFullName(parts) {
@@ -86,7 +91,7 @@ function buildCanonicalProfile(profile) {
     mfaEnabled: Boolean(profile.mfa_enabled),
     accountStatus: profile.account_status ?? null,
     registrationDate: profile.registration_date ?? null,
-    lastLogin: profile.last_login ?? null
+    lastLogin: profile.last_login ?? null,
   };
 }
 
@@ -100,12 +105,12 @@ function buildPreferenceSummary(preferences) {
     dislikes: normalizeNameList(source.dislikes),
     healthConditions: normalizeNameList(source.health_conditions),
     spiceLevels: normalizeNameList(source.spice_levels),
-    cookingMethods: normalizeNameList(source.cooking_methods)
+    cookingMethods: normalizeNameList(source.cooking_methods),
   };
 
   return {
     ...summary,
-    hasPreferences: Object.values(summary).some((items) => items.length > 0)
+    hasPreferences: Object.values(summary).some((items) => items.length > 0),
   };
 }
 
@@ -118,7 +123,7 @@ function buildProfileResponse(profile, preferences) {
     message: 'Profile retrieved successfully',
     contractVersion: PROFILE_CONTRACT_VERSION,
     profile: canonicalProfile,
-    preferenceSummary
+    preferenceSummary,
   };
 }
 
@@ -132,7 +137,7 @@ function extractProfileInput(body = {}) {
     email: normalizeEmail(source.email),
     contactNumber: normalizeString(source.contactNumber ?? source.contact_number),
     address: normalizeString(source.address),
-    userImage: source.userImage ?? source.user_image
+    userImage: source.userImage ?? source.user_image,
   };
 }
 
@@ -169,12 +174,12 @@ async function updateCanonicalProfile({ actor, targetLookup, body }) {
     last_name: updates.lastName,
     email: updates.email,
     contact_number: updates.contactNumber,
-    address: updates.address
+    address: updates.address,
   };
 
   const updatedProfile = await updateUser({
     userId: existingProfile.user_id,
-    attributes
+    attributes,
   });
 
   const mergedProfile = updatedProfile || existingProfile;
@@ -189,8 +194,8 @@ async function updateCanonicalProfile({ actor, targetLookup, body }) {
     ...buildProfileResponse(mergedProfile, preferences),
     message: 'Profile updated successfully',
     meta: {
-      updatedBy: actor?.userId || null
-    }
+      updatedBy: actor?.userId || null,
+    },
   };
 }
 
@@ -202,5 +207,5 @@ module.exports = {
   extractProfileInput,
   getCanonicalProfile,
   normalizeNameList,
-  updateCanonicalProfile
+  updateCanonicalProfile,
 };

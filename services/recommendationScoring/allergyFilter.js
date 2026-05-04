@@ -37,7 +37,7 @@ const ALLERGEN_ALIASES = {
   gluten: ['wheat', 'barley', 'rye', 'bread', 'pasta', 'noodle', 'seitan'],
   sesame: ['sesame', 'tahini'],
   mustard: ['mustard'],
-  celery: ['celery']
+  celery: ['celery'],
 };
 
 function safeLower(value) {
@@ -73,7 +73,9 @@ function evaluate(recipe, context = {}) {
   const recipeText = [
     safeLower(recipe.recipe_name),
     safeLower(recipe.description),
-    safeLower(Array.isArray(recipe.ingredients) ? recipe.ingredients.join(' ') : recipe.ingredients)
+    safeLower(
+      Array.isArray(recipe.ingredients) ? recipe.ingredients.join(' ') : recipe.ingredients
+    ),
   ].join(' ');
 
   // Legacy DB-level flag — some rows pre-mark unsafe items for this user.
@@ -104,11 +106,11 @@ function evaluate(recipe, context = {}) {
     blocked: blockers.length > 0,
     blockers: [...new Set(blockers)],
     severity: worstSeverity,
-    notes
+    notes,
   };
 }
 
 module.exports = {
   ALLERGEN_ALIASES,
-  evaluate
+  evaluate,
 };

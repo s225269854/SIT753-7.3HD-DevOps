@@ -1,11 +1,11 @@
-const fetchAllDietaryRequirements = require("../model/fetchAllDietaryRequirements.js");
-const fetchAllCuisines = require("../model/fetchAllCuisines.js");
-const fetchAllAllergies = require("../model/fetchAllAllergies.js");
-const fetchAllIngredients = require("../model/fetchAllIngredients.js");
-const fetchAllCookingMethods = require("../model/fetchAllCookingMethods.js");
-const fetchAllSpiceLevels = require("../model/fetchAllSpiceLevels.js");
-const fetchAllHealthConditions = require("../model/fetchAllHealthConditions");
-const logger = require("../utils/logger");
+const fetchAllDietaryRequirements = require('../model/fetchAllDietaryRequirements.js');
+const fetchAllCuisines = require('../model/fetchAllCuisines.js');
+const fetchAllAllergies = require('../model/fetchAllAllergies.js');
+const fetchAllIngredients = require('../model/fetchAllIngredients.js');
+const fetchAllCookingMethods = require('../model/fetchAllCookingMethods.js');
+const fetchAllSpiceLevels = require('../model/fetchAllSpiceLevels.js');
+const fetchAllHealthConditions = require('../model/fetchAllHealthConditions');
+const logger = require('../utils/logger');
 
 const LOOKUP_CACHE_TTL_MS = 5 * 60 * 1000;
 const LOOKUP_RETRY_ATTEMPTS = 3;
@@ -14,14 +14,14 @@ const LOOKUP_RETRY_BASE_DELAY_MS = 120;
 const lookupCache = new Map();
 
 function isRetryableLookupError(error) {
-  const message = String(error?.message || "").toLowerCase();
+  const message = String(error?.message || '').toLowerCase();
   return (
-    message.includes("fetch failed") ||
-    message.includes("network") ||
-    message.includes("timeout") ||
-    message.includes("socket") ||
-    message.includes("econn") ||
-    message.includes("etimedout")
+    message.includes('fetch failed') ||
+    message.includes('network') ||
+    message.includes('timeout') ||
+    message.includes('socket') ||
+    message.includes('econn') ||
+    message.includes('etimedout')
   );
 }
 
@@ -61,7 +61,7 @@ async function getCachedLookup(cacheKey, fetcher) {
 
   lookupCache.set(cacheKey, {
     data: normalized,
-    expiresAt: now + LOOKUP_CACHE_TTL_MS
+    expiresAt: now + LOOKUP_CACHE_TTL_MS,
   });
 
   return normalized;
@@ -77,54 +77,38 @@ function createLookupHandler(cacheKey, fetcher, label) {
         error: error?.message,
         code: error?.code,
         details: error?.details,
-        hint: error?.hint
+        hint: error?.hint,
       });
 
-      return res.status(500).json({ error: "Internal server error" });
+      return res.status(500).json({ error: 'Internal server error' });
     }
   };
 }
 
 const getAllDietaryRequirements = createLookupHandler(
-  "dietary_requirements",
+  'dietary_requirements',
   fetchAllDietaryRequirements,
-  "dietary requirements"
+  'dietary requirements'
 );
 
-const getAllCuisines = createLookupHandler(
-  "cuisines",
-  fetchAllCuisines,
-  "cuisines"
-);
+const getAllCuisines = createLookupHandler('cuisines', fetchAllCuisines, 'cuisines');
 
-const getAllAllergies = createLookupHandler(
-  "allergies",
-  fetchAllAllergies,
-  "allergies"
-);
+const getAllAllergies = createLookupHandler('allergies', fetchAllAllergies, 'allergies');
 
-const getAllIngredients = createLookupHandler(
-  "ingredients",
-  fetchAllIngredients,
-  "ingredients"
-);
+const getAllIngredients = createLookupHandler('ingredients', fetchAllIngredients, 'ingredients');
 
 const getAllCookingMethods = createLookupHandler(
-  "cooking_methods",
+  'cooking_methods',
   fetchAllCookingMethods,
-  "cooking methods"
+  'cooking methods'
 );
 
-const getAllSpiceLevels = createLookupHandler(
-  "spice_levels",
-  fetchAllSpiceLevels,
-  "spice levels"
-);
+const getAllSpiceLevels = createLookupHandler('spice_levels', fetchAllSpiceLevels, 'spice levels');
 
 const getAllHealthConditions = createLookupHandler(
-  "health_conditions",
+  'health_conditions',
   fetchAllHealthConditions,
-  "health conditions"
+  'health conditions'
 );
 
 module.exports = {
@@ -134,5 +118,5 @@ module.exports = {
   getAllIngredients,
   getAllCookingMethods,
   getAllSpiceLevels,
-  getAllHealthConditions
+  getAllHealthConditions,
 };

@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 const { contentAndSupport } = require('../controller');
 
@@ -14,7 +14,7 @@ const { contact: controller } = contentAndSupport;
 // });
 // Apply rate limiter and validation before the controller
 router.post('/', formLimiter, contactusValidator, validate, (req, res) => {
-    controller.contactus(req, res);
+  controller.contactus(req, res);
 });
 
 module.exports = router;

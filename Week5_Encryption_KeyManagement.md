@@ -13,11 +13,13 @@ This implements the secure AES-256-GCM encryption service with Supabase Vault ke
 ## Vault Setup
 
 ### 1. Generate AES-256 Key
+
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
 
 ### 2. Store in Supabase Vault
+
 ```sql
 select vault.create_secret(
    '<BASE64_KEY_FROM_STEP_1>',
@@ -27,6 +29,7 @@ select vault.create_secret(
 ```
 
 ### 3. Create Key Retrieval RPC
+
 ```sql
 create or replace function get_encryption_key()
 returns text
@@ -49,6 +52,7 @@ $$;
 ```
 
 ### 4. Secure RPC Permissions
+
 ```sql
 revoke execute on function get_encryption_key() from public, anon, authenticated;
 grant execute on function get_encryption_key() to service_role;
@@ -57,6 +61,7 @@ grant execute on function get_encryption_key() to service_role;
 ## Environment Configuration
 
 Add to `.env`:
+
 ```env
 ENCRYPTION_KEY_SOURCE=vault
 ENCRYPTION_VAULT_RPC=get_encryption_key
@@ -79,17 +84,20 @@ const original = await decrypt(result.encrypted, result.iv, result.authTag);
 ## Verification Commands
 
 **Full Round-Trip Test:**
+
 ```bash
 # Run comprehensive test suite
 node test-encryption-roundtrip.js
 ```
 
 **Quick Round-trip Test:**
+
 ```bash
 node -e "require('dotenv').config(); const { encrypt, decrypt } = require('./services/encryptionService'); (async () => { const original = 'Hello NutriHelp'; const enc = await encrypt(original); const dec = await decrypt(enc.encrypted, enc.iv, enc.authTag); console.log(dec === original ? 'PASS' : 'FAIL'); })();"
 ```
 
 **Vault RPC Test:**
+
 ```bash
 node -e "require('dotenv').config(); const supabase = require('./database/supabaseClient'); (async () => { const { data, error } = await supabase.rpc('get_encryption_key'); console.log('RPC OK:', !error && Boolean(data)); })();"
 ```
@@ -100,7 +108,7 @@ node -e "require('dotenv').config(); const supabase = require('./database/supaba
 ✅ **Model Integration**: Updated `model/addUser.js`, `model/getUser.js`, `model/updateUserProfile.js`, `model/getUserProfile.js` to use Vault-backed encryption  
 ✅ **Data-at-Rest**: Sensitive fields (contact_number, address) now encrypted with AES-256-GCM  
 ✅ **Round-Trip Testing**: Automated test suite validates encryption/decryption functionality  
-✅ **Vault Reachability**: Test evidence confirms RPC key retrieval works  
+✅ **Vault Reachability**: Test evidence confirms RPC key retrieval works
 
 ## Test Evidence
 

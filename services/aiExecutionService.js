@@ -4,7 +4,7 @@ const monitor = require('./aiServiceMonitor');
 
 const DEFAULT_TIMEOUT_MS = 30000;
 const DEFAULT_PYTHON_COMMAND = process.env.PYTHON_BIN || 'python3';
-const DEFAULT_MAX_RETRIES = 1;        // 1 retry = 2 total attempts
+const DEFAULT_MAX_RETRIES = 1; // 1 retry = 2 total attempts
 const RETRY_DELAY_MS = 500;
 
 function tryParseJson(value) {
@@ -76,15 +76,7 @@ function normalizeResult({ stdout, stderr, exitCode, timedOut, scriptPath, timeo
 /**
  * Execute a single Python script invocation. Returns a normalised result.
  */
-function _spawnOnce({
-  scriptPath,
-  args,
-  stdin,
-  timeoutMs,
-  cwd,
-  env,
-  pythonCommand,
-}) {
+function _spawnOnce({ scriptPath, args, stdin, timeoutMs, cwd, env, pythonCommand }) {
   return new Promise((resolve) => {
     let pythonProcess;
 
@@ -116,11 +108,17 @@ function _spawnOnce({
 
     const timeoutHandle = setTimeout(() => {
       timedOut = true;
-      try { pythonProcess.kill('SIGKILL'); } catch (_) {}
+      try {
+        pythonProcess.kill('SIGKILL');
+      } catch (_) {}
     }, timeoutMs);
 
-    pythonProcess.stdout.on('data', (chunk) => { stdout += chunk.toString(); });
-    pythonProcess.stderr.on('data', (chunk) => { stderr += chunk.toString(); });
+    pythonProcess.stdout.on('data', (chunk) => {
+      stdout += chunk.toString();
+    });
+    pythonProcess.stderr.on('data', (chunk) => {
+      stderr += chunk.toString();
+    });
 
     pythonProcess.on('error', (error) => {
       clearTimeout(timeoutHandle);
@@ -141,14 +139,25 @@ function _spawnOnce({
 
     pythonProcess.on('close', (exitCode) => {
       clearTimeout(timeoutHandle);
-      const normalized = normalizeResult({ stdout, stderr, exitCode, timedOut, scriptPath, timeoutMs });
+      const normalized = normalizeResult({
+        stdout,
+        stderr,
+        exitCode,
+        timedOut,
+        scriptPath,
+        timeoutMs,
+      });
       resolve(normalized);
     });
 
     if (stdin !== null && stdin !== undefined) {
-      try { pythonProcess.stdin.write(stdin); } catch (_) {}
+      try {
+        pythonProcess.stdin.write(stdin);
+      } catch (_) {}
     }
-    try { pythonProcess.stdin.end(); } catch (_) {}
+    try {
+      pythonProcess.stdin.end();
+    } catch (_) {}
   });
 }
 
@@ -198,7 +207,15 @@ async function executePythonScript({
 
   for (let attempt = 1; attempt <= totalAttempts; attempt++) {
     const start = Date.now();
-    const result = await _spawnOnce({ scriptPath, args, stdin, timeoutMs, cwd, env, pythonCommand });
+    const result = await _spawnOnce({
+      scriptPath,
+      args,
+      stdin,
+      timeoutMs,
+      cwd,
+      env,
+      pythonCommand,
+    });
     const durationMs = Date.now() - start;
 
     monitor.record(serviceName, result, durationMs, { attempt, scriptPath });

@@ -13,10 +13,10 @@ async function fetchJson(url, options = {}, customFetch = null) {
   return {
     ok: response.ok,
     status: response.status,
-    data: parsed
+    data: parsed,
   };
 }
 
 module.exports = {
-  fetchJson
+  fetchJson,
 };

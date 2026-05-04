@@ -28,7 +28,9 @@ function assertBackendRuntime() {
 
 function normalizeKey(rawKey) {
   if (!rawKey) {
-    throw new Error('Encryption key is missing. Set ENCRYPTION_KEY or configure Vault key retrieval.');
+    throw new Error(
+      'Encryption key is missing. Set ENCRYPTION_KEY or configure Vault key retrieval.'
+    );
   }
 
   const trimmed = String(rawKey).trim();
@@ -59,14 +61,18 @@ async function loadKeyFromVault() {
   try {
     supabase = require('../database/supabaseClient');
   } catch (error) {
-    throw new Error(`Vault key source requested but Supabase client unavailable: ${error.message || error}`);
+    throw new Error(
+      `Vault key source requested but Supabase client unavailable: ${error.message || error}`
+    );
   }
 
   const rpcName = process.env.ENCRYPTION_VAULT_RPC || 'get_encryption_key';
   const { data, error } = await supabase.rpc(rpcName);
 
   if (error) {
-    throw new Error(`Failed to load encryption key from Vault RPC '${rpcName}': ${error.message || error}`);
+    throw new Error(
+      `Failed to load encryption key from Vault RPC '${rpcName}': ${error.message || error}`
+    );
   }
 
   // RPC may return a plain string, an object, or an array of rows.
@@ -145,10 +151,7 @@ async function encrypt(data) {
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv, { authTagLength: AUTH_TAG_LENGTH });
 
   const plaintext = toPayload(data);
-  const encryptedBuffer = Buffer.concat([
-    cipher.update(plaintext, 'utf8'),
-    cipher.final(),
-  ]);
+  const encryptedBuffer = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
 
   const authTag = cipher.getAuthTag();
 
@@ -171,12 +174,9 @@ async function decrypt(encryptedData, iv, authTag) {
   const { key } = await loadEncryptionKey();
 
   try {
-    const decipher = crypto.createDecipheriv(
-      ALGORITHM,
-      key,
-      Buffer.from(String(iv), 'base64'),
-      { authTagLength: AUTH_TAG_LENGTH }
-    );
+    const decipher = crypto.createDecipheriv(ALGORITHM, key, Buffer.from(String(iv), 'base64'), {
+      authTagLength: AUTH_TAG_LENGTH,
+    });
 
     decipher.setAuthTag(Buffer.from(String(authTag), 'base64'));
 

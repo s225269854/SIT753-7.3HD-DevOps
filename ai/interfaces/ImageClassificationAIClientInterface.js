@@ -1,6 +1,6 @@
 /**
  * ImageClassificationAIClientInterface.js
- * 
+ *
  * Interface for image classification AI services.
  * Handles food image recognition, barcode processing, and recipe image analysis.
  */

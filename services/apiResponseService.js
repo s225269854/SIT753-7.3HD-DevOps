@@ -56,7 +56,7 @@ function formatSession(payload) {
   return {
     accessToken: payload.accessToken,
     refreshToken: payload.refreshToken,
-    tokenType: payload.tokenType || "Bearer",
+    tokenType: payload.tokenType || 'Bearer',
     expiresIn: payload.expiresIn,
   };
 }
@@ -64,9 +64,9 @@ function formatSession(payload) {
 function formatNotification(notification) {
   return {
     id: notification.simple_id,
-    type: notification.type || "general",
-    content: notification.content || "",
-    status: notification.status || "unread",
+    type: notification.type || 'general',
+    content: notification.content || '',
+    status: notification.status || 'unread',
     createdAt: notification.created_at || null,
   };
 }

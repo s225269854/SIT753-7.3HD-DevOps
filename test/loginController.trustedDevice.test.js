@@ -1,6 +1,6 @@
-const { expect } = require("chai");
-const sinon = require("sinon");
-const proxyquire = require("proxyquire").noCallThru();
+const { expect } = require('chai');
+const sinon = require('sinon');
+const proxyquire = require('proxyquire').noCallThru();
 
 function createRes() {
   return {
@@ -65,7 +65,7 @@ function createSupabaseStub() {
   };
 }
 
-describe("loginController trusted device flow", () => {
+describe('loginController trusted device flow', () => {
   let bcrypt;
   let jwt;
   let getUserCredentials;
@@ -83,13 +83,13 @@ describe("loginController trusted device flow", () => {
       compare: sinon.stub(),
     };
     jwt = {
-      sign: sinon.stub().returns("jwt-token"),
+      sign: sinon.stub().returns('jwt-token'),
     };
     getUserCredentials = sinon.stub();
     addMfaToken = sinon.stub().resolves();
     verifyMfaToken = sinon.stub().resolves(true);
     authService = {
-      trustedDeviceCookieName: "trusted_device",
+      trustedDeviceCookieName: 'trusted_device',
       trustedDeviceExpiry: 30 * 24 * 60 * 60 * 1000,
       validateTrustedDeviceToken: sinon.stub(),
       issueTrustedDeviceToken: sinon.stub(),
@@ -106,19 +106,19 @@ describe("loginController trusted device flow", () => {
 
     const supabaseStub = createSupabaseStub();
 
-    controller = proxyquire("../controller/loginController", {
+    controller = proxyquire('../controller/loginController', {
       bcryptjs: bcrypt,
       jsonwebtoken: jwt,
-      "../model/getUserCredentials.js": getUserCredentials,
-      "../model/addMfaToken.js": {
+      '../model/getUserCredentials.js': getUserCredentials,
+      '../model/addMfaToken.js': {
         addMfaToken,
         verifyMfaToken,
       },
-      "../services/authService": authService,
-      "../Monitor_&_Logging/loginLogger": logLoginEvent,
+      '../services/authService': authService,
+      '../Monitor_&_Logging/loginLogger': logLoginEvent,
       crypto: cryptoMock,
-      "../dbConnection": supabaseStub.client,
-      "express-validator": {
+      '../dbConnection': supabaseStub.client,
+      'express-validator': {
         validationResult,
       },
       nodemailer: {
@@ -129,20 +129,20 @@ describe("loginController trusted device flow", () => {
     });
   });
 
-  it("skips MFA when the trusted-device cookie is valid", async () => {
+  it('skips MFA when the trusted-device cookie is valid', async () => {
     const req = {
       body: {
-        email: "user@example.com",
-        password: "CurrentPass123!",
+        email: 'user@example.com',
+        password: 'CurrentPass123!',
       },
       headers: {
-        cookie: "trusted_device=trusted-token",
-        "user-agent": "test-agent",
+        cookie: 'trusted_device=trusted-token',
+        'user-agent': 'test-agent',
       },
       socket: {
-        remoteAddress: "::1",
+        remoteAddress: '::1',
       },
-      ip: "::1",
+      ip: '::1',
       get(header) {
         return this.headers[header.toLowerCase()];
       },
@@ -151,10 +151,10 @@ describe("loginController trusted device flow", () => {
 
     getUserCredentials.resolves({
       user_id: 100,
-      email: "user@example.com",
-      password: "hashed",
+      email: 'user@example.com',
+      password: 'hashed',
       mfa_enabled: true,
-      user_roles: { role_name: "user" },
+      user_roles: { role_name: 'user' },
     });
     bcrypt.compare.resolves(true);
     authService.validateTrustedDeviceToken.resolves({ valid: true });
@@ -165,20 +165,20 @@ describe("loginController trusted device flow", () => {
     expect(res.body.trusted_device).to.equal(true);
     expect(res.body.mfa_skipped).to.equal(true);
     expect(addMfaToken.called).to.equal(false);
-    expect(res.cookies[0].name).to.equal("trusted_device");
+    expect(res.cookies[0].name).to.equal('trusted_device');
   });
 
-  it("issues a trusted-device cookie after successful MFA login", async () => {
+  it('issues a trusted-device cookie after successful MFA login', async () => {
     const req = {
       body: {
-        email: "user@example.com",
-        password: "CurrentPass123!",
-        mfa_token: "123456",
+        email: 'user@example.com',
+        password: 'CurrentPass123!',
+        mfa_token: '123456',
       },
       headers: {
-        "user-agent": "test-agent",
+        'user-agent': 'test-agent',
       },
-      ip: "127.0.0.1",
+      ip: '127.0.0.1',
       get(header) {
         return this.headers[header.toLowerCase()];
       },
@@ -187,20 +187,20 @@ describe("loginController trusted device flow", () => {
 
     getUserCredentials.resolves({
       user_id: 100,
-      email: "user@example.com",
-      password: "hashed",
-      user_roles: { role_name: "user" },
+      email: 'user@example.com',
+      password: 'hashed',
+      user_roles: { role_name: 'user' },
     });
     bcrypt.compare.resolves(true);
     authService.issueTrustedDeviceToken.resolves({
-      token: "trusted-device-token",
+      token: 'trusted-device-token',
     });
 
     await controller.loginMfa(req, res);
 
     expect(res.statusCode).to.equal(200);
     expect(res.body.trusted_device).to.equal(true);
-    expect(res.cookies[0].name).to.equal("trusted_device");
-    expect(res.cookies[0].value).to.equal("trusted-device-token");
+    expect(res.cookies[0].name).to.equal('trusted_device');
+    expect(res.cookies[0].value).to.equal('trusted-device-token');
   });
 });

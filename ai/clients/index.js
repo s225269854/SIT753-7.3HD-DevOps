@@ -1,13 +1,13 @@
 /**
  * ai/clients/index.js
- * 
+ *
  * Export all AI client implementations
  */
 
 const {
   ExternalAIServerClient,
   ExternalChatbotClient,
-  ExternalMedicalPredictionClient
+  ExternalMedicalPredictionClient,
 } = require('./ExternalAIServerClient');
 
 const { PythonImageClassificationClient } = require('./PythonScriptClient');
@@ -21,13 +21,13 @@ module.exports = {
   ExternalAIServerClient,
   ExternalChatbotClient,
   ExternalMedicalPredictionClient,
-  
+
   // Python-based models
   PythonImageClassificationClient,
-  
+
   // Groq LLM (future)
   GroqChatbotClient,
-  
+
   // Chroma RAG (future)
-  ChromaRecommendationClient
+  ChromaRecommendationClient,
 };

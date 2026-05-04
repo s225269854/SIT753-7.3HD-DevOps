@@ -11,7 +11,7 @@ function getDeviceInfo(req) {
     ip: req.ip,
     userAgent: req.get('User-Agent') || 'Unknown',
     deviceId: req.get('X-Device-Id') || null,
-    clientType: req.get('X-Client-Type') || 'web'
+    clientType: req.get('X-Client-Type') || 'web',
   };
 }
 
@@ -24,7 +24,7 @@ function clearTrustedDeviceCookie(res) {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
-    path: '/'
+    path: '/',
   });
 }
 
@@ -32,14 +32,14 @@ function handleServiceError(res, error, fallbackStatus, fallbackLogLabel) {
   if (isServiceError(error)) {
     return res.status(error.statusCode).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 
   logger.error(fallbackLogLabel, { error: error.message });
   return res.status(fallbackStatus).json({
     success: false,
-    error: error.message || 'Internal server error'
+    error: error.message || 'Internal server error',
   });
 }
 
@@ -50,7 +50,7 @@ exports.register = async (req, res) => {
       email: req.body.email,
       password: req.body.password,
       first_name: req.body.first_name,
-      last_name: req.body.last_name
+      last_name: req.body.last_name,
     });
 
     return res.status(201).json(result);
@@ -62,10 +62,13 @@ exports.register = async (req, res) => {
 
 exports.login = async (req, res) => {
   try {
-    const result = await authService.login({
-      email: req.body.email,
-      password: req.body.password
-    }, getDeviceInfo(req));
+    const result = await authService.login(
+      {
+        email: req.body.email,
+        password: req.body.password,
+      },
+      getDeviceInfo(req)
+    );
 
     return res.json(result);
   } catch (error) {
@@ -86,7 +89,8 @@ exports.refreshToken = async (req, res) => {
 
 exports.googleExchange = async (req, res) => {
   try {
-    const supabaseAccessToken = req.body.supabaseAccessToken || req.body.accessToken || req.body.token;
+    const supabaseAccessToken =
+      req.body.supabaseAccessToken || req.body.accessToken || req.body.token;
     const provider = req.body.provider || 'google';
 
     const result = await authService.exchangeSupabaseToken(
@@ -115,7 +119,7 @@ exports.logoutAll = async (req, res) => {
   try {
     const result = await authService.logoutAll(req.user.userId, {
       reason: 'logout_all',
-      deviceInfo: getDeviceInfo(req)
+      deviceInfo: getDeviceInfo(req),
     });
 
     clearTrustedDeviceCookie(res);
@@ -138,10 +142,13 @@ exports.revokeTrustedDevices = async (req, res) => {
     return res.json({
       success: true,
       message: 'Trusted devices revoked successfully',
-      revokedCount: result.revokedCount
+      revokedCount: result.revokedCount,
     });
   } catch (error) {
-    logger.error('Revoke trusted devices error', { error: error.message, userId: req.user?.userId });
+    logger.error('Revoke trusted devices error', {
+      error: error.message,
+      userId: req.user?.userId,
+    });
     return handleServiceError(res, error, 500, 'Revoke trusted devices error:');
   }
 };
@@ -154,14 +161,14 @@ exports.getProfile = async (req, res) => {
     if (error instanceof ServiceError) {
       return res.status(error.statusCode).json({
         success: false,
-        error: error.message
+        error: error.message,
       });
     }
 
     logger.error('Get profile error', { error: error.message, userId: req.user?.userId });
     return res.status(500).json({
       success: false,
-      error: 'Internal server error'
+      error: 'Internal server error',
     });
   }
 };
@@ -173,7 +180,7 @@ exports.logLoginAttempt = async (req, res) => {
       userId: req.body.user_id,
       success: req.body.success,
       ipAddress: req.body.ip_address,
-      createdAt: req.body.created_at
+      createdAt: req.body.created_at,
     });
 
     return res.status(201).json(result);

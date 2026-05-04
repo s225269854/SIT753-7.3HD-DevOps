@@ -1,6 +1,6 @@
 /**
  * MockImageClassificationClient.js
- * 
+ *
  * Mock image classification client for development and testing.
  */
 
@@ -13,7 +13,7 @@ class MockImageClassificationClient extends ImageClassificationAIClientInterface
       { name: 'apple', confidence: 0.95, calories: 95 },
       { name: 'banana', confidence: 0.92, calories: 105 },
       { name: 'salad', confidence: 0.88, calories: 150 },
-      { name: 'sandwich', confidence: 0.91, calories: 350 }
+      { name: 'sandwich', confidence: 0.91, calories: 350 },
     ];
   }
 
@@ -23,7 +23,7 @@ class MockImageClassificationClient extends ImageClassificationAIClientInterface
       return this.errorResponse(new Error(validation.error));
     }
 
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
     // Return random mock food
     const mockFood = this.mockFoods[Math.floor(Math.random() * this.mockFoods.length)];
@@ -31,15 +31,13 @@ class MockImageClassificationClient extends ImageClassificationAIClientInterface
     const mockPrediction = {
       prediction: mockFood.name,
       confidence: mockFood.confidence,
-      alternatives: [
-        { name: `${mockFood.name}_variant`, confidence: 0.8 }
-      ],
+      alternatives: [{ name: `${mockFood.name}_variant`, confidence: 0.8 }],
       nutritionInfo: {
         calories: mockFood.calories,
         protein: Math.random() * 20,
         carbs: Math.random() * 50,
-        fat: Math.random() * 20
-      }
+        fat: Math.random() * 20,
+      },
     };
 
     return this.successResponse(mockPrediction, {
@@ -47,8 +45,8 @@ class MockImageClassificationClient extends ImageClassificationAIClientInterface
       metadata: {
         source: 'mock_image_classification',
         model: 'food_classifier',
-        mockData: true
-      }
+        mockData: true,
+      },
     });
   }
 
@@ -58,7 +56,7 @@ class MockImageClassificationClient extends ImageClassificationAIClientInterface
       return this.errorResponse(new Error(validation.error));
     }
 
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
     const mockPrediction = {
       prediction: 'pasta_carbonara',
@@ -66,15 +64,15 @@ class MockImageClassificationClient extends ImageClassificationAIClientInterface
       ingredients: ['pasta', 'eggs', 'bacon', 'cheese'],
       servings: 4,
       prepTime: '20 minutes',
-      cookTime: '15 minutes'
+      cookTime: '15 minutes',
     };
 
     return this.successResponse(mockPrediction, {
       latencyMs: 200,
       metadata: {
         source: 'mock_image_classification',
-        model: 'recipe_classifier'
-      }
+        model: 'recipe_classifier',
+      },
     });
   }
 
@@ -84,7 +82,7 @@ class MockImageClassificationClient extends ImageClassificationAIClientInterface
       return this.errorResponse(new Error(validation.error));
     }
 
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     const mockBarcode = {
       barcodeValue: '5901234123457',
@@ -96,16 +94,16 @@ class MockImageClassificationClient extends ImageClassificationAIClientInterface
         protein: 4,
         carbs: 14,
         fat: 1,
-        fiber: 2
-      }
+        fiber: 2,
+      },
     };
 
     return this.successResponse(mockBarcode, {
       latencyMs: 100,
       metadata: {
         source: 'mock_image_classification',
-        model: 'barcode_scanner'
-      }
+        model: 'barcode_scanner',
+      },
     });
   }
 
@@ -115,7 +113,7 @@ class MockImageClassificationClient extends ImageClassificationAIClientInterface
       return this.errorResponse(new Error(validation.error));
     }
 
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
     const mockNutrition = {
       extractedData: {
@@ -133,17 +131,17 @@ class MockImageClassificationClient extends ImageClassificationAIClientInterface
         vitaminA: 4,
         vitaminC: 2,
         calcium: 30,
-        iron: 8
+        iron: 8,
       },
-      confidence: 0.87
+      confidence: 0.87,
     };
 
     return this.successResponse(mockNutrition, {
       latencyMs: 300,
       metadata: {
         source: 'mock_image_classification',
-        model: 'nutrition_extractor'
-      }
+        model: 'nutrition_extractor',
+      },
     });
   }
 
@@ -156,11 +154,11 @@ class MockImageClassificationClient extends ImageClassificationAIClientInterface
       serviceName: this.serviceName,
       type: 'mock',
       healthy: true,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
 
 module.exports = {
-  MockImageClassificationClient
+  MockImageClassificationClient,
 };

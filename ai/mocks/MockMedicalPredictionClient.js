@@ -1,6 +1,6 @@
 /**
  * MockMedicalPredictionClient.js
- * 
+ *
  * Mock medical prediction client for development and testing.
  */
 
@@ -18,7 +18,7 @@ class MockMedicalPredictionClient extends MedicalPredictionAIClientInterface {
     }
 
     // Simulate processing
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise((resolve) => setTimeout(resolve, 200));
 
     const mockPrediction = {
       riskLevel: 'medium',
@@ -26,72 +26,65 @@ class MockMedicalPredictionClient extends MedicalPredictionAIClientInterface {
       recommendations: [
         'Increase physical activity',
         'Monitor dietary intake',
-        'Regular health check-ups'
+        'Regular health check-ups',
       ],
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     return this.successResponse(mockPrediction, {
       latencyMs: 200,
       metadata: {
         source: 'mock_medical_prediction',
-        mockData: true
-      }
+        mockData: true,
+      },
     });
   }
 
   async predictObesity(request, options = {}) {
-    await new Promise(resolve => setTimeout(resolve, 150));
+    await new Promise((resolve) => setTimeout(resolve, 150));
 
     const mockPrediction = {
       obesity_prediction: {
         obesity: false,
         obesity_level: 'Normal_Weight',
         probability: 0.85,
-        bmi: 22.5
+        bmi: 22.5,
       },
-      recommendations: [
-        'Maintain current lifestyle',
-        'Continue balanced diet'
-      ]
+      recommendations: ['Maintain current lifestyle', 'Continue balanced diet'],
     };
 
     return this.successResponse(mockPrediction, {
       latencyMs: 150,
       metadata: {
         source: 'mock_medical_prediction',
-        model: 'obesity_classifier'
-      }
+        model: 'obesity_classifier',
+      },
     });
   }
 
   async predictDiabetes(request, options = {}) {
-    await new Promise(resolve => setTimeout(resolve, 150));
+    await new Promise((resolve) => setTimeout(resolve, 150));
 
     const mockPrediction = {
       diabetes_prediction: {
         diabetes: false,
         probability: 0.92,
-        risk_level: 'low'
+        risk_level: 'low',
       },
-      recommendations: [
-        'Maintain healthy diet',
-        'Regular physical activity',
-        'Limit sugar intake'
-      ]
+      recommendations: ['Maintain healthy diet', 'Regular physical activity', 'Limit sugar intake'],
     };
 
     return this.successResponse(mockPrediction, {
       latencyMs: 150,
       metadata: {
         source: 'mock_medical_prediction',
-        model: 'diabetes_classifier'
-      }
+        model: 'diabetes_classifier',
+      },
     });
   }
 
   async generateReport(request, options = {}) {
-    await new Promise(resolve => setTimeout(resolve, 300));
+    await new Promise((resolve) => setTimeout(resolve, 300));
 
     const mockReport = {
       reportId: `report_${Date.now()}`,
@@ -100,22 +93,22 @@ class MockMedicalPredictionClient extends MedicalPredictionAIClientInterface {
       predictions: {
         obesity: {
           level: 'Normal_Weight',
-          probability: 0.85
+          probability: 0.85,
         },
         diabetes: {
           risk: 'low',
-          probability: 0.92
-        }
+          probability: 0.92,
+        },
       },
-      summary: 'Health metrics appear normal. Continue current regimen.'
+      summary: 'Health metrics appear normal. Continue current regimen.',
     };
 
     return this.successResponse(mockReport, {
       latencyMs: 300,
       metadata: {
         source: 'mock_medical_prediction',
-        mockData: true
-      }
+        mockData: true,
+      },
     });
   }
 
@@ -125,7 +118,7 @@ class MockMedicalPredictionClient extends MedicalPredictionAIClientInterface {
       return this.errorResponse(new Error(validation.error));
     }
 
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     const mockReport = {
       reportId: 'report_mock_12345',
@@ -134,15 +127,15 @@ class MockMedicalPredictionClient extends MedicalPredictionAIClientInterface {
       msg: 'Mock medical report retrieved successfully',
       data: {
         obesity_prediction: { obesity: false },
-        diabetes_prediction: { diabetes: false }
-      }
+        diabetes_prediction: { diabetes: false },
+      },
     };
 
     return this.successResponse(mockReport, {
       latencyMs: 100,
       metadata: {
-        source: 'mock_medical_prediction'
-      }
+        source: 'mock_medical_prediction',
+      },
     });
   }
 
@@ -155,11 +148,11 @@ class MockMedicalPredictionClient extends MedicalPredictionAIClientInterface {
       serviceName: this.serviceName,
       type: 'mock',
       healthy: true,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }
 
 module.exports = {
-  MockMedicalPredictionClient
+  MockMedicalPredictionClient,
 };

@@ -10,7 +10,7 @@ function createSupabaseStub({
   recipes = [],
   dietaryRequirements = [],
   allergies = [],
-  inserts = {}
+  inserts = {},
 } = {}) {
   return {
     from(table) {
@@ -29,13 +29,13 @@ function createSupabaseStub({
           if (table === 'recommendation_lists') {
             return Promise.resolve({
               data: { id: 'list-1' },
-              error: null
+              error: null,
             });
           }
 
           return Promise.resolve({
             data: this._insertRows?.[0] || null,
-            error: null
+            error: null,
           });
         },
         eq() {
@@ -49,28 +49,30 @@ function createSupabaseStub({
           if (table === 'recipe_meal') {
             return Promise.resolve({
               data: recentRecipeIds.map((recipeId) => ({ recipe_id: recipeId })),
-              error: null
+              error: null,
             });
           }
 
           if (table === 'recipes') {
             return Promise.resolve({
               data: recipes,
-              error: null
+              error: null,
             });
           }
 
           if (table === 'dietary_requirements') {
             return Promise.resolve({
-              data: dietaryRequirements.filter((row) => !this._inValues || this._inValues.includes(row.id)),
-              error: null
+              data: dietaryRequirements.filter(
+                (row) => !this._inValues || this._inValues.includes(row.id)
+              ),
+              error: null,
             });
           }
 
           if (table === 'allergies') {
             return Promise.resolve({
               data: allergies.filter((row) => !this._inValues || this._inValues.includes(row.id)),
-              error: null
+              error: null,
             });
           }
 
@@ -84,15 +86,15 @@ function createSupabaseStub({
             const rows = insertedRows.length ? insertedRows : this._insertRows;
             return Promise.resolve({
               data: rows,
-              error: null
+              error: null,
             }).then(resolve, reject);
           }
           return this._execute().then(resolve, reject);
-        }
+        },
       };
 
       return query;
-    }
+    },
   };
 }
 
@@ -115,7 +117,7 @@ describe('Recommendation Service', () => {
             fat: 14,
             carbohydrates: 40,
             allergy: false,
-            dislike: false
+            dislike: false,
           },
           {
             id: 2,
@@ -130,9 +132,9 @@ describe('Recommendation Service', () => {
             fat: 18,
             carbohydrates: 80,
             allergy: false,
-            dislike: false
-          }
-        ]
+            dislike: false,
+          },
+        ],
       }),
       '../model/fetchUserPreferences': async () => ({
         dietary_requirements: [{ id: 1, name: 'High Protein' }],
@@ -145,14 +147,20 @@ describe('Recommendation Service', () => {
         health_context: {
           allergies: [],
           chronic_conditions: [{ referenceId: 7, status: 'managed', notes: 'monitor glucose' }],
-          medications: [{
-            name: 'Metformin',
-            dosage: { amount: '500', unit: 'mg' },
-            frequency: { timesPerDay: 2 }
-          }]
-        }
+          medications: [
+            {
+              name: 'Metformin',
+              dosage: { amount: '500', unit: 'mg' },
+              frequency: { timesPerDay: 2 },
+            },
+          ],
+        },
       }),
-      '../model/getUserProfile': async () => ({ user_id: 5, email: 'user@example.com', first_name: 'Alex' }),
+      '../model/getUserProfile': async () => ({
+        user_id: 5,
+        email: 'user@example.com',
+        first_name: 'Alex',
+      }),
       './recommendationAiAdapter': {
         AI_ADAPTER_VERSION: 'v1',
         resolveAiRecommendationSignals: async () => ({
@@ -171,10 +179,10 @@ describe('Recommendation Service', () => {
             prioritizeFiber: true,
             limitSugar: true,
             limitSodium: false,
-            explanationTags: ['ranking_signal']
-          }
-        })
-      }
+            explanationTags: ['ranking_signal'],
+          },
+        }),
+      },
     });
 
     const result = await service.generateRecommendations({
@@ -182,7 +190,7 @@ describe('Recommendation Service', () => {
       email: 'user@example.com',
       healthGoals: { prioritizeProtein: true, targetCalories: 500 },
       aiInsights: { preferredCuisineIds: [10], preferredRecipeIds: [1] },
-      maxResults: 2
+      maxResults: 2,
     });
 
     expect(result.success).to.equal(true);
@@ -203,19 +211,19 @@ describe('Recommendation Service', () => {
     expect(result.userContext.profile).to.deep.include({
       id: 5,
       email: 'user@example.com',
-      firstName: 'Alex'
+      firstName: 'Alex',
     });
     expect(result.userContext.preferences).to.deep.include({
       cuisines: ['mediterranean'],
-      hasPreferences: true
+      hasPreferences: true,
     });
     expect(result.userContext.healthContext.chronic_conditions[0]).to.deep.include({
       referenceId: 7,
       name: 'Diabetes',
-      status: 'managed'
+      status: 'managed',
     });
     expect(result.userContext.healthContext.medications[0]).to.deep.include({
-      name: 'Metformin'
+      name: 'Metformin',
     });
   });
 
@@ -238,26 +246,28 @@ describe('Recommendation Service', () => {
 
               recipeQueryCount += 1;
               return Promise.resolve({
-                data: [{
-                  id: 1,
-                  recipe_name: 'Cached Meal',
-                  cuisine_id: 1,
-                  cooking_method_id: 1,
-                  calories: 450,
-                  protein: 20,
-                  fiber: 5,
-                  sugar: 5,
-                  sodium: 300,
-                  fat: 10,
-                  carbohydrates: 35,
-                  allergy: false,
-                  dislike: false
-                }],
-                error: null
+                data: [
+                  {
+                    id: 1,
+                    recipe_name: 'Cached Meal',
+                    cuisine_id: 1,
+                    cooking_method_id: 1,
+                    calories: 450,
+                    protein: 20,
+                    fiber: 5,
+                    sugar: 5,
+                    sodium: 300,
+                    fat: 10,
+                    carbohydrates: 35,
+                    allergy: false,
+                    dislike: false,
+                  },
+                ],
+                error: null,
               });
-            }
+            },
           };
-        }
+        },
       },
       '../model/fetchUserPreferences': async () => ({
         dietary_requirements: [],
@@ -266,7 +276,7 @@ describe('Recommendation Service', () => {
         dislikes: [],
         health_conditions: [],
         spice_levels: [],
-        cooking_methods: []
+        cooking_methods: [],
       }),
       '../model/getUserProfile': async () => ({ user_id: 8, email: 'cache@example.com' }),
       './recommendationAiAdapter': {
@@ -277,9 +287,9 @@ describe('Recommendation Service', () => {
           fallbackUsed: true,
           adapterFailed: false,
           warnings: [],
-          hints: {}
-        })
-      }
+          hints: {},
+        }),
+      },
     });
 
     service.clearRecommendationCache();
@@ -320,22 +330,24 @@ describe('Recommendation Service', () => {
 
               if (table === 'recipes') {
                 return Promise.resolve({
-                  data: [{
-                    id: 1,
-                    recipe_name: 'Protein Bowl',
-                    cuisine_id: 1,
-                    cooking_method_id: 1,
-                    calories: 420,
-                    protein: 24,
-                    fiber: 8,
-                    sugar: 5,
-                    sodium: 220,
-                    fat: 11,
-                    carbohydrates: 34,
-                    allergy: false,
-                    dislike: false
-                  }],
-                  error: null
+                  data: [
+                    {
+                      id: 1,
+                      recipe_name: 'Protein Bowl',
+                      cuisine_id: 1,
+                      cooking_method_id: 1,
+                      calories: 420,
+                      protein: 24,
+                      fiber: 8,
+                      sugar: 5,
+                      sodium: 220,
+                      fat: 11,
+                      carbohydrates: 34,
+                      allergy: false,
+                      dislike: false,
+                    },
+                  ],
+                  error: null,
                 });
               }
 
@@ -345,21 +357,21 @@ describe('Recommendation Service', () => {
               if (table === 'recommendations') {
                 return Promise.resolve({
                   data: [{ id: 'rec-1', recipe_id: 1, rank: 1 }],
-                  error: null
+                  error: null,
                 }).then(resolve, reject);
               }
 
               if (this._insertRows) {
                 return Promise.resolve({
                   data: this._insertRows,
-                  error: null
+                  error: null,
                 }).then(resolve, reject);
               }
 
               return Promise.resolve({ data: [], error: null }).then(resolve, reject);
-            }
+            },
           };
-        }
+        },
       },
       '../model/fetchUserPreferences': async () => ({}),
       '../model/getUserProfile': async () => ({ user_id: 33, email: 'persist@example.com' }),
@@ -371,50 +383,52 @@ describe('Recommendation Service', () => {
           fallbackUsed: true,
           adapterFailed: false,
           warnings: [],
-          hints: {}
-        })
-      }
+          hints: {},
+        }),
+      },
     });
 
     const result = await service.generateRecommendations({
       userId: 33,
       email: 'persist@example.com',
-      dietaryConstraints: {}
+      dietaryConstraints: {},
     });
 
     expect(result.persistence).to.deep.include({
       enabled: true,
       persisted: true,
       recommendationListId: 'list-123',
-      resultCount: 1
+      resultCount: 1,
     });
     expect(insertedTables).to.include.members([
       'recommendation_lists',
       'recommendations',
       'recommendation_results',
       'user_recommendations',
-      'recommendation_history'
+      'recommendation_history',
     ]);
   });
 
   it('falls back cleanly when the AI adapter reports failure', async () => {
     const service = proxyquire('../services/recommendationService', {
       '../dbConnection': createSupabaseStub({
-        recipes: [{
-          id: 4,
-          recipe_name: 'Fallback Soup',
-          cuisine_id: 1,
-          cooking_method_id: 2,
-          calories: 350,
-          protein: 14,
-          fiber: 7,
-          sugar: 4,
-          sodium: 250,
-          fat: 8,
-          carbohydrates: 30,
-          allergy: false,
-          dislike: false
-        }]
+        recipes: [
+          {
+            id: 4,
+            recipe_name: 'Fallback Soup',
+            cuisine_id: 1,
+            cooking_method_id: 2,
+            calories: 350,
+            protein: 14,
+            fiber: 7,
+            sugar: 4,
+            sodium: 250,
+            fat: 8,
+            carbohydrates: 30,
+            allergy: false,
+            dislike: false,
+          },
+        ],
       }),
       '../model/fetchUserPreferences': async () => ({
         dietary_requirements: [],
@@ -423,7 +437,7 @@ describe('Recommendation Service', () => {
         dislikes: [],
         health_conditions: [],
         spice_levels: [],
-        cooking_methods: []
+        cooking_methods: [],
       }),
       '../model/getUserProfile': async () => ({ user_id: 12, email: 'fallback@example.com' }),
       './recommendationAiAdapter': {
@@ -434,15 +448,15 @@ describe('Recommendation Service', () => {
           fallbackUsed: true,
           adapterFailed: true,
           warnings: ['AI recommendation service error: 503'],
-          hints: {}
-        })
-      }
+          hints: {},
+        }),
+      },
     });
 
     const result = await service.generateRecommendations({
       userId: 12,
       email: 'fallback@example.com',
-      aiAdapterInput: { user_id: 12 }
+      aiAdapterInput: { user_id: 12 },
     });
 
     expect(result.success).to.equal(true);
@@ -458,32 +472,34 @@ describe('Recommendation Service', () => {
 
     const service = proxyquire('../services/recommendationService', {
       '../dbConnection': createSupabaseStub({
-        recipes: [{
-          id: 4,
-          recipe_name: 'Fallback Soup',
-          cuisine_id: 1,
-          cooking_method_id: 2,
-          calories: 350,
-          protein: 14,
-          fiber: 7,
-          sugar: 4,
-          sodium: 250,
-          fat: 8,
-          carbohydrates: 30,
-          allergy: false,
-          dislike: false
-        }]
+        recipes: [
+          {
+            id: 4,
+            recipe_name: 'Fallback Soup',
+            cuisine_id: 1,
+            cooking_method_id: 2,
+            calories: 350,
+            protein: 14,
+            fiber: 7,
+            sugar: 4,
+            sodium: 250,
+            fat: 8,
+            carbohydrates: 30,
+            allergy: false,
+            dislike: false,
+          },
+        ],
       }),
       '../model/fetchUserPreferences': async () => null,
       '../model/getUserProfile': async () => ({ user_id: 12, email: 'fallback@example.com' }),
-      './recommendationAiAdapter': proxyquire('../services/recommendationAiAdapter', {})
+      './recommendationAiAdapter': proxyquire('../services/recommendationAiAdapter', {}),
     });
 
     const result = await service.generateRecommendations({
       userId: 12,
       email: 'fallback@example.com',
       dietaryConstraints: {},
-      aiAdapterInput: { user_id: 12 }
+      aiAdapterInput: { user_id: 12 },
     });
 
     process.env.AI_RECOMMENDATION_URL = originalUrl;
@@ -505,13 +521,16 @@ describe('Recommendation Service', () => {
             },
             limit() {
               if (table === 'recipe_meal') {
-                return Promise.resolve({ data: null, error: new Error('recent recipe query failed') });
+                return Promise.resolve({
+                  data: null,
+                  error: new Error('recent recipe query failed'),
+                });
               }
 
               return Promise.resolve({ data: [], error: null });
-            }
+            },
           };
-        }
+        },
       },
       '../model/fetchUserPreferences': async () => ({}),
       '../model/getUserProfile': async () => ({ user_id: 8, email: 'cache@example.com' }),
@@ -523,14 +542,18 @@ describe('Recommendation Service', () => {
           fallbackUsed: true,
           adapterFailed: false,
           warnings: [],
-          hints: {}
-        })
-      }
+          hints: {},
+        }),
+      },
     });
 
     let caughtError = null;
     try {
-      await service.generateRecommendations({ userId: 8, email: 'cache@example.com', dietaryConstraints: {} });
+      await service.generateRecommendations({
+        userId: 8,
+        email: 'cache@example.com',
+        dietaryConstraints: {},
+      });
     } catch (error) {
       caughtError = error;
     }
@@ -542,25 +565,31 @@ describe('Recommendation Service', () => {
   it('handles multiple medical reports and combines hint derivation signals', async () => {
     const service = proxyquire('../services/recommendationService', {
       '../dbConnection': createSupabaseStub({
-        recipes: [{
-          id: 1,
-          recipe_name: 'Protein Bowl',
-          cuisine_id: 10,
-          cooking_method_id: 3,
-          calories: 520,
-          protein: 32,
-          fiber: 9,
-          sugar: 6,
-          sodium: 250,
-          fat: 14,
-          carbohydrates: 40,
-          allergy: false,
-          dislike: false
-        }]
+        recipes: [
+          {
+            id: 1,
+            recipe_name: 'Protein Bowl',
+            cuisine_id: 10,
+            cooking_method_id: 3,
+            calories: 520,
+            protein: 32,
+            fiber: 9,
+            sugar: 6,
+            sodium: 250,
+            fat: 14,
+            carbohydrates: 40,
+            allergy: false,
+            dislike: false,
+          },
+        ],
       }),
       '../model/fetchUserPreferences': async () => ({}),
-      '../model/getUserProfile': async () => ({ user_id: 5, email: 'user@example.com', first_name: 'Alex' }),
-      './recommendationAiAdapter': proxyquire('../services/recommendationAiAdapter', {})
+      '../model/getUserProfile': async () => ({
+        user_id: 5,
+        email: 'user@example.com',
+        first_name: 'Alex',
+      }),
+      './recommendationAiAdapter': proxyquire('../services/recommendationAiAdapter', {}),
     });
 
     const result = await service.generateRecommendations({
@@ -569,8 +598,8 @@ describe('Recommendation Service', () => {
       dietaryConstraints: {},
       medicalReport: [
         { diabetes_prediction: { diabetes: true } },
-        { obesity_prediction: { obesity_level: 'Overweight' } }
-      ]
+        { obesity_prediction: { obesity_level: 'Overweight' } },
+      ],
     });
 
     expect(result.source.ai.source).to.equal('medical_report');
@@ -596,7 +625,7 @@ describe('Recommendation Service', () => {
             fat: 18,
             carbohydrates: 36,
             allergy: false,
-            dislike: false
+            dislike: false,
           },
           {
             id: 2,
@@ -611,17 +640,17 @@ describe('Recommendation Service', () => {
             fat: 14,
             carbohydrates: 40,
             allergy: false,
-            dislike: false
-          }
-        ]
+            dislike: false,
+          },
+        ],
       }),
       '../model/fetchUserPreferences': async () => ({
         allergies: [{ id: 11, name: 'Peanut' }],
         health_context: {
           allergies: [{ referenceId: 11, severity: 'severe' }],
           chronic_conditions: [],
-          medications: []
-        }
+          medications: [],
+        },
       }),
       '../model/getUserProfile': async () => ({ user_id: 9, email: 'allergic@example.com' }),
       './recommendationAiAdapter': {
@@ -632,16 +661,16 @@ describe('Recommendation Service', () => {
           fallbackUsed: true,
           adapterFailed: false,
           warnings: [],
-          hints: {}
-        })
-      }
+          hints: {},
+        }),
+      },
     });
 
     service.clearRecommendationCache();
     const result = await service.generateRecommendations({
       userId: 9,
       email: 'allergic@example.com',
-      dietaryConstraints: {}
+      dietaryConstraints: {},
     });
 
     const returnedIds = result.recommendations.map((r) => r.recipeId);
@@ -669,9 +698,9 @@ describe('Recommendation Service', () => {
             fat: 18,
             carbohydrates: 26,
             allergy: false,
-            dislike: false
-          }
-        ]
+            dislike: false,
+          },
+        ],
       }),
       '../model/fetchUserPreferences': async () => ({
         allergies: [],
@@ -679,8 +708,8 @@ describe('Recommendation Service', () => {
         health_context: {
           allergies: [],
           chronic_conditions: [{ referenceId: 4, status: 'managed' }],
-          medications: [{ name: 'Atorvastatin', active: true }]
-        }
+          medications: [{ name: 'Atorvastatin', active: true }],
+        },
       }),
       '../model/getUserProfile': async () => ({ user_id: 14, email: 'statin@example.com' }),
       './recommendationAiAdapter': {
@@ -691,16 +720,16 @@ describe('Recommendation Service', () => {
           fallbackUsed: true,
           adapterFailed: false,
           warnings: [],
-          hints: {}
-        })
-      }
+          hints: {},
+        }),
+      },
     });
 
     service.clearRecommendationCache();
     const result = await service.generateRecommendations({
       userId: 14,
       email: 'statin@example.com',
-      dietaryConstraints: {}
+      dietaryConstraints: {},
     });
 
     expect(result.recommendations).to.have.length(1);
@@ -730,7 +759,7 @@ describe('Recommendation Service', () => {
             fat: 12,
             carbohydrates: 28,
             allergy: false,
-            dislike: false
+            dislike: false,
           },
           {
             id: 2,
@@ -747,13 +776,13 @@ describe('Recommendation Service', () => {
             fat: 24,
             carbohydrates: 72,
             allergy: false,
-            dislike: false
-          }
+            dislike: false,
+          },
         ],
         dietaryRequirements: [
           { id: 1, name: 'Vegan' },
-          { id: 2, name: 'High Protein' }
-        ]
+          { id: 2, name: 'High Protein' },
+        ],
       }),
       '../model/fetchUserPreferences': async () => ({
         dietary_requirements: [],
@@ -762,7 +791,7 @@ describe('Recommendation Service', () => {
         dislikes: [],
         health_conditions: [],
         spice_levels: [],
-        cooking_methods: []
+        cooking_methods: [],
       }),
       '../model/getUserProfile': async () => ({ user_id: 15, email: 'dietary@example.com' }),
       './recommendationAiAdapter': {
@@ -773,9 +802,9 @@ describe('Recommendation Service', () => {
           fallbackUsed: true,
           adapterFailed: false,
           warnings: [],
-          hints: {}
-        })
-      }
+          hints: {},
+        }),
+      },
     });
 
     service.clearRecommendationCache();
@@ -783,15 +812,19 @@ describe('Recommendation Service', () => {
       userId: 15,
       email: 'dietary@example.com',
       dietaryConstraints: {
-        dietaryRequirementIds: [1, 2]
-      }
+        dietaryRequirementIds: [1, 2],
+      },
     });
 
     expect(result.recommendations[0].recipeId).to.equal(1);
     expect(result.userContext.preferences.dietaryRequirements).to.include('vegan');
     expect(result.userContext.preferences.dietaryRequirements).to.include('high protein');
-    expect(result.recommendations[0].explanation.reasons.map((r) => r.tag)).to.include('dietary_vegan');
-    expect(result.recommendations[0].explanation.reasons.map((r) => r.tag)).to.include('dietary_high_protein');
+    expect(result.recommendations[0].explanation.reasons.map((r) => r.tag)).to.include(
+      'dietary_vegan'
+    );
+    expect(result.recommendations[0].explanation.reasons.map((r) => r.tag)).to.include(
+      'dietary_high_protein'
+    );
   });
 
   it('uses allergy IDs from dietaryConstraints to block unsafe recipes even without stored user allergies', async () => {
@@ -813,12 +846,10 @@ describe('Recommendation Service', () => {
             fat: 20,
             carbohydrates: 58,
             allergy: false,
-            dislike: false
-          }
+            dislike: false,
+          },
         ],
-        allergies: [
-          { id: 11, name: 'Peanut' }
-        ]
+        allergies: [{ id: 11, name: 'Peanut' }],
       }),
       '../model/fetchUserPreferences': async () => ({
         dietary_requirements: [],
@@ -828,9 +859,12 @@ describe('Recommendation Service', () => {
         health_conditions: [],
         spice_levels: [],
         cooking_methods: [],
-        health_context: { allergies: [], chronic_conditions: [], medications: [] }
+        health_context: { allergies: [], chronic_conditions: [], medications: [] },
       }),
-      '../model/getUserProfile': async () => ({ user_id: 16, email: 'request-allergy@example.com' }),
+      '../model/getUserProfile': async () => ({
+        user_id: 16,
+        email: 'request-allergy@example.com',
+      }),
       './recommendationAiAdapter': {
         AI_ADAPTER_VERSION: 'v1',
         resolveAiRecommendationSignals: async () => ({
@@ -839,9 +873,9 @@ describe('Recommendation Service', () => {
           fallbackUsed: true,
           adapterFailed: false,
           warnings: [],
-          hints: {}
-        })
-      }
+          hints: {},
+        }),
+      },
     });
 
     service.clearRecommendationCache();
@@ -849,8 +883,8 @@ describe('Recommendation Service', () => {
       userId: 16,
       email: 'request-allergy@example.com',
       dietaryConstraints: {
-        allergyIds: [11]
-      }
+        allergyIds: [11],
+      },
     });
 
     expect(result.recommendations).to.have.length(0);

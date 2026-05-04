@@ -1,6 +1,7 @@
 # CT-004 Proposed Alert Conditions (Week 5 Final)
 
 ## Baseline Tuning Notes
+
 These thresholds are tuned for typical small to medium Nutri-Help authentication traffic and should be re-validated weekly using rolling 7-day median and peak values.
 
 - Baseline assumptions:
@@ -24,6 +25,7 @@ These thresholds are tuned for typical small to medium Nutri-Help authentication
 ## Alert Definitions (A1 to A12)
 
 ### A1. Brute-Force by Account
+
 - Trigger condition:
   - 10 or more failed login attempts for the same account (email or user_id) within 10 minutes.
 - Severity: High
@@ -38,6 +40,7 @@ These thresholds are tuned for typical small to medium Nutri-Help authentication
   - `alert_id`, `event_time_window`, `account_identifier`, `failed_count`, `source_ips`, `top_user_agents`, `endpoint_paths`, `request_ids`
 
 ### A2. Brute-Force by Source IP
+
 - Trigger condition:
   - 20 or more failed login attempts from a single source IP across at least 3 distinct accounts within 10 minutes.
 - Severity: High
@@ -52,6 +55,7 @@ These thresholds are tuned for typical small to medium Nutri-Help authentication
   - `alert_id`, `source_ip`, `failed_count`, `targeted_account_count`, `targeted_accounts_sample`, `geo_hint`, `endpoint_paths`, `first_seen`, `last_seen`
 
 ### A3. Successful Login After Failure Burst
+
 - Trigger condition:
   - A successful login occurs for an account within 5 minutes after 5 or more failed login attempts for that same account.
 - Severity: Critical
@@ -66,6 +70,7 @@ These thresholds are tuned for typical small to medium Nutri-Help authentication
   - `alert_id`, `account_identifier`, `success_event_id`, `preceding_failed_count`, `source_ip_sequence`, `device_fingerprint_summary`, `session_ids`, `token_ids`
 
 ### A4. MFA Failure Burst
+
 - Trigger condition:
   - 5 or more MFA verification failures for the same account within 10 minutes.
 - Severity: High
@@ -80,6 +85,7 @@ These thresholds are tuned for typical small to medium Nutri-Help authentication
   - `alert_id`, `account_identifier`, `mfa_failure_count`, `source_ips`, `related_login_outcomes`, `user_agents`, `time_buckets`
 
 ### A5. Rate-Limit Abuse on Sensitive Endpoints
+
 - Trigger condition:
   - 30 or more HTTP 429 events from the same IP within 15 minutes on sensitive endpoints (`/api/login`, `/api/auth/*`, `/api/signup`, `/api/chatbot/*`, `/api/plan/generate`).
 - Severity: High
@@ -96,6 +102,7 @@ These thresholds are tuned for typical small to medium Nutri-Help authentication
   - Required when endpoint path matches AI routes.
 
 ### A6. Session Anomaly (Geo-Impossible Concurrent Sessions)
+
 - Trigger condition:
   - 2 or more active sessions for same account within 30 minutes with conflicting location metadata (country/region mismatch) or impossible travel pattern.
 - Severity: High
@@ -110,6 +117,7 @@ These thresholds are tuned for typical small to medium Nutri-Help authentication
   - `alert_id`, `account_identifier`, `active_session_count`, `session_ids`, `location_markers`, `ip_addresses`, `user_agents`, `created_at_list`
 
 ### A7. Token Lifecycle Anomaly
+
 - Trigger condition:
   - 8 or more token refresh/reissue/revoke events for same principal within 10 minutes, or
   - 3 or more rapid revoke and reissue loops within 10 minutes.
@@ -125,6 +133,7 @@ These thresholds are tuned for typical small to medium Nutri-Help authentication
   - `alert_id`, `principal_id`, `token_event_count`, `revoke_reissue_loops`, `refresh_endpoint_hits`, `ip_addresses`, `device_info`
 
 ### A8. Correlated Security Incident
+
 - Trigger condition:
   - Correlation engine confidence score >= 0.80, or
   - 3 or more high-risk signals (A1/A2/A3/A5/A6/A7/A11) for same principal or IP within 10 minutes.
@@ -142,6 +151,7 @@ These thresholds are tuned for typical small to medium Nutri-Help authentication
   - Required when correlated events involve AI routes.
 
 ### A9. Integrity Tamper Event
+
 - Trigger condition:
   - Any monitored file integrity mismatch (`hash_mismatch`) or missing critical file (`missing_file`) in integrity results.
 - Severity: Critical
@@ -156,6 +166,7 @@ These thresholds are tuned for typical small to medium Nutri-Help authentication
   - `alert_id`, `host_id`, `file_path`, `baseline_hash`, `observed_hash`, `tamper_type`, `integrity_scan_id`, `last_known_good_build`
 
 ### A10. Monitoring Pipeline Failure
+
 - Trigger condition:
   - Log ingestion or alert checker heartbeat absent for more than 5 minutes, or
   - Monitoring component emits persistent ingestion/query failure in last 5 minutes.
@@ -171,6 +182,7 @@ These thresholds are tuned for typical small to medium Nutri-Help authentication
   - `alert_id`, `failing_component`, `first_failure_time`, `last_healthy_time`, `error_samples`, `affected_tables`, `backlog_estimate`
 
 ### A11. Critical Security Error Category Event
+
 - Trigger condition:
   - Any `critical` category error on auth/session/security routes (High), or
   - 3 or more such critical errors in 10 minutes (Critical escalation).
@@ -190,6 +202,7 @@ These thresholds are tuned for typical small to medium Nutri-Help authentication
   - Required when endpoint belongs to AI routes.
 
 ### A12. Encryption/Decryption Anomaly (Week 5+)
+
 - Trigger condition:
   - 10 or more decrypt failures within 15 minutes, or
   - Decrypt failure rate >= 30% over rolling 15-minute window.
@@ -207,6 +220,7 @@ These thresholds are tuned for typical small to medium Nutri-Help authentication
   - Required for AI encryption/decryption paths.
 
 ## Notification Policy
+
 - Critical alerts:
   - Channel: Email urgent distribution list
   - Triage SLA: 15 minutes
@@ -215,7 +229,9 @@ These thresholds are tuned for typical small to medium Nutri-Help authentication
   - Triage SLA: 60 minutes
 
 ## Week 5 Review Confirmation
+
 This document now includes:
+
 1. Exact trigger conditions with threshold values for A1 to A12.
 2. Severity mapping limited to Critical and High.
 3. Email notification channels for all High and Critical alerts.

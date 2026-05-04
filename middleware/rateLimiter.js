@@ -6,7 +6,7 @@ const loginLimiter = rateLimit({
   max: 20,
   message: {
     status: 429,
-    error: "Too many login attempts, please try again after 10 minutes.",
+    error: 'Too many login attempts, please try again after 10 minutes.',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -17,7 +17,7 @@ const mfaResendLimiter = rateLimit({
   max: 5,
   message: {
     status: 429,
-    error: "Too many MFA resend attempts, please try again after 10 minutes.",
+    error: 'Too many MFA resend attempts, please try again after 10 minutes.',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -28,7 +28,7 @@ const passwordRecoveryLimiter = rateLimit({
   max: 6,
   message: {
     status: 429,
-    error: "Too many password recovery attempts, please try again after 15 minutes.",
+    error: 'Too many password recovery attempts, please try again after 15 minutes.',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -39,7 +39,7 @@ const passwordResetLimiter = rateLimit({
   max: 10,
   message: {
     status: 429,
-    error: "Too many password reset attempts, please try again after 15 minutes.",
+    error: 'Too many password reset attempts, please try again after 15 minutes.',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -51,7 +51,7 @@ const signupLimiter = rateLimit({
   max: 10,
   message: {
     status: 429,
-    error: "Too many signup attempts, please try again later.",
+    error: 'Too many signup attempts, please try again later.',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -63,7 +63,7 @@ const formLimiter = rateLimit({
   max: 20,
   message: {
     status: 429,
-    error: "Too many form submissions from this IP, please try again after an hour.",
+    error: 'Too many form submissions from this IP, please try again after an hour.',
   },
   standardHeaders: true,
   legacyHeaders: false,
@@ -78,8 +78,8 @@ const passwordChangeLimiter = rateLimit({
   keyGenerator: (req) => req.user?.userId || req.ip,
   message: {
     status: 429,
-    error: "Too many password verification attempts. Please try again later.",
-    code: "RATE_LIMITED",
+    error: 'Too many password verification attempts. Please try again later.',
+    code: 'RATE_LIMITED',
   },
 });
 

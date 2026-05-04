@@ -152,9 +152,7 @@ describe('aiExecutionService — retry', () => {
 
     spawnSpy.mockImplementation(() => {
       callCount++;
-      return callCount === 1
-        ? makeProcess('', 'error', 1)
-        : makeProcess(successPayload, '', 0);
+      return callCount === 1 ? makeProcess('', 'error', 1) : makeProcess(successPayload, '', 0);
     });
 
     const result = await executePythonScript({

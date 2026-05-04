@@ -1,6 +1,6 @@
 /**
  * MedicalPredictionAIClientInterface.js
- * 
+ *
  * Interface for medical prediction AI services.
  * Handles health risk assessments and medical predictions.
  */

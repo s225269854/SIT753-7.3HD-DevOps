@@ -7,8 +7,8 @@ function successResponse(statusCode, data) {
     body: {
       statusCode,
       message: 'success',
-      data
-    }
+      data,
+    },
   };
 }
 
@@ -20,7 +20,8 @@ class ShoppingListService {
 
     const { data, error } = await supabase
       .from('ingredient_price')
-      .select(`
+      .select(
+        `
         id,
         ingredient_id,
         name,
@@ -29,7 +30,8 @@ class ShoppingListService {
         price,
         store_id,
         ingredients!inner(name, category)
-      `)
+      `
+      )
       .ilike('ingredients.name', `%${name}%`)
       .order('price', { ascending: true });
 
@@ -47,7 +49,7 @@ class ShoppingListService {
       measurement: item.measurement || 'unit',
       price: item.price || 0,
       store: `Store ${item.store_id}`,
-      store_location: 'Location not specified'
+      store_location: 'Location not specified',
     }));
 
     return successResponse(200, formattedData);
@@ -60,7 +62,8 @@ class ShoppingListService {
 
     const { data: mealPlanData, error: mealPlanError } = await supabase
       .from('recipe_meal')
-      .select(`
+      .select(
+        `
         mealplan_id,
         recipe_id,
         meal_type,
@@ -72,7 +75,8 @@ class ShoppingListService {
             ingredients!inner(name, category)
           )
         )
-      `)
+      `
+      )
       .in('mealplan_id', mealPlanIds)
       .eq('user_id', userId);
 
@@ -110,7 +114,7 @@ class ShoppingListService {
           unit: ingredient.quantity,
           measurement: ingredient.measurement,
           meals: [mealType],
-          estimated_cost: { min: 0, max: 0 }
+          estimated_cost: { min: 0, max: 0 },
         });
       });
     });
@@ -148,10 +152,10 @@ class ShoppingListService {
         total_items: shoppingList.length,
         total_estimated_cost: {
           min: Math.round(totalMinCost * 100) / 100,
-          max: Math.round(totalMaxCost * 100) / 100
+          max: Math.round(totalMaxCost * 100) / 100,
         },
-        categories: [...new Set(shoppingList.map((item) => item.category))]
-      }
+        categories: [...new Set(shoppingList.map((item) => item.category))],
+      },
     });
   }
 
@@ -162,11 +166,13 @@ class ShoppingListService {
 
     const { data: shoppingList, error: listError } = await supabase
       .from('shopping_lists')
-      .insert([{
-        user_id: userId,
-        name,
-        estimated_total_cost: estimatedTotalCost || 0
-      }])
+      .insert([
+        {
+          user_id: userId,
+          name,
+          estimated_total_cost: estimatedTotalCost || 0,
+        },
+      ])
       .select()
       .single();
 
@@ -185,7 +191,7 @@ class ShoppingListService {
       notes: item.notes,
       purchased: item.purchased || false,
       meal_tags: item.meal_tags || [],
-      estimated_cost: item.estimated_cost || 0
+      estimated_cost: item.estimated_cost || 0,
     }));
 
     const { data: itemsData, error: itemsError } = await supabase
@@ -200,7 +206,7 @@ class ShoppingListService {
 
     return successResponse(201, {
       shopping_list: shoppingList,
-      items: itemsData
+      items: itemsData,
     });
   }
 
@@ -239,8 +245,9 @@ class ShoppingListService {
         progress: {
           total_items: totalItems,
           purchased_items: purchasedItems,
-          completion_percentage: totalItems > 0 ? Math.round((purchasedItems / totalItems) * 100) : 0
-        }
+          completion_percentage:
+            totalItems > 0 ? Math.round((purchasedItems / totalItems) * 100) : 0,
+        },
       });
     }
 
@@ -282,7 +289,7 @@ class ShoppingListService {
       notes: item.notes || '',
       purchased: false,
       meal_tags: item.mealTags || [],
-      estimated_cost: item.estimatedCost || 0
+      estimated_cost: item.estimatedCost || 0,
     };
 
     const { data, error } = await supabase
@@ -299,10 +306,7 @@ class ShoppingListService {
   }
 
   async deleteShoppingListItem(id) {
-    const { error } = await supabase
-      .from('shopping_list_items')
-      .delete()
-      .eq('id', id);
+    const { error } = await supabase.from('shopping_list_items').delete().eq('id', id);
 
     if (error) {
       throw new ServiceError(500, 'Failed to delete shopping list item');
@@ -312,8 +316,8 @@ class ShoppingListService {
       statusCode: 204,
       body: {
         statusCode: 204,
-        message: 'success'
-      }
+        message: 'success',
+      },
     };
   }
 }

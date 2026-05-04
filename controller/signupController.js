@@ -4,7 +4,7 @@ const { isServiceError } = require('../services/serviceError');
 function getRequestContext(req) {
   return {
     ip: req.headers['x-forwarded-for'] || req.socket?.remoteAddress || req.ip || '',
-    userAgent: req.get('User-Agent') || ''
+    userAgent: req.get('User-Agent') || '',
   };
 }
 
@@ -16,7 +16,7 @@ async function signup(req, res) {
       password: req.body.password,
       contactNumber: req.body.contact_number,
       address: req.body.address,
-      ...getRequestContext(req)
+      ...getRequestContext(req),
     });
 
     return res.status(result.statusCode).json(result.body);

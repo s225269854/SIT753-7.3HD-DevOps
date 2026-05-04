@@ -2,13 +2,9 @@ const express = require('express');
 const router = express.Router();
 const { authenticateToken } = require('../middleware/authenticateToken');
 const authorizeRoles = require('../middleware/authorizeRoles');
-const {
-  createBlockMiddleware,
-} = require('../services/securityEvents/securityResponseService');
+const { createBlockMiddleware } = require('../services/securityEvents/securityResponseService');
 
-const {
-  exportSecurityEvents,
-} = require('../controller/securityEventsController');
+const { exportSecurityEvents } = require('../controller/securityEventsController');
 
 // BE23 Hardening: Block, Auth, and Admin Role enforcement on ALL security routes
 router.use(createBlockMiddleware());
@@ -54,7 +50,7 @@ router.get('/events/export', exportSecurityEvents);
 
 // GET /api/security/logs (Merged from legacy securtiy.js)
 router.get('/logs', (req, res) => {
-  res.status(200).json({ message: "System security logs retrieved" });
+  res.status(200).json({ message: 'System security logs retrieved' });
 });
 
 module.exports = router;

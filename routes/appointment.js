@@ -10,16 +10,19 @@ const router = express.Router();
 const { appointments: appointmentController } = coreApp;
 
 // Legacy appointment routes
-router.route('/')
+router
+  .route('/')
   .post(appointmentValidator, validate, appointmentController.saveAppointment)
   .get(appointmentController.getAppointments);
 
 // Structured appointment routes used by newer clients
-router.route('/v2')
+router
+  .route('/v2')
   .post(appointmentValidatorV2, validate, appointmentController.saveAppointmentV2)
   .get(appointmentController.getAppointmentsV2);
 
-router.route('/v2/:id')
+router
+  .route('/v2/:id')
   .put(appointmentValidatorV2, validate, appointmentController.updateAppointment)
   .delete(appointmentController.delAppointment);
 

@@ -57,11 +57,10 @@ function msg(key, vars = {}, locale = DEFAULT_LOCALE) {
  * res.locals.msg('auth.login.success') with auto locale detection.
  */
 function localeMiddleware(req, res, next) {
-  const locale =
-    (req.headers['accept-language'] || DEFAULT_LOCALE)
-      .split(',')[0]
-      .split('-')[0]
-      .trim();
+  const locale = (req.headers['accept-language'] || DEFAULT_LOCALE)
+    .split(',')[0]
+    .split('-')[0]
+    .trim();
 
   res.locals.msg = (key, vars = {}) => msg(key, vars, locale);
   next();

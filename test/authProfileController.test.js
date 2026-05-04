@@ -13,31 +13,33 @@ describe('Auth Profile Controller', () => {
         success: true,
         contractVersion: 'user-profile-v1',
         profile: { id: 3, email: 'user@example.com' },
-        preferenceSummary: { allergies: [], hasPreferences: false }
-      })
+        preferenceSummary: { allergies: [], hasPreferences: false },
+      }),
     };
 
     const controller = proxyquire('../controller/authController', {
       '../services/authService': { '@noCallThru': {} },
       '../services/userProfileService': userProfileService,
-      '../utils/logger': { error: sinon.stub() }
+      '../utils/logger': { error: sinon.stub() },
     });
 
     const req = {
-      user: { userId: 3 }
+      user: { userId: 3 },
     };
     const res = {
-      json: sinon.stub()
+      json: sinon.stub(),
     };
 
     await controller.getProfile(req, res);
 
     expect(userProfileService.getCanonicalProfile.calledOnceWith({ userId: 3 })).to.equal(true);
-    expect(res.json.calledWith({
-      success: true,
-      contractVersion: 'user-profile-v1',
-      profile: { id: 3, email: 'user@example.com' },
-      preferenceSummary: { allergies: [], hasPreferences: false }
-    })).to.equal(true);
+    expect(
+      res.json.calledWith({
+        success: true,
+        contractVersion: 'user-profile-v1',
+        profile: { id: 3, email: 'user@example.com' },
+        preferenceSummary: { allergies: [], hasPreferences: false },
+      })
+    ).to.equal(true);
   });
 });

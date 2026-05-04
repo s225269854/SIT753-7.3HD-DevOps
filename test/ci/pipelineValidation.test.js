@@ -7,9 +7,9 @@ describe('CI Pipeline Validation Tests', () => {
         user_id: 1,
         dietaryConstraints: {
           allergies: ['peanut'],
-          dietaryRequirements: ['vegetarian']
+          dietaryRequirements: ['vegetarian'],
         },
-        maxResults: 5
+        maxResults: 5,
       };
 
       expect(payload).to.have.property('user_id').that.is.a('number');
@@ -22,7 +22,7 @@ describe('CI Pipeline Validation Tests', () => {
     it('rejects a payload missing dietaryConstraints', () => {
       const payload = {
         user_id: 1,
-        maxResults: 5
+        maxResults: 5,
       };
 
       expect(payload).to.not.have.property('dietaryConstraints');
@@ -32,7 +32,7 @@ describe('CI Pipeline Validation Tests', () => {
       const payload = {
         user_id: 1,
         dietaryConstraints: {},
-        maxResults: 'many'
+        maxResults: 'many',
       };
 
       expect(payload.maxResults).to.not.be.a('number');
@@ -44,7 +44,7 @@ describe('CI Pipeline Validation Tests', () => {
       const payload = {
         user_id: 1,
         dietaryConstraints: {},
-        maxResults: 1
+        maxResults: 1,
       };
 
       expect(payload.maxResults).to.equal(1);
@@ -54,7 +54,7 @@ describe('CI Pipeline Validation Tests', () => {
       const payload = {
         user_id: 1,
         dietaryConstraints: {},
-        maxResults: 20
+        maxResults: 20,
       };
 
       expect(payload.maxResults).to.equal(20);
@@ -64,9 +64,9 @@ describe('CI Pipeline Validation Tests', () => {
       const payload = {
         user_id: 1,
         dietaryConstraints: {
-          allergies: []
+          allergies: [],
         },
-        maxResults: 5
+        maxResults: 5,
       };
 
       expect(payload.dietaryConstraints.allergies).to.be.an('array').that.is.empty;

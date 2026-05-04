@@ -16,7 +16,14 @@ async function saveMealPlan({ userId, filters, plan, aiModelUsed }) {
   return data.id;
 }
 
-async function saveFeedback({ mealPlanId, rating, likedMeals, dislikedMeals, followedPlan, notes }) {
+async function saveFeedback({
+  mealPlanId,
+  rating,
+  likedMeals,
+  dislikedMeals,
+  followedPlan,
+  notes,
+}) {
   const { data, error } = await supabase
     .from('ai_meal_plan_feedback')
     .insert({

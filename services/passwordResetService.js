@@ -1,12 +1,12 @@
-const bcrypt = require("bcryptjs");
-const crypto = require("crypto");
-const nodemailer = require("nodemailer");
+const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
 
-const supabase = require("../dbConnection");
-const { ServiceError } = require("./serviceError");
+const supabase = require('../dbConnection');
+const { ServiceError } = require('./serviceError');
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  service: 'gmail',
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_APP_PASSWORD,
@@ -22,7 +22,7 @@ function nowIso() {
 }
 
 function hashValue(value) {
-  return crypto.createHash("sha256").update(String(value)).digest("hex");
+  return crypto.createHash('sha256').update(String(value)).digest('hex');
 }
 
 function randomCode() {
@@ -30,18 +30,18 @@ function randomCode() {
 }
 
 function randomToken() {
-  return crypto.randomBytes(24).toString("hex");
+  return crypto.randomBytes(24).toString('hex');
 }
 
 function isMissingTable(error) {
-  const message = error?.message || "";
+  const message = error?.message || '';
   return (
     error?.status === 404 ||
-    error?.code === "42P01" ||
-    error?.statusText === "Not Found" ||
-    message.includes("does not exist") ||
-    message.includes("relation") ||
-    message.includes("password_reset_tokens")
+    error?.code === '42P01' ||
+    error?.statusText === 'Not Found' ||
+    message.includes('does not exist') ||
+    message.includes('relation') ||
+    message.includes('password_reset_tokens')
   );
 }
 
@@ -54,10 +54,10 @@ function throwSupabaseError(response) {
 
 async function invalidateSupabaseTokens(email) {
   const response = await supabase
-    .from("password_reset_tokens")
+    .from('password_reset_tokens')
     .update({ is_active: false })
-    .eq("email", email)
-    .eq("is_active", true);
+    .eq('email', email)
+    .eq('is_active', true);
 
   if (response.error) {
     throwSupabaseError(response);
@@ -73,7 +73,7 @@ function invalidateFallbackTokens(email) {
 }
 
 async function createSupabaseToken(record) {
-  const response = await supabase.from("password_reset_tokens").insert(record);
+  const response = await supabase.from('password_reset_tokens').insert(record);
   if (response.error) {
     throwSupabaseError(response);
   }
@@ -90,7 +90,7 @@ async function storeResetRecord(record) {
   try {
     await invalidateSupabaseTokens(record.email);
     await createSupabaseToken(record);
-    return "supabase";
+    return 'supabase';
   } catch (error) {
     if (!isMissingTable(error)) {
       throw error;
@@ -99,17 +99,17 @@ async function storeResetRecord(record) {
 
   invalidateFallbackTokens(record.email);
   createFallbackToken(record);
-  return "memory";
+  return 'memory';
 }
 
 async function findSupabaseCodeRecord(email, codeHash) {
   const response = await supabase
-    .from("password_reset_tokens")
-    .select("id, email, code_hash, reset_token_hash, expires_at, verified_at, is_active")
-    .eq("email", email)
-    .eq("code_hash", codeHash)
-    .eq("is_active", true)
-    .order("expires_at", { ascending: false })
+    .from('password_reset_tokens')
+    .select('id, email, code_hash, reset_token_hash, expires_at, verified_at, is_active')
+    .eq('email', email)
+    .eq('code_hash', codeHash)
+    .eq('is_active', true)
+    .order('expires_at', { ascending: false })
     .limit(1);
 
   if (response.error) {
@@ -124,22 +124,19 @@ function findFallbackCodeRecord(email, codeHash) {
     [...fallbackStore]
       .reverse()
       .find(
-        (item) =>
-          item.email === email &&
-          item.code_hash === codeHash &&
-          item.is_active === true,
+        (item) => item.email === email && item.code_hash === codeHash && item.is_active === true
       ) || null
   );
 }
 
 async function markSupabaseCodeVerified(id, resetTokenHash) {
   const response = await supabase
-    .from("password_reset_tokens")
+    .from('password_reset_tokens')
     .update({
       verified_at: nowIso(),
       reset_token_hash: resetTokenHash,
     })
-    .eq("id", id);
+    .eq('id', id);
 
   if (response.error) {
     throwSupabaseError(response);
@@ -156,12 +153,12 @@ function markFallbackCodeVerified(id, resetTokenHash) {
 
 async function findSupabaseTokenRecord(email, resetTokenHash) {
   const response = await supabase
-    .from("password_reset_tokens")
-    .select("id, email, reset_token_hash, expires_at, verified_at, is_active")
-    .eq("email", email)
-    .eq("reset_token_hash", resetTokenHash)
-    .eq("is_active", true)
-    .order("expires_at", { ascending: false })
+    .from('password_reset_tokens')
+    .select('id, email, reset_token_hash, expires_at, verified_at, is_active')
+    .eq('email', email)
+    .eq('reset_token_hash', resetTokenHash)
+    .eq('is_active', true)
+    .order('expires_at', { ascending: false })
     .limit(1);
 
   if (response.error) {
@@ -179,16 +176,16 @@ function findFallbackTokenRecord(email, resetTokenHash) {
         (item) =>
           item.email === email &&
           item.reset_token_hash === resetTokenHash &&
-          item.is_active === true,
+          item.is_active === true
       ) || null
   );
 }
 
 async function deactivateSupabaseRecord(id) {
   const response = await supabase
-    .from("password_reset_tokens")
+    .from('password_reset_tokens')
     .update({ is_active: false })
-    .eq("id", id);
+    .eq('id', id);
 
   if (response.error) {
     throwSupabaseError(response);
@@ -215,12 +212,12 @@ async function withStorageFallback(primaryFn, fallbackFn) {
 
 async function findUserByEmail(email) {
   const { data, error } = await supabase
-    .from("users")
-    .select("user_id, email, name")
-    .eq("email", email)
+    .from('users')
+    .select('user_id, email, name')
+    .eq('email', email)
     .single();
 
-  if (error && error.code !== "PGRST116") {
+  if (error && error.code !== 'PGRST116') {
     throw error;
   }
 
@@ -229,9 +226,9 @@ async function findUserByEmail(email) {
 
 async function updatePassword(userId, hashedPassword) {
   const { error } = await supabase
-    .from("users")
+    .from('users')
     .update({ password: hashedPassword })
-    .eq("user_id", userId);
+    .eq('user_id', userId);
 
   if (error) {
     throw error;
@@ -247,22 +244,22 @@ async function sendResetEmail(email, code) {
   await transporter.sendMail({
     from: `"NutriHelp Security" <${process.env.GMAIL_USER}>`,
     to: email,
-    subject: "NutriHelp password reset code",
+    subject: 'NutriHelp password reset code',
     text:
       `Your NutriHelp password reset code is ${code}.\n\n` +
-      "It expires in 10 minutes.\n\n" +
-      "If you did not request this, you can safely ignore this email.",
+      'It expires in 10 minutes.\n\n' +
+      'If you did not request this, you can safely ignore this email.',
     html:
       `<p>Your NutriHelp password reset code is:</p><h2>${code}</h2>` +
-      "<p>This code expires in <strong>10 minutes</strong>.</p>" +
-      "<p>If you did not request this, you can safely ignore this email.</p>",
+      '<p>This code expires in <strong>10 minutes</strong>.</p>' +
+      '<p>If you did not request this, you can safely ignore this email.</p>',
   });
 }
 
 class PasswordResetService {
   async requestReset(email, deviceInfo = {}) {
     if (!email) {
-      throw new ServiceError(400, "Email is required");
+      throw new ServiceError(400, 'Email is required');
     }
 
     const normalizedEmail = email.trim().toLowerCase();
@@ -271,7 +268,7 @@ class PasswordResetService {
     if (!user) {
       return {
         success: true,
-        message: "If that email exists, a verification code was sent.",
+        message: 'If that email exists, a verification code was sent.',
       };
     }
 
@@ -298,28 +295,28 @@ class PasswordResetService {
 
     return {
       success: true,
-      message: "If that email exists, a verification code was sent.",
+      message: 'If that email exists, a verification code was sent.',
     };
   }
 
   async verifyCode(email, code) {
     if (!email || !code) {
-      throw new ServiceError(400, "Email and verification code are required");
+      throw new ServiceError(400, 'Email and verification code are required');
     }
 
     const normalizedEmail = email.trim().toLowerCase();
     const codeHash = hashValue(code);
     const record = await withStorageFallback(
       () => findSupabaseCodeRecord(normalizedEmail, codeHash),
-      () => findFallbackCodeRecord(normalizedEmail, codeHash),
+      () => findFallbackCodeRecord(normalizedEmail, codeHash)
     );
 
     if (!record) {
-      throw new ServiceError(401, "Verification code is invalid or has expired");
+      throw new ServiceError(401, 'Verification code is invalid or has expired');
     }
 
     if (new Date(record.expires_at) < new Date()) {
-      throw new ServiceError(401, "Verification code is invalid or has expired");
+      throw new ServiceError(401, 'Verification code is invalid or has expired');
     }
 
     const resetToken = randomToken();
@@ -327,12 +324,12 @@ class PasswordResetService {
 
     await withStorageFallback(
       () => markSupabaseCodeVerified(record.id, resetTokenHash),
-      () => markFallbackCodeVerified(record.id, resetTokenHash),
+      () => markFallbackCodeVerified(record.id, resetTokenHash)
     );
 
     return {
       success: true,
-      message: "Verification code accepted.",
+      message: 'Verification code accepted.',
       resetToken,
       expiresIn: Math.floor(RESET_TOKEN_TTL_MS / 1000),
     };
@@ -340,7 +337,7 @@ class PasswordResetService {
 
   async resetPassword({ email, resetToken, code, newPassword }) {
     if (!email || !newPassword) {
-      throw new ServiceError(400, "Email and new password are required");
+      throw new ServiceError(400, 'Email and new password are required');
     }
 
     let effectiveResetToken = resetToken;
@@ -351,27 +348,27 @@ class PasswordResetService {
     }
 
     if (!effectiveResetToken) {
-      throw new ServiceError(400, "Reset token is required");
+      throw new ServiceError(400, 'Reset token is required');
     }
 
     const normalizedEmail = email.trim().toLowerCase();
     const resetTokenHash = hashValue(effectiveResetToken);
     const record = await withStorageFallback(
       () => findSupabaseTokenRecord(normalizedEmail, resetTokenHash),
-      () => findFallbackTokenRecord(normalizedEmail, resetTokenHash),
+      () => findFallbackTokenRecord(normalizedEmail, resetTokenHash)
     );
 
     if (!record || !record.verified_at) {
-      throw new ServiceError(401, "Reset token is invalid or has expired");
+      throw new ServiceError(401, 'Reset token is invalid or has expired');
     }
 
     if (new Date(record.expires_at) < new Date()) {
-      throw new ServiceError(401, "Reset token is invalid or has expired");
+      throw new ServiceError(401, 'Reset token is invalid or has expired');
     }
 
     const user = await findUserByEmail(normalizedEmail);
     if (!user) {
-      throw new ServiceError(404, "Account not found");
+      throw new ServiceError(404, 'Account not found');
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 12);
@@ -379,12 +376,12 @@ class PasswordResetService {
 
     await withStorageFallback(
       () => deactivateSupabaseRecord(record.id),
-      () => deactivateFallbackRecord(record.id),
+      () => deactivateFallbackRecord(record.id)
     );
 
     return {
       success: true,
-      message: "Password updated successfully.",
+      message: 'Password updated successfully.',
     };
   }
 }

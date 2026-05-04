@@ -28,16 +28,16 @@ function calculateRiskScore(eventCount, severity) {
 }
 
 function getIncidentPriority(riskScore) {
-  if (riskScore >= 20) return "CRITICAL";
-  if (riskScore >= 10) return "HIGH";
-  if (riskScore >= 5) return "MEDIUM";
-  return "LOW";
+  if (riskScore >= 20) return 'CRITICAL';
+  if (riskScore >= 10) return 'HIGH';
+  if (riskScore >= 5) return 'MEDIUM';
+  return 'LOW';
 }
 
 function getIncidentStatus(inc) {
-  if (inc.eventCount > 5) return "OPEN";
-  if (inc.eventCount > 2) return "MONITORING";
-  return "RESOLVED";
+  if (inc.eventCount > 5) return 'OPEN';
+  if (inc.eventCount > 2) return 'MONITORING';
+  return 'RESOLVED';
 }
 
 function detectIncidentType(events) {
@@ -67,30 +67,28 @@ function aggregateIncidents(events) {
 
   for (const ev of events) {
     const incidentKey =
-  ev.correlationId ||
-  `${ev.type || 'UNKNOWN'}::${ev.actor?.email || ev.actor?.userId || ev.network?.ip || 'anonymous'}`;
+      ev.correlationId ||
+      `${ev.type || 'UNKNOWN'}::${ev.actor?.email || ev.actor?.userId || ev.network?.ip || 'anonymous'}`;
 
-if (!incidentsMap[incidentKey]) {
-  incidentsMap[incidentKey] = {
-    incidentId: incidentKey,
-    confidence: ev.confidence ?? null,
-    firstSeen: ev.occurredAt,
-    lastSeen: ev.occurredAt,
-    durationMs: 0,
-    eventCount: 0,
-    severity: ev.severity || 'LOW',
-    actors: new Set(),
-    sources: new Set(),
-    eventTypes: new Set(),
-    successCount: 0,
-    failureCount: 0,
-    events: [],
-  };
-}
+    if (!incidentsMap[incidentKey]) {
+      incidentsMap[incidentKey] = {
+        incidentId: incidentKey,
+        confidence: ev.confidence ?? null,
+        firstSeen: ev.occurredAt,
+        lastSeen: ev.occurredAt,
+        durationMs: 0,
+        eventCount: 0,
+        severity: ev.severity || 'LOW',
+        actors: new Set(),
+        sources: new Set(),
+        eventTypes: new Set(),
+        successCount: 0,
+        failureCount: 0,
+        events: [],
+      };
+    }
 
-const inc = incidentsMap[incidentKey];
-
-  
+    const inc = incidentsMap[incidentKey];
 
     inc.eventCount += 1;
     inc.events.push(ev);
@@ -110,26 +108,26 @@ const inc = incidentsMap[incidentKey];
   }
 
   return Object.values(incidentsMap)
-  .map((inc) => {
-    const firstSeenMs = new Date(inc.firstSeen).getTime();
-    const lastSeenMs = new Date(inc.lastSeen).getTime();
-    const incidentType = detectIncidentType(inc.events);
-    const riskScore = calculateRiskScore(inc.eventCount, inc.severity);
+    .map((inc) => {
+      const firstSeenMs = new Date(inc.firstSeen).getTime();
+      const lastSeenMs = new Date(inc.lastSeen).getTime();
+      const incidentType = detectIncidentType(inc.events);
+      const riskScore = calculateRiskScore(inc.eventCount, inc.severity);
 
-    return {
-      ...inc,
-      durationMs: lastSeenMs - firstSeenMs,
-      incidentType,
-      summary: `${inc.eventCount} event(s) grouped as ${incidentType}`,
-      riskScore,
-      priority: getIncidentPriority(riskScore),
-      status: getIncidentStatus(inc),
-      actors: Array.from(inc.actors),
-      sources: Array.from(inc.sources),
-      eventTypes: Array.from(inc.eventTypes),
-    };
-  })
-  .sort((a, b) => b.riskScore - a.riskScore);
+      return {
+        ...inc,
+        durationMs: lastSeenMs - firstSeenMs,
+        incidentType,
+        summary: `${inc.eventCount} event(s) grouped as ${incidentType}`,
+        riskScore,
+        priority: getIncidentPriority(riskScore),
+        status: getIncidentStatus(inc),
+        actors: Array.from(inc.actors),
+        sources: Array.from(inc.sources),
+        eventTypes: Array.from(inc.eventTypes),
+      };
+    })
+    .sort((a, b) => b.riskScore - a.riskScore);
 }
 
 module.exports = {

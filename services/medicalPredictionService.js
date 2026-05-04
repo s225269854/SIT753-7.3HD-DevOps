@@ -2,8 +2,7 @@ const { ServiceError } = require('./serviceError');
 const { fetchJson } = require('./httpClientService');
 
 const AI_RETRIEVE_URL =
-  process.env.AI_RETRIEVE_URL ||
-  'http://localhost:8000/ai-model/medical-report/retrieve';
+  process.env.AI_RETRIEVE_URL || 'http://localhost:8000/ai-model/medical-report/retrieve';
 
 const lower = (value) => (typeof value === 'string' ? value.trim().toLowerCase() : value);
 
@@ -43,7 +42,7 @@ const ALLOWED_MTRANS = new Set([
   'Bike',
   'Public_Transportation',
   'Automobile',
-  'Motorbike'
+  'Motorbike',
 ]);
 
 const normalizeMTRANS = (value) => {
@@ -82,7 +81,7 @@ function encodeMedicalSurvey(input) {
     FAF: Number(input.FAF),
     TUE: Number(input.TUE),
     CALC: normalizeEnum(input.CALC, 2),
-    MTRANS: normalizeMTRANS(input.MTRANS)
+    MTRANS: normalizeMTRANS(input.MTRANS),
   };
 }
 
@@ -94,20 +93,20 @@ class MedicalPredictionService {
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(encoded)
+        body: JSON.stringify(encoded),
       },
       options.fetch
     );
 
     if (!ok) {
       throw new ServiceError(status, 'AI retrieve error', {
-        detail: typeof data === 'string' ? data : data?.detail || data
+        detail: typeof data === 'string' ? data : data?.detail || data,
       });
     }
 
     if (!data || !data.medical_report) {
       throw new ServiceError(400, 'AI server returned no medical_report', {
-        message: data
+        message: data,
       });
     }
 
@@ -115,8 +114,8 @@ class MedicalPredictionService {
       statusCode: 200,
       body: {
         survey_id: null,
-        medical_report: data.medical_report
-      }
+        medical_report: data.medical_report,
+      },
     };
   }
 }
@@ -124,5 +123,5 @@ class MedicalPredictionService {
 module.exports = {
   MedicalPredictionService,
   medicalPredictionService: new MedicalPredictionService(),
-  encodeMedicalSurvey
+  encodeMedicalSurvey,
 };

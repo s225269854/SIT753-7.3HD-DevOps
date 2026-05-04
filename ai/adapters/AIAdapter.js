@@ -1,9 +1,9 @@
 /**
  * AIAdapter.js
- * 
+ *
  * Main adapter layer that provides a unified interface to all AI services.
  * This is what backend controllers should consume instead of calling AI services directly.
- * 
+ *
  * The adapter handles:
  * - Service selection (mock, external, local, or future Groq/Chroma)
  * - Configuration management
@@ -15,13 +15,13 @@
 const {
   ExternalChatbotClient,
   ExternalMedicalPredictionClient,
-  PythonImageClassificationClient
+  PythonImageClassificationClient,
 } = require('../clients');
 
 const {
   MockChatbotClient,
   MockMedicalPredictionClient,
-  MockImageClassificationClient
+  MockImageClassificationClient,
 } = require('../mocks');
 
 class AIAdapter {
@@ -33,7 +33,7 @@ class AIAdapter {
       pythonBin: config.pythonBin || process.env.PYTHON_BIN || 'python3',
       enableLogging: config.enableLogging !== false,
       enableFallback: config.enableFallback !== false,
-      ...config
+      ...config,
     };
 
     this.logger = config.logger || console;
@@ -57,7 +57,7 @@ class AIAdapter {
       this.clients.medicalPrediction = new ExternalMedicalPredictionClient(null, this.config);
       this.clients.imageClassification = new PythonImageClassificationClient({
         pythonCommand: this.config.pythonBin,
-        timeout: this.config.timeout
+        timeout: this.config.timeout,
       });
     }
   }
@@ -251,24 +251,24 @@ class AIAdapter {
   async checkSystemHealth() {
     const health = {
       timestamp: new Date().toISOString(),
-      services: {}
+      services: {},
     };
 
     for (const [name, client] of Object.entries(this.clients)) {
       try {
         health.services[name] = {
           healthy: await client.isHealthy(),
-          status: await client.getStatus()
+          status: await client.getStatus(),
         };
       } catch (error) {
         health.services[name] = {
           healthy: false,
-          error: error.message
+          error: error.message,
         };
       }
     }
 
-    health.overallHealthy = Object.values(health.services).every(s => s.healthy);
+    health.overallHealthy = Object.values(health.services).every((s) => s.healthy);
     return health;
   }
 
@@ -282,7 +282,7 @@ class AIAdapter {
       aiServerUrl: this.config.aiServerUrl,
       timeout: this.config.timeout,
       enableLogging: this.config.enableLogging,
-      enableFallback: this.config.enableFallback
+      enableFallback: this.config.enableFallback,
     };
   }
 
@@ -294,26 +294,26 @@ class AIAdapter {
     try {
       this.log('debug', `Executing operation: ${operation}`, { requestId });
       const result = await fn();
-      
+
       if (result.success) {
         this.log('debug', `Operation succeeded: ${operation}`, {
           requestId,
-          latencyMs: result.latencyMs
+          latencyMs: result.latencyMs,
         });
       } else {
         this.log('warn', `Operation failed: ${operation}`, {
           requestId,
-          error: result.error
+          error: result.error,
         });
       }
-      
+
       return result;
     } catch (error) {
       this.log('error', `Unexpected error in operation: ${operation}`, {
         requestId,
-        error: error.message
+        error: error.message,
       });
-      
+
       return {
         success: false,
         data: null,
@@ -321,10 +321,10 @@ class AIAdapter {
         metadata: {
           operation,
           requestId,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         },
         warnings: [],
-        latencyMs: 0
+        latencyMs: 0,
       };
     }
   }
@@ -353,5 +353,5 @@ function resetAIAdapter() {
 module.exports = {
   AIAdapter,
   getAIAdapter,
-  resetAIAdapter
+  resetAIAdapter,
 };

@@ -3,12 +3,10 @@ const { ServiceError } = require('./serviceError');
 const { fetchJson } = require('./httpClientService');
 
 const CHATBOT_CHAT_URL =
-  process.env.AI_CHATBOT_CHAT_URL ||
-  'http://localhost:8000/ai-model/chatbot/chat';
+  process.env.AI_CHATBOT_CHAT_URL || 'http://localhost:8000/ai-model/chatbot/chat';
 
 const CHATBOT_ADD_URLS_BASE =
-  process.env.AI_CHATBOT_ADD_URLS_URL ||
-  'http://localhost:8000/ai-model/chatbot/add_urls';
+  process.env.AI_CHATBOT_ADD_URLS_URL || 'http://localhost:8000/ai-model/chatbot/add_urls';
 
 class ChatbotService {
   async getChatResponse({ userId, userInput }, options = {}) {
@@ -28,7 +26,7 @@ class ChatbotService {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query: userInput })
+          body: JSON.stringify({ query: userInput }),
         },
         options.fetch
       );
@@ -50,8 +48,8 @@ class ChatbotService {
       statusCode: 200,
       body: {
         message: 'Success',
-        response_text: responseText
-      }
+        response_text: responseText,
+      },
     };
   }
 
@@ -65,7 +63,7 @@ class ChatbotService {
         `${CHATBOT_ADD_URLS_BASE}?urls=${urls}`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
+          headers: { 'Content-Type': 'application/json' },
         },
         options.fetch
       );
@@ -78,8 +76,8 @@ class ChatbotService {
         statusCode: 200,
         body: {
           message: 'Success',
-          result: data
-        }
+          result: data,
+        },
       };
     } catch (error) {
       if (error instanceof ServiceError) {
@@ -95,8 +93,8 @@ class ChatbotService {
       statusCode: 200,
       body: {
         message: 'Success',
-        result: 'This is dummy response'
-      }
+        result: 'This is dummy response',
+      },
     };
   }
 
@@ -115,8 +113,8 @@ class ChatbotService {
       statusCode: 200,
       body: {
         message: 'Chat history retrieved successfully',
-        chat_history: history
-      }
+        chat_history: history,
+      },
     };
   }
 
@@ -130,13 +128,13 @@ class ChatbotService {
     return {
       statusCode: 200,
       body: {
-        message: 'Chat history cleared successfully'
-      }
+        message: 'Chat history cleared successfully',
+      },
     };
   }
 }
 
 module.exports = {
   ChatbotService,
-  chatbotService: new ChatbotService()
+  chatbotService: new ChatbotService(),
 };

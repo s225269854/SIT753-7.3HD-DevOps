@@ -15,7 +15,7 @@ layers that produce it, and the frontend migration steps required.
 3. Filter recipes that conflict with a user's allergies.
 4. Adjust scores based on chronic conditions (diabetes, hypertension, high
    cholesterol, renal disease, obesity, coeliac).
-5. Surface *cautionary* safety notes where a user's medications and a
+5. Surface _cautionary_ safety notes where a user's medications and a
    recipe's ingredients are known to interact.
 6. Attach structured explanations — reasons, warnings, safety notes — so
    the frontend can render rationale, not just a label.
@@ -41,22 +41,22 @@ so the layers remain independent and individually testable.
 
 ### Scoring layers at a glance
 
-| Layer | Blocks? | Score delta | Outputs |
-|-------|---------|-------------|---------|
-| allergyFilter | Yes — hard block | — | blockers, severity, notes |
-| preferenceMatcher | No | +/- on cuisine, method, goal fit | reasons, warnings, matched signals |
-| conditionAdjuster | No | +/- on nutrient/condition alignment | reasons, warnings |
-| nutritionBalance | No | +/- on meal balance | reasons, warnings, breakdown |
-| medicationGuard | No | minor penalty only if high severity | safetyNotes (with disclaimer) |
+| Layer             | Blocks?          | Score delta                         | Outputs                            |
+| ----------------- | ---------------- | ----------------------------------- | ---------------------------------- |
+| allergyFilter     | Yes — hard block | —                                   | blockers, severity, notes          |
+| preferenceMatcher | No               | +/- on cuisine, method, goal fit    | reasons, warnings, matched signals |
+| conditionAdjuster | No               | +/- on nutrient/condition alignment | reasons, warnings                  |
+| nutritionBalance  | No               | +/- on meal balance                 | reasons, warnings, breakdown       |
+| medicationGuard   | No               | minor penalty only if high severity | safetyNotes (with disclaimer)      |
 
 ### Medication rules covered
 
-| Rule id | Medication keywords | Food keywords | Severity |
-|---------|---------------------|---------------|----------|
-| warfarin_vitamin_k | warfarin, coumadin | kale, spinach, collard greens, … | warn |
-| maoi_tyramine | phenelzine, tranylcypromine, MAOI | aged cheese, cured meats, miso, … | high |
-| statin_grapefruit | statin, atorvastatin, simvastatin | grapefruit, pomelo | warn |
-| diabetes_meds_alcohol | metformin, insulin, glipizide | wine, beer, whiskey, cocktail | warn |
+| Rule id               | Medication keywords               | Food keywords                     | Severity |
+| --------------------- | --------------------------------- | --------------------------------- | -------- |
+| warfarin_vitamin_k    | warfarin, coumadin                | kale, spinach, collard greens, …  | warn     |
+| maoi_tyramine         | phenelzine, tranylcypromine, MAOI | aged cheese, cured meats, miso, … | high     |
+| statin_grapefruit     | statin, atorvastatin, simvastatin | grapefruit, pomelo                | warn     |
+| diabetes_meds_alcohol | metformin, insulin, glipizide     | wine, beer, whiskey, cocktail     | warn     |
 
 All medication rules emit `disclaimer: true` so the FE must render the
 "not medical advice — please consult your clinician" copy alongside.
@@ -184,10 +184,10 @@ weight management, celiac / coeliac / gluten.
 
 HTTP codes:
 
-| Code | When |
-|------|------|
-| 200  | Success |
-| 400  | Validation failure |
+| Code | When                    |
+| ---- | ----------------------- |
+| 200  | Success                 |
+| 400  | Validation failure      |
 | 500  | Unhandled service error |
 
 ## Frontend migration checklist

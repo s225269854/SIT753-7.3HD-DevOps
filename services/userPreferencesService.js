@@ -9,13 +9,13 @@ const DEFAULT_NOTIFICATION_PREFERENCES = {
   waterReminders: true,
   healthTips: true,
   weeklyReports: false,
-  systemUpdates: true
+  systemUpdates: true,
 };
 
 const DEFAULT_UI_SETTINGS = {
   language: 'en',
   theme: 'light',
-  font_size: '16px'
+  font_size: '16px',
 };
 
 function asTrimmedString(value) {
@@ -25,26 +25,36 @@ function asTrimmedString(value) {
 }
 
 function normalizeStringArray(items) {
-  return Array.isArray(items)
-    ? [...new Set(items.map(asTrimmedString).filter(Boolean))]
-    : [];
+  return Array.isArray(items) ? [...new Set(items.map(asTrimmedString).filter(Boolean))] : [];
 }
 
 function normalizeStructuredAllergy(item = {}) {
   return {
-    referenceId: Number.isInteger(item.referenceId) ? item.referenceId : Number.isInteger(item.id) ? item.id : null,
+    referenceId: Number.isInteger(item.referenceId)
+      ? item.referenceId
+      : Number.isInteger(item.id)
+        ? item.id
+        : null,
     name: asTrimmedString(item.name),
-    severity: ['mild', 'moderate', 'severe', 'unknown'].includes(item.severity) ? item.severity : 'unknown',
-    notes: asTrimmedString(item.notes)
+    severity: ['mild', 'moderate', 'severe', 'unknown'].includes(item.severity)
+      ? item.severity
+      : 'unknown',
+    notes: asTrimmedString(item.notes),
   };
 }
 
 function normalizeStructuredCondition(item = {}) {
   return {
-    referenceId: Number.isInteger(item.referenceId) ? item.referenceId : Number.isInteger(item.id) ? item.id : null,
+    referenceId: Number.isInteger(item.referenceId)
+      ? item.referenceId
+      : Number.isInteger(item.id)
+        ? item.id
+        : null,
     name: asTrimmedString(item.name),
-    status: ['active', 'managed', 'resolved', 'unknown'].includes(item.status) ? item.status : 'active',
-    notes: asTrimmedString(item.notes)
+    status: ['active', 'managed', 'resolved', 'unknown'].includes(item.status)
+      ? item.status
+      : 'active',
+    notes: asTrimmedString(item.notes),
   };
 }
 
@@ -54,32 +64,34 @@ function normalizeMedication(item = {}, index = 0) {
     name: asTrimmedString(item.name),
     dosage: {
       amount: asTrimmedString(item.dosage?.amount ?? item.amount),
-      unit: asTrimmedString(item.dosage?.unit ?? item.unit)
+      unit: asTrimmedString(item.dosage?.unit ?? item.unit),
     },
     frequency: {
-      timesPerDay: Number.isInteger(item.frequency?.timesPerDay) ? item.frequency.timesPerDay : null,
+      timesPerDay: Number.isInteger(item.frequency?.timesPerDay)
+        ? item.frequency.timesPerDay
+        : null,
       interval: asTrimmedString(item.frequency?.interval),
       schedule: normalizeStringArray(item.frequency?.schedule),
-      asNeeded: Boolean(item.frequency?.asNeeded)
+      asNeeded: Boolean(item.frequency?.asNeeded),
     },
     purpose: asTrimmedString(item.purpose),
     notes: asTrimmedString(item.notes),
-    active: item.active !== false
+    active: item.active !== false,
   };
 }
 
 function buildStructuredHealthContext(rawPreferences = {}) {
   const storeHealthContext = rawPreferences.health_context || {};
 
-  const allergiesById = new Map(
-    (rawPreferences.allergies || []).map((item) => [item.id, item])
-  );
+  const allergiesById = new Map((rawPreferences.allergies || []).map((item) => [item.id, item]));
   const conditionsById = new Map(
     (rawPreferences.health_conditions || []).map((item) => [item.id, item])
   );
 
   const structuredAllergies = (storeHealthContext.allergies || []).map(normalizeStructuredAllergy);
-  const structuredConditions = (storeHealthContext.chronic_conditions || []).map(normalizeStructuredCondition);
+  const structuredConditions = (storeHealthContext.chronic_conditions || []).map(
+    normalizeStructuredCondition
+  );
 
   const mergedAllergies = (rawPreferences.allergies || []).map((item) => {
     const detail = structuredAllergies.find((entry) => entry.referenceId === item.id) || {};
@@ -87,7 +99,7 @@ function buildStructuredHealthContext(rawPreferences = {}) {
       referenceId: item.id,
       name: item.name,
       severity: detail.severity,
-      notes: detail.notes
+      notes: detail.notes,
     });
   });
 
@@ -97,22 +109,49 @@ function buildStructuredHealthContext(rawPreferences = {}) {
       referenceId: item.id,
       name: item.name,
       status: detail.status,
-      notes: detail.notes
+      notes: detail.notes,
     });
   });
 
-  const extraAllergies = structuredAllergies.filter((entry) => entry.referenceId == null || !allergiesById.has(entry.referenceId));
-  const extraConditions = structuredConditions.filter((entry) => entry.referenceId == null || !conditionsById.has(entry.referenceId));
+  const extraAllergies = structuredAllergies.filter(
+    (entry) => entry.referenceId == null || !allergiesById.has(entry.referenceId)
+  );
+  const extraConditions = structuredConditions.filter(
+    (entry) => entry.referenceId == null || !conditionsById.has(entry.referenceId)
+  );
 
   return {
     allergies: [...mergedAllergies, ...extraAllergies],
     chronic_conditions: [...mergedConditions, ...extraConditions],
-    medications: (storeHealthContext.medications || []).map(normalizeMedication).filter((item) => item.name),
+    medications: (storeHealthContext.medications || [])
+      .map(normalizeMedication)
+      .filter((item) => item.name),
     normalized_summary: {
-      allergyNames: [...new Set([...mergedAllergies, ...extraAllergies].map((item) => item.name).filter(Boolean).map((item) => item.toLowerCase()))],
-      chronicConditionNames: [...new Set([...mergedConditions, ...extraConditions].map((item) => item.name).filter(Boolean).map((item) => item.toLowerCase()))],
-      activeMedicationNames: [...new Set((storeHealthContext.medications || []).map(normalizeMedication).filter((item) => item.name && item.active).map((item) => item.name.toLowerCase()))]
-    }
+      allergyNames: [
+        ...new Set(
+          [...mergedAllergies, ...extraAllergies]
+            .map((item) => item.name)
+            .filter(Boolean)
+            .map((item) => item.toLowerCase())
+        ),
+      ],
+      chronicConditionNames: [
+        ...new Set(
+          [...mergedConditions, ...extraConditions]
+            .map((item) => item.name)
+            .filter(Boolean)
+            .map((item) => item.toLowerCase())
+        ),
+      ],
+      activeMedicationNames: [
+        ...new Set(
+          (storeHealthContext.medications || [])
+            .map(normalizeMedication)
+            .filter((item) => item.name && item.active)
+            .map((item) => item.name.toLowerCase())
+        ),
+      ],
+    },
   };
 }
 
@@ -126,18 +165,18 @@ function buildExtendedPreferences(rawPreferences = {}) {
         cuisines: rawPreferences.cuisines || [],
         dislikes: rawPreferences.dislikes || [],
         spice_levels: rawPreferences.spice_levels || [],
-        cooking_methods: rawPreferences.cooking_methods || []
+        cooking_methods: rawPreferences.cooking_methods || [],
       },
       health_context: buildStructuredHealthContext(rawPreferences),
       notification_preferences: {
         ...DEFAULT_NOTIFICATION_PREFERENCES,
-        ...(rawPreferences.notification_preferences || {})
+        ...(rawPreferences.notification_preferences || {}),
       },
       ui_settings: {
         ...DEFAULT_UI_SETTINGS,
-        ...(rawPreferences.ui_settings || {})
-      }
-    }
+        ...(rawPreferences.ui_settings || {}),
+      },
+    },
   };
 }
 
@@ -163,7 +202,7 @@ async function getNotificationPreferences(userId) {
   const response = await getExtendedPreferences(userId);
   return {
     success: true,
-    data: response.data.notification_preferences
+    data: response.data.notification_preferences,
   };
 }
 
@@ -173,7 +212,7 @@ async function updateNotificationPreferences(userId, notificationPreferences = {
   }
 
   await updateUserPreferences(userId, {
-    notification_preferences: notificationPreferences
+    notification_preferences: notificationPreferences,
   });
 
   return getNotificationPreferences(userId);
@@ -188,5 +227,5 @@ module.exports = {
   getExtendedPreferences,
   getNotificationPreferences,
   updateExtendedPreferences,
-  updateNotificationPreferences
+  updateNotificationPreferences,
 };

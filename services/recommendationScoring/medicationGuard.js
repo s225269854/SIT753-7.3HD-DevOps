@@ -24,30 +24,47 @@ const MEDICATION_RULES = [
     id: 'warfarin_vitamin_k',
     medicationMatch: ['warfarin', 'coumadin', 'jantoven'],
     foodMatch: ['kale', 'spinach', 'collard', 'swiss chard', 'mustard greens', 'turnip greens'],
-    message: 'Foods very high in vitamin K can affect warfarin dosing — please discuss portion consistency with your clinician.',
-    severity: 'warn'
+    message:
+      'Foods very high in vitamin K can affect warfarin dosing — please discuss portion consistency with your clinician.',
+    severity: 'warn',
   },
   {
     id: 'maoi_tyramine',
     medicationMatch: ['maoi', 'phenelzine', 'tranylcypromine', 'isocarboxazid', 'selegiline'],
-    foodMatch: ['aged cheese', 'blue cheese', 'cheddar', 'parmesan', 'salami', 'pepperoni', 'cured', 'fermented soy', 'miso', 'tempeh', 'kimchi', 'sauerkraut'],
-    message: 'This dish may contain tyramine-rich ingredients, which can interact with MAOI medications — please check with your prescriber.',
-    severity: 'high'
+    foodMatch: [
+      'aged cheese',
+      'blue cheese',
+      'cheddar',
+      'parmesan',
+      'salami',
+      'pepperoni',
+      'cured',
+      'fermented soy',
+      'miso',
+      'tempeh',
+      'kimchi',
+      'sauerkraut',
+    ],
+    message:
+      'This dish may contain tyramine-rich ingredients, which can interact with MAOI medications — please check with your prescriber.',
+    severity: 'high',
   },
   {
     id: 'statin_grapefruit',
     medicationMatch: ['statin', 'atorvastatin', 'simvastatin', 'lovastatin'],
     foodMatch: ['grapefruit', 'pomelo'],
-    message: 'Grapefruit can affect some statins. Consider an alternative citrus unless your clinician has cleared it.',
-    severity: 'warn'
+    message:
+      'Grapefruit can affect some statins. Consider an alternative citrus unless your clinician has cleared it.',
+    severity: 'warn',
   },
   {
     id: 'diabetes_meds_alcohol',
     medicationMatch: ['metformin', 'glipizide', 'glyburide', 'glimepiride', 'insulin'],
     foodMatch: ['wine', 'beer', 'vodka', 'whiskey', 'rum', 'cocktail', 'liqueur'],
-    message: 'Dishes with significant alcohol can affect blood-sugar medications. Check with your clinician before pairing.',
-    severity: 'warn'
-  }
+    message:
+      'Dishes with significant alcohol can affect blood-sugar medications. Check with your clinician before pairing.',
+    severity: 'warn',
+  },
 ];
 
 function lower(value) {
@@ -62,7 +79,7 @@ function recipeText(recipe) {
   return [
     lower(recipe.recipe_name),
     lower(recipe.description),
-    lower(Array.isArray(recipe.ingredients) ? recipe.ingredients.join(' ') : recipe.ingredients)
+    lower(Array.isArray(recipe.ingredients) ? recipe.ingredients.join(' ') : recipe.ingredients),
   ].join(' ');
 }
 
@@ -101,18 +118,18 @@ function evaluate(recipe, context = {}) {
       disclaimer: true,
       triggeredBy: {
         medication: matchingMed,
-        food: matchingFood
-      }
+        food: matchingFood,
+      },
     });
   }
 
   return {
     safetyNotes,
-    triggeredRuleIds: triggered
+    triggeredRuleIds: triggered,
   };
 }
 
 module.exports = {
   MEDICATION_RULES,
-  evaluate
+  evaluate,
 };

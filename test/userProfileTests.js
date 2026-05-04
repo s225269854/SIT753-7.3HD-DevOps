@@ -17,29 +17,29 @@ describe('User Profile Controller', () => {
         profile: {
           id: 42,
           email: 'user@example.com',
-          firstName: 'Alex'
+          firstName: 'Alex',
         },
         preferenceSummary: {
           dietaryRequirements: ['high protein'],
           allergies: [],
-          hasPreferences: true
-        }
-      })
+          hasPreferences: true,
+        },
+      }),
     };
 
     const controller = proxyquire('../controller/userProfileController', {
       '../services/userProfileService': userProfileService,
-      '../utils/logger': { error: sinon.stub() }
+      '../utils/logger': { error: sinon.stub() },
     });
 
     const req = {
       user: { userId: 42, role: 'user', email: 'user@example.com' },
       query: {},
-      body: {}
+      body: {},
     };
     const res = {
       status: sinon.stub().returnsThis(),
-      json: sinon.stub()
+      json: sinon.stub(),
     };
 
     await controller.getUserProfile(req, res);
@@ -52,13 +52,13 @@ describe('User Profile Controller', () => {
       profile: {
         id: 42,
         email: 'user@example.com',
-        firstName: 'Alex'
+        firstName: 'Alex',
       },
       preferenceSummary: {
         dietaryRequirements: ['high protein'],
         allergies: [],
-        hasPreferences: true
-      }
+        hasPreferences: true,
+      },
     });
   });
 
@@ -68,28 +68,30 @@ describe('User Profile Controller', () => {
         success: true,
         contractVersion: 'user-profile-v1',
         profile: { id: 9, email: 'target@example.com' },
-        preferenceSummary: { allergies: [], hasPreferences: false }
-      })
+        preferenceSummary: { allergies: [], hasPreferences: false },
+      }),
     };
 
     const controller = proxyquire('../controller/userProfileController', {
       '../services/userProfileService': userProfileService,
-      '../utils/logger': { error: sinon.stub() }
+      '../utils/logger': { error: sinon.stub() },
     });
 
     const req = {
       user: { userId: 1, role: 'admin', email: 'admin@example.com' },
       query: { email: 'target@example.com' },
-      body: {}
+      body: {},
     };
     const res = {
       status: sinon.stub().returnsThis(),
-      json: sinon.stub()
+      json: sinon.stub(),
     };
 
     await controller.getUserProfile(req, res);
 
-    expect(userProfileService.getCanonicalProfile.calledOnceWith({ email: 'target@example.com' })).to.equal(true);
+    expect(
+      userProfileService.getCanonicalProfile.calledOnceWith({ email: 'target@example.com' })
+    ).to.equal(true);
     expect(res.status.calledWith(200)).to.equal(true);
   });
 
@@ -100,13 +102,13 @@ describe('User Profile Controller', () => {
         contractVersion: 'user-profile-v1',
         profile: { id: 42, firstName: 'Updated' },
         preferenceSummary: { allergies: [], hasPreferences: false },
-        meta: { updatedBy: 42 }
-      })
+        meta: { updatedBy: 42 },
+      }),
     };
 
     const controller = proxyquire('../controller/userProfileController', {
       '../services/userProfileService': userProfileService,
-      '../utils/logger': { error: sinon.stub() }
+      '../utils/logger': { error: sinon.stub() },
     });
 
     const req = {
@@ -115,13 +117,13 @@ describe('User Profile Controller', () => {
       body: {
         profile: {
           firstName: 'Updated',
-          contactNumber: '12345678'
-        }
-      }
+          contactNumber: '12345678',
+        },
+      },
     };
     const res = {
       status: sinon.stub().returnsThis(),
-      json: sinon.stub()
+      json: sinon.stub(),
     };
 
     await controller.updateUserProfile(req, res);
@@ -133,9 +135,9 @@ describe('User Profile Controller', () => {
       body: {
         profile: {
           firstName: 'Updated',
-          contactNumber: '12345678'
-        }
-      }
+          contactNumber: '12345678',
+        },
+      },
     });
     expect(res.status.calledWith(200)).to.equal(true);
   });
@@ -143,31 +145,35 @@ describe('User Profile Controller', () => {
   it('returns stable service errors for invalid updates', async () => {
     const logger = { error: sinon.stub() };
     const userProfileService = {
-      updateCanonicalProfile: sinon.stub().rejects(new ServiceError(400, 'At least one profile field is required'))
+      updateCanonicalProfile: sinon
+        .stub()
+        .rejects(new ServiceError(400, 'At least one profile field is required')),
     };
 
     const controller = proxyquire('../controller/userProfileController', {
       '../services/userProfileService': userProfileService,
-      '../utils/logger': logger
+      '../utils/logger': logger,
     });
 
     const req = {
       user: { userId: 42, role: 'user', email: 'user@example.com' },
       query: {},
-      body: {}
+      body: {},
     };
     const res = {
       status: sinon.stub().returnsThis(),
-      json: sinon.stub()
+      json: sinon.stub(),
     };
 
     await controller.updateUserProfile(req, res);
 
     expect(res.status.calledWith(400)).to.equal(true);
-    expect(res.json.calledWith({
-      success: false,
-      error: 'At least one profile field is required'
-    })).to.equal(true);
+    expect(
+      res.json.calledWith({
+        success: false,
+        error: 'At least one profile field is required',
+      })
+    ).to.equal(true);
     expect(logger.error.called).to.equal(false);
   });
 });

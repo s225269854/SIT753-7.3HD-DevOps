@@ -1,6 +1,6 @@
 /**
  * ChatbotAIClientInterface.js
- * 
+ *
  * Interface for chatbot AI services.
  * Expected to handle conversational queries and return contextual responses.
  */

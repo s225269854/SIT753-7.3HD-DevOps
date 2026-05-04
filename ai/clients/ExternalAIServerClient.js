@@ -1,6 +1,6 @@
 /**
  * ExternalAIServerClient.js
- * 
+ *
  * Wrapper for external AI server at localhost:8000
  * Currently handles chatbot and medical prediction services.
  * This is a bridge to existing AI infrastructure during transition period.
@@ -36,9 +36,9 @@ class ExternalAIServerClient {
         method,
         headers: {
           'Content-Type': 'application/json',
-          ...options.headers
+          ...options.headers,
         },
-        timeout: options.timeout || this.timeout
+        timeout: options.timeout || this.timeout,
       };
 
       if (body) {
@@ -60,7 +60,7 @@ class ExternalAIServerClient {
         success: true,
         data,
         latencyMs,
-        requestId: options.requestId
+        requestId: options.requestId,
       };
     } catch (error) {
       const latencyMs = Date.now() - startTime;
@@ -68,7 +68,7 @@ class ExternalAIServerClient {
         success: false,
         error: error.message,
         latencyMs,
-        requestId: options.requestId
+        requestId: options.requestId,
       };
     }
   }
@@ -121,8 +121,8 @@ class ExternalChatbotClient extends ChatbotAIClientInterface {
         latencyMs: result.latencyMs,
         metadata: {
           source: 'external_ai_server',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
     } catch (error) {
       return this.errorResponse(error, 'generateResponse');
@@ -149,8 +149,8 @@ class ExternalChatbotClient extends ChatbotAIClientInterface {
       return this.successResponse(result.data, {
         latencyMs: result.latencyMs,
         metadata: {
-          source: 'external_ai_server'
-        }
+          source: 'external_ai_server',
+        },
       });
     } catch (error) {
       return this.errorResponse(error, 'getConversationHistory');
@@ -173,9 +173,12 @@ class ExternalChatbotClient extends ChatbotAIClientInterface {
         return this.errorResponse(new Error(result.error), 'clearConversationHistory');
       }
 
-      return this.successResponse({ cleared: true }, {
-        latencyMs: result.latencyMs
-      });
+      return this.successResponse(
+        { cleared: true },
+        {
+          latencyMs: result.latencyMs,
+        }
+      );
     } catch (error) {
       return this.errorResponse(error, 'clearConversationHistory');
     }
@@ -190,7 +193,7 @@ class ExternalChatbotClient extends ChatbotAIClientInterface {
       serviceName: this.serviceName,
       healthy: this.serverClient.isHealthy,
       lastHealthCheck: this.serverClient.lastHealthCheck,
-      baseUrl: this.serverClient.baseUrl
+      baseUrl: this.serverClient.baseUrl,
     };
   }
 }
@@ -226,8 +229,8 @@ class ExternalMedicalPredictionClient extends MedicalPredictionAIClientInterface
         latencyMs: result.latencyMs,
         metadata: {
           source: 'external_ai_server',
-          timestamp: new Date().toISOString()
-        }
+          timestamp: new Date().toISOString(),
+        },
       });
     } catch (error) {
       return this.errorResponse(error, 'predictRisk');
@@ -248,7 +251,7 @@ class ExternalMedicalPredictionClient extends MedicalPredictionAIClientInterface
       }
 
       return this.successResponse(result.data, {
-        latencyMs: result.latencyMs
+        latencyMs: result.latencyMs,
       });
     } catch (error) {
       return this.errorResponse(error, 'predictObesity');
@@ -269,7 +272,7 @@ class ExternalMedicalPredictionClient extends MedicalPredictionAIClientInterface
       }
 
       return this.successResponse(result.data, {
-        latencyMs: result.latencyMs
+        latencyMs: result.latencyMs,
       });
     } catch (error) {
       return this.errorResponse(error, 'predictDiabetes');
@@ -295,7 +298,7 @@ class ExternalMedicalPredictionClient extends MedicalPredictionAIClientInterface
       }
 
       return this.successResponse(result.data, {
-        latencyMs: result.latencyMs
+        latencyMs: result.latencyMs,
       });
     } catch (error) {
       return this.errorResponse(error, 'retrieveReport');
@@ -316,7 +319,7 @@ class ExternalMedicalPredictionClient extends MedicalPredictionAIClientInterface
       }
 
       return this.successResponse(result.data, {
-        latencyMs: result.latencyMs
+        latencyMs: result.latencyMs,
       });
     } catch (error) {
       return this.errorResponse(error, 'generateReport');
@@ -332,7 +335,7 @@ class ExternalMedicalPredictionClient extends MedicalPredictionAIClientInterface
       serviceName: this.serviceName,
       healthy: this.serverClient.isHealthy,
       lastHealthCheck: this.serverClient.lastHealthCheck,
-      baseUrl: this.serverClient.baseUrl
+      baseUrl: this.serverClient.baseUrl,
     };
   }
 }
@@ -340,5 +343,5 @@ class ExternalMedicalPredictionClient extends MedicalPredictionAIClientInterface
 module.exports = {
   ExternalAIServerClient,
   ExternalChatbotClient,
-  ExternalMedicalPredictionClient
+  ExternalMedicalPredictionClient,
 };

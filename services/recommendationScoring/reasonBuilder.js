@@ -8,7 +8,8 @@
  * contract with consumers lives in one place.
  */
 
-const DEFAULT_DISCLAIMER = 'Recommendations are informational and do not replace guidance from a healthcare professional.';
+const DEFAULT_DISCLAIMER =
+  'Recommendations are informational and do not replace guidance from a healthcare professional.';
 
 function dedupeBy(items, getKey) {
   const seen = new Set();
@@ -29,8 +30,9 @@ function compactReasons(reasons) {
 
 function compactWarnings(warnings) {
   const severityOrder = { high: 3, warn: 2, info: 1 };
-  return dedupeBy(warnings, (w) => `${w.tag}`)
-    .sort((a, b) => (severityOrder[b.severity] || 0) - (severityOrder[a.severity] || 0));
+  return dedupeBy(warnings, (w) => `${w.tag}`).sort(
+    (a, b) => (severityOrder[b.severity] || 0) - (severityOrder[a.severity] || 0)
+  );
 }
 
 function compactSafetyNotes(notes) {
@@ -38,20 +40,30 @@ function compactSafetyNotes(notes) {
 }
 
 function buildSummary({ reasons, warnings, fallback }) {
-  const top = compactReasons(reasons).slice(0, 3).map((r) => r.message);
+  const top = compactReasons(reasons)
+    .slice(0, 3)
+    .map((r) => r.message);
   if (top.length) return top.join(' ');
-  const warn = compactWarnings(warnings).slice(0, 1).map((w) => w.message);
+  const warn = compactWarnings(warnings)
+    .slice(0, 1)
+    .map((w) => w.message);
   if (warn.length) return warn[0];
   return fallback || 'Recommended based on available nutrition data.';
 }
 
-function buildExplanation({ reasons = [], warnings = [], safetyNotes = [], fallback, disclaimer = DEFAULT_DISCLAIMER }) {
+function buildExplanation({
+  reasons = [],
+  warnings = [],
+  safetyNotes = [],
+  fallback,
+  disclaimer = DEFAULT_DISCLAIMER,
+}) {
   return {
     summary: buildSummary({ reasons, warnings, fallback }),
     reasons: compactReasons(reasons),
     warnings: compactWarnings(warnings),
     safetyNotes: compactSafetyNotes(safetyNotes),
-    disclaimer
+    disclaimer,
   };
 }
 
@@ -70,5 +82,5 @@ module.exports = {
   decideSafetyLevel,
   compactReasons,
   compactWarnings,
-  compactSafetyNotes
+  compactSafetyNotes,
 };

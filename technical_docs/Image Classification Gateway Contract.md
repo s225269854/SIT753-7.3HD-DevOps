@@ -31,52 +31,52 @@ Field:        image (JPEG or PNG, ≤ 5 MB)
 ```jsonc
 {
   "classification": {
-    "label":        "Banana",                              // null when uncertain
-    "rawLabel":     "Banana:~89 calories per 100 grams",
-    "calories":     { "value": 89, "unit": "kcal/100g" },  // null when uncertain
-    "confidence":   0.91,                                  // 0..1, may be null
-    "uncertain":    false,                                 // true when confidence < threshold
-    "source":       "ai",                                  // "ai" | "fallback" | "none"
+    "label": "Banana", // null when uncertain
+    "rawLabel": "Banana:~89 calories per 100 grams",
+    "calories": { "value": 89, "unit": "kcal/100g" }, // null when uncertain
+    "confidence": 0.91, // 0..1, may be null
+    "uncertain": false, // true when confidence < threshold
+    "source": "ai", // "ai" | "fallback" | "none"
     "fallbackUsed": false,
-    "alternatives": []
+    "alternatives": [],
   },
   "explainability": {
-    "service":             "image_classification",
-    "source":              "ai",
-    "fallbackUsed":        false,
-    "timedOut":            false,
-    "circuitOpen":         false,
-    "durationMs":          42,
-    "confidence":          0.91,
+    "service": "image_classification",
+    "source": "ai",
+    "fallbackUsed": false,
+    "timedOut": false,
+    "circuitOpen": false,
+    "durationMs": 42,
+    "confidence": 0.91,
     "confidenceThreshold": 0.6,
-    "warnings":            [],
-    "generatedAt":         "2026-04-23T12:34:56.000Z",
-    "contractVersion":     "v1"
-  }
+    "warnings": [],
+    "generatedAt": "2026-04-23T12:34:56.000Z",
+    "contractVersion": "v1",
+  },
 }
 ```
 
 ### Rendering rules for the frontend
 
-| State | `classification.uncertain` | `classification.source` | UI guidance |
-|---|---|---|---|
-| Confident AI result | `false` | `"ai"` | Show label + calories + "Powered by NutriHelp AI". |
-| Low-confidence AI result | `true` | `"ai"` | Show "We're not sure — here's a similar match" + `rawLabel`. |
-| Fallback classifier | any | `"fallback"` | Show "Running on backup classifier — result may be less accurate". |
-| Fallback + uncertain | `true` | `"fallback"` | Show "We couldn't confidently recognise this image. Try a clearer photo." |
+| State                    | `classification.uncertain` | `classification.source` | UI guidance                                                               |
+| ------------------------ | -------------------------- | ----------------------- | ------------------------------------------------------------------------- |
+| Confident AI result      | `false`                    | `"ai"`                  | Show label + calories + "Powered by NutriHelp AI".                        |
+| Low-confidence AI result | `true`                     | `"ai"`                  | Show "We're not sure — here's a similar match" + `rawLabel`.              |
+| Fallback classifier      | any                        | `"fallback"`            | Show "Running on backup classifier — result may be less accurate".        |
+| Fallback + uncertain     | `true`                     | `"fallback"`            | Show "We couldn't confidently recognise this image. Try a clearer photo." |
 
 `explainability.fallbackUsed` and `explainability.timedOut` can drive
 analytics, a "report issue" button, or a retry prompt.
 
 ## Error payloads
 
-| `code`                   | HTTP | When                                                 |
-|--------------------------|------|------------------------------------------------------|
-| `IMAGE_MISSING`          | 400  | No file uploaded                                     |
-| `VALIDATION_ERROR`       | 400  | Bad MIME type, extension, or size. Has `errors[]`.   |
-| `UPLOAD_FAILED`          | 400  | Multer-level failure                                 |
-| `INTERNAL_ERROR`         | 500  | Unhandled controller error                           |
-| `AI_SERVICE_UNAVAILABLE` | 503  | **Both** primary AI and fallback failed              |
+| `code`                   | HTTP | When                                               |
+| ------------------------ | ---- | -------------------------------------------------- |
+| `IMAGE_MISSING`          | 400  | No file uploaded                                   |
+| `VALIDATION_ERROR`       | 400  | Bad MIME type, extension, or size. Has `errors[]`. |
+| `UPLOAD_FAILED`          | 400  | Multer-level failure                               |
+| `INTERNAL_ERROR`         | 500  | Unhandled controller error                         |
+| `AI_SERVICE_UNAVAILABLE` | 503  | **Both** primary AI and fallback failed            |
 
 Example validation error:
 
@@ -106,12 +106,12 @@ In `ScanProducts.jsx` / `FoodDetails.js` / upload-history pages:
 
 ## Where this is implemented (BE)
 
-- `routes/imageClassification.js`             — upload + validation pipeline
-- `validators/imageValidator.js`              — safe validation errors
+- `routes/imageClassification.js` — upload + validation pipeline
+- `validators/imageValidator.js` — safe validation errors
 - `controller/imageClassificationController.js` — thin handler
-- `services/imageClassificationGateway.js`    — AI + fallback + uncertainty
-- `services/imageClassificationContract.js`   — the shape definition
-- `model/imageClassification.py`              — primary TF classifier
-- `model/imageClassificationFallback.py`      — safe fallback classifier
-- `test/imageClassificationGateway.test.js`   — gateway branch coverage
+- `services/imageClassificationGateway.js` — AI + fallback + uncertainty
+- `services/imageClassificationContract.js` — the shape definition
+- `model/imageClassification.py` — primary TF classifier
+- `model/imageClassificationFallback.py` — safe fallback classifier
+- `test/imageClassificationGateway.test.js` — gateway branch coverage
 - `test/imageClassificationController.test.js`— controller contract tests

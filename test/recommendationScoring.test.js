@@ -8,7 +8,7 @@ const {
   reasonBuilder,
   rankRecipes,
   scoreRecipe,
-  STRATEGY_ID
+  STRATEGY_ID,
 } = require('../services/recommendationScoring');
 
 const balancedRecipe = {
@@ -24,7 +24,7 @@ const balancedRecipe = {
   fat: 16,
   carbohydrates: 42,
   allergy: false,
-  dislike: false
+  dislike: false,
 };
 
 const peanutSatay = {
@@ -40,7 +40,7 @@ const peanutSatay = {
   fat: 22,
   carbohydrates: 38,
   allergy: false,
-  dislike: false
+  dislike: false,
 };
 
 const grapefruitSalad = {
@@ -56,7 +56,7 @@ const grapefruitSalad = {
   fat: 18,
   carbohydrates: 28,
   allergy: false,
-  dislike: false
+  dislike: false,
 };
 
 const sugaryDessert = {
@@ -72,13 +72,13 @@ const sugaryDessert = {
   fat: 32,
   carbohydrates: 96,
   allergy: false,
-  dislike: false
+  dislike: false,
 };
 
 describe('recommendationScoring — allergyFilter', () => {
   it('hard blocks a recipe that matches a peanut allergy', () => {
     const result = allergyFilter.evaluate(peanutSatay, {
-      allergies: [{ name: 'Peanut', severity: 'severe' }]
+      allergies: [{ name: 'Peanut', severity: 'severe' }],
     });
     expect(result.blocked).to.equal(true);
     expect(result.blockers).to.include('peanut');
@@ -95,7 +95,7 @@ describe('recommendationScoring — allergyFilter', () => {
 
   it('does not block recipes that do not match any allergy terms', () => {
     const result = allergyFilter.evaluate(balancedRecipe, {
-      allergies: [{ name: 'Shellfish', severity: 'moderate' }]
+      allergies: [{ name: 'Shellfish', severity: 'moderate' }],
     });
     expect(result.blocked).to.equal(false);
     expect(result.blockers).to.deep.equal([]);
@@ -104,7 +104,7 @@ describe('recommendationScoring — allergyFilter', () => {
   it('expands dairy aliases so cheese-only dishes are still caught', () => {
     const cheesePizza = { ...balancedRecipe, id: 10, recipe_name: 'Four Cheese Pizza' };
     const result = allergyFilter.evaluate(cheesePizza, {
-      allergies: [{ name: 'Dairy', severity: 'moderate' }]
+      allergies: [{ name: 'Dairy', severity: 'moderate' }],
     });
     expect(result.blocked).to.equal(true);
     expect(result.blockers).to.include('dairy');
@@ -114,7 +114,7 @@ describe('recommendationScoring — allergyFilter', () => {
 describe('recommendationScoring — conditionAdjuster', () => {
   it('rewards low-sugar + high-fibre recipes when diabetes is present', () => {
     const result = conditionAdjuster.evaluate(balancedRecipe, {
-      conditionNames: ['diabetes']
+      conditionNames: ['diabetes'],
     });
     expect(result.score).to.be.greaterThan(0);
     const tags = result.reasons.map((r) => r.tag);
@@ -125,7 +125,7 @@ describe('recommendationScoring — conditionAdjuster', () => {
 
   it('penalises high-sugar dishes for diabetic users and surfaces a warning', () => {
     const result = conditionAdjuster.evaluate(sugaryDessert, {
-      conditionNames: ['type 2 diabetes']
+      conditionNames: ['type 2 diabetes'],
     });
     expect(result.score).to.be.lessThan(0);
     const warnTags = result.warnings.map((w) => w.tag);
@@ -135,7 +135,7 @@ describe('recommendationScoring — conditionAdjuster', () => {
   it('flags high-sodium dishes for hypertensive users', () => {
     const saltyStew = { ...balancedRecipe, sodium: 1400 };
     const result = conditionAdjuster.evaluate(saltyStew, {
-      conditionNames: ['hypertension']
+      conditionNames: ['hypertension'],
     });
     expect(result.warnings.map((w) => w.tag)).to.include('hypertension_high_sodium');
     expect(result.score).to.be.lessThan(0);
@@ -144,7 +144,7 @@ describe('recommendationScoring — conditionAdjuster', () => {
   it('flags suspected gluten for celiac users', () => {
     const breadBowl = { ...balancedRecipe, recipe_name: 'Creamy Bread Bowl' };
     const result = conditionAdjuster.evaluate(breadBowl, {
-      conditionNames: ['celiac']
+      conditionNames: ['celiac'],
     });
     expect(result.warnings.map((w) => w.tag)).to.include('celiac_gluten_risk');
   });
@@ -154,7 +154,7 @@ describe('recommendationScoring — medicationGuard', () => {
   it('emits a high-severity safety note when MAOI + aged cheese combine', () => {
     const agedCheeseDish = { ...balancedRecipe, recipe_name: 'Aged Cheddar Mac Bowl' };
     const result = medicationGuard.evaluate(agedCheeseDish, {
-      medications: [{ name: 'Phenelzine', active: true }]
+      medications: [{ name: 'Phenelzine', active: true }],
     });
     expect(result.triggeredRuleIds).to.include('maoi_tyramine');
     expect(result.safetyNotes[0].severity).to.equal('high');
@@ -163,7 +163,7 @@ describe('recommendationScoring — medicationGuard', () => {
 
   it('flags grapefruit + statin as a caution', () => {
     const result = medicationGuard.evaluate(grapefruitSalad, {
-      medications: [{ name: 'Atorvastatin', active: true }]
+      medications: [{ name: 'Atorvastatin', active: true }],
     });
     expect(result.triggeredRuleIds).to.include('statin_grapefruit');
     expect(result.safetyNotes[0].severity).to.equal('warn');
@@ -171,7 +171,7 @@ describe('recommendationScoring — medicationGuard', () => {
 
   it('ignores inactive medications', () => {
     const result = medicationGuard.evaluate(grapefruitSalad, {
-      medications: [{ name: 'Atorvastatin', active: false }]
+      medications: [{ name: 'Atorvastatin', active: false }],
     });
     expect(result.triggeredRuleIds).to.deep.equal([]);
     expect(result.safetyNotes).to.deep.equal([]);
@@ -179,7 +179,7 @@ describe('recommendationScoring — medicationGuard', () => {
 
   it('stays silent when there is no medication-food overlap', () => {
     const result = medicationGuard.evaluate(balancedRecipe, {
-      medications: [{ name: 'Atorvastatin', active: true }]
+      medications: [{ name: 'Atorvastatin', active: true }],
     });
     expect(result.triggeredRuleIds).to.deep.equal([]);
   });
@@ -208,7 +208,7 @@ describe('recommendationScoring — preferenceMatcher', () => {
     const result = preferenceMatcher.evaluate(balancedRecipe, {
       preferredCuisineIds: [3],
       preferredRecipeIds: [1],
-      goalState: { prioritizeProtein: true, prioritizeFiber: true }
+      goalState: { prioritizeProtein: true, prioritizeFiber: true },
     });
     expect(result.score).to.be.greaterThan(0);
     expect(result.matchedSignals).to.include('preferred_cuisine');
@@ -219,7 +219,7 @@ describe('recommendationScoring — preferenceMatcher', () => {
   it('penalises recent recipes for variety', () => {
     const result = preferenceMatcher.evaluate(balancedRecipe, {
       recentRecipeIds: [1],
-      goalState: {}
+      goalState: {},
     });
     expect(result.score).to.be.lessThan(0);
     expect(result.reasons.map((r) => r.tag)).to.include('recent_meal_penalty');
@@ -238,12 +238,12 @@ describe('recommendationScoring — reasonBuilder', () => {
     const explanation = reasonBuilder.buildExplanation({
       reasons: [
         { tag: 'a', message: 'A', weight: 2 },
-        { tag: 'b', message: 'B', weight: 10 }
+        { tag: 'b', message: 'B', weight: 10 },
       ],
       warnings: [
         { tag: 'w1', message: 'w1', severity: 'info' },
-        { tag: 'w2', message: 'w2', severity: 'high' }
-      ]
+        { tag: 'w2', message: 'w2', severity: 'high' },
+      ],
     });
     expect(explanation.reasons[0].tag).to.equal('b');
     expect(explanation.warnings[0].tag).to.equal('w2');
@@ -252,7 +252,9 @@ describe('recommendationScoring — reasonBuilder', () => {
 
   it('picks a safe/caution/blocked safety level based on inputs', () => {
     expect(reasonBuilder.decideSafetyLevel({ blocked: true })).to.equal('blocked');
-    expect(reasonBuilder.decideSafetyLevel({ warnings: [{ severity: 'high' }] })).to.equal('caution');
+    expect(reasonBuilder.decideSafetyLevel({ warnings: [{ severity: 'high' }] })).to.equal(
+      'caution'
+    );
     expect(reasonBuilder.decideSafetyLevel({ warnings: [], safetyNotes: [] })).to.equal('safe');
   });
 });
@@ -261,7 +263,7 @@ describe('recommendationScoring — orchestrator.scoreRecipe', () => {
   it('returns a blocked result with zero score when the allergy filter fires', () => {
     const result = scoreRecipe(peanutSatay, {
       allergies: [{ name: 'peanut', severity: 'severe' }],
-      goalState: {}
+      goalState: {},
     });
     expect(result.blocked).to.equal(true);
     expect(result.safetyLevel).to.equal('blocked');
@@ -274,7 +276,7 @@ describe('recommendationScoring — orchestrator.scoreRecipe', () => {
       allergies: [],
       preferredCuisineIds: [3],
       goalState: { prioritizeProtein: true, prioritizeFiber: true },
-      aiSource: 'request'
+      aiSource: 'request',
     });
     expect(result.blocked).to.equal(false);
     expect(result.safetyLevel).to.equal('safe');
@@ -287,7 +289,7 @@ describe('recommendationScoring — orchestrator.scoreRecipe', () => {
     const result = scoreRecipe(grapefruitSalad, {
       allergies: [],
       medications: [{ name: 'Atorvastatin', active: true }],
-      goalState: {}
+      goalState: {},
     });
     expect(result.blocked).to.equal(false);
     expect(result.safetyLevel).to.equal('caution');
@@ -300,7 +302,7 @@ describe('recommendationScoring — orchestrator.scoreRecipe', () => {
     const result = scoreRecipe(sugaryDessert, {
       allergies: [],
       conditionNames: ['diabetes'],
-      goalState: {}
+      goalState: {},
     });
     expect(result.blocked).to.equal(false);
     expect(result.safetyLevel).to.equal('caution');
@@ -317,10 +319,12 @@ describe('recommendationScoring — orchestrator.rankRecipes', () => {
       medications: [{ name: 'Atorvastatin', active: true }],
       conditionNames: ['diabetes'],
       preferredCuisineIds: [3],
-      goalState: { prioritizeProtein: true, prioritizeFiber: true, limitSugar: true }
+      goalState: { prioritizeProtein: true, prioritizeFiber: true, limitSugar: true },
     };
 
-    const { recommendations, blockedRecipes, downgradedRecipes } = rankRecipes(input, ctx, { maxResults: 5 });
+    const { recommendations, blockedRecipes, downgradedRecipes } = rankRecipes(input, ctx, {
+      maxResults: 5,
+    });
 
     const returnedIds = recommendations.map((r) => r.recipeId);
     expect(returnedIds).to.not.include(2); // peanut blocked

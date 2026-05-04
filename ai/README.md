@@ -52,6 +52,7 @@ ai/
 ### Existing Directories (Not Refactored)
 
 Currently Left Untouched:
+
 - `prediction_models/` - Local ML models
 - `scripts/` - Utility scripts
 - `services/aiExecutionService.js` - Python script executor
@@ -78,6 +79,7 @@ class ChatbotAIClientInterface {
 ```
 
 **Benefits:**
+
 - Guarantees all implementations have consistent methods
 - Enables easy swapping between real and mock implementations
 - Clear contract for what operations are supported
@@ -115,6 +117,7 @@ const response = await aiAdapter.generateChatResponse({ query });
 ```
 
 **Benefits:**
+
 - Single point of configuration
 - Easy to switch between mock/real implementations
 - Centralized error handling and logging
@@ -124,22 +127,27 @@ const response = await aiAdapter.generateChatResponse({ query });
 ### 4. **Client Types**
 
 #### **ExternalAIServerClient** (Current)
+
 - Calls localhost:8000 for chatbot and medical predictions
 - Direct HTTP wrapper for existing AI infrastructure
 
 #### **PythonScriptClient** (Current)
+
 - Executes local Python scripts for image classification
 - Uses existing `aiExecutionService`
 
 #### **GroqClient** (Future - Sprint 2)
+
 - LLM-based chat using Groq API
 - Will replace ExternalChatbotClient when API is stabilized
 
 #### **ChromaClient** (Future - Sprint 2)
+
 - Vector-based recommendations using Chroma
 - Enables RAG pipeline when ready
 
 #### **MockClients** (Always Available)
+
 - Consistent responses for testing
 - No external dependencies required
 
@@ -148,34 +156,42 @@ const response = await aiAdapter.generateChatResponse({ query });
 ## Module Responsibilities
 
 ### AIClientInterface
+
 **Responsibility:** Define service contracts
--   Define method signatures for each AI service type
--   Standardize request/response formats
--   Provide base error handling methods
--   NOT responsible for: Implementation details, external calls
+
+- Define method signatures for each AI service type
+- Standardize request/response formats
+- Provide base error handling methods
+- NOT responsible for: Implementation details, external calls
 
 ### Clients (ExternalAIServerClient, PythonScriptClient, etc.)
+
 **Responsibility:** Implement service contracts
--   Connect to actual AI services (external servers, Python scripts, APIs)
--   Handle service-specific authentication and error handling
--   Transform responses to standard format
--   NOT responsible for: Choosing which implementation to use, controlling backend logic
+
+- Connect to actual AI services (external servers, Python scripts, APIs)
+- Handle service-specific authentication and error handling
+- Transform responses to standard format
+- NOT responsible for: Choosing which implementation to use, controlling backend logic
 
 ### AIAdapter
+
 **Responsibility:** Provide unified access and configuration
--   Manage client instances (real or mock)
--   Route requests to appropriate clients
--   Handle configuration and switching
--   Monitor service health
--   Provide logging and request tracking
--   NOT responsible for: Business logic, controller-level operations
+
+- Manage client instances (real or mock)
+- Route requests to appropriate clients
+- Handle configuration and switching
+- Monitor service health
+- Provide logging and request tracking
+- NOT responsible for: Business logic, controller-level operations
 
 ### Mock Clients
+
 **Responsibility:** Provide predictable responses for testing
--   Return realistic but deterministic responses
--   Simulate processing delays
--   Maintain conversation state (for chatbot)
--   NOT responsible for: Actual ML inference, integrating with real databases
+
+- Return realistic but deterministic responses
+- Simulate processing delays
+- Maintain conversation state (for chatbot)
+- NOT responsible for: Actual ML inference, integrating with real databases
 
 ---
 
@@ -215,13 +231,14 @@ res.json({ message: response.data.message });
 ### Complete Example: Update chatbotController.js
 
 **Before:**
+
 ```javascript
 const getChatResponse = async (req, res) => {
   const { user_id, user_input } = req.body;
-  const ai_response = await fetch("http://localhost:8000/ai-model/chatbot/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ "query": user_input })
+  const ai_response = await fetch('http://localhost:8000/ai-model/chatbot/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: user_input }),
   });
   const result = await ai_response.json();
   res.json(result);
@@ -229,12 +246,13 @@ const getChatResponse = async (req, res) => {
 ```
 
 **After:**
+
 ```javascript
 const { getAIAdapter } = require('../../ai/adapters');
 
 const getChatResponse = async (req, res) => {
   const { user_id, user_input } = req.body;
-  
+
   try {
     const aiAdapter = getAIAdapter();
     const response = await aiAdapter.generateChatResponse(
@@ -249,7 +267,7 @@ const getChatResponse = async (req, res) => {
     res.json({
       success: true,
       msg: response.data.message,
-      latency: response.latencyMs
+      latency: response.latencyMs,
     });
   } catch (error) {
     console.error('Chat error:', error);
@@ -287,7 +305,7 @@ const aiAdapter = new AIAdapter({
   aiServerUrl: 'http://localhost:8000',
   timeout: 30000,
   enableLogging: true,
-  enableFallback: true
+  enableFallback: true,
 });
 ```
 
@@ -319,6 +337,7 @@ npm start
 ```
 
 **Benefits of Mocks:**
+
 - No external dependencies
 - Consistent, predictable responses
 - Fast execution (simulated delays)
@@ -341,7 +360,7 @@ describe('Chatbot Integration', () => {
   it('should generate a chat response', async () => {
     const response = await aiAdapter.generateChatResponse({
       query: 'What is nutrition?',
-      userId: 'test_user'
+      userId: 'test_user',
     });
 
     expect(response.success).toBe(true);
@@ -352,7 +371,7 @@ describe('Chatbot Integration', () => {
   it('should handle errors gracefully', async () => {
     const response = await aiAdapter.generateChatResponse({
       query: '', // Empty query
-      userId: 'test_user'
+      userId: 'test_user',
     });
 
     expect(response.success).toBe(false);
@@ -386,22 +405,27 @@ console.log(health);
 ## Migration Path for Sprint 2
 
 ### Current State (Sprint 1)
-  **Interfaces Defined**
+
+**Interfaces Defined**
+
 - All service contracts are documented
 - Backend can use abstraction layer immediately
 
   **Current Implementations Working**
+
 - External AI Server calls working through wrapper
 - Python scripts working through wrapper
 - Mock clients available for testing
 
   **No Breaking Changes**
+
 - AI team can continue current work uninterrupted
 - New structure is additive, not disruptive
 
 ### Sprint 2 Transition
 
 #### Phase 1: Groq LLM Integration (Week 1-2)
+
 1. Implement `GroqChatbotClient` fully
 2. Test with Groq API keys
 3. Update `AIAdapter` configuration to support Groq selection
@@ -413,12 +437,14 @@ console.log(health);
 ```
 
 #### Phase 2: Chroma RAG Pipeline (Week 3-4)
-1. Implement `ChromaRecommendationClient` 
+
+1. Implement `ChromaRecommendationClient`
 2. Set up Chroma vector database
 3. Migrate recipe embeddings
 4. Update recommendation logic in `AIAdapter`
 
 #### Phase 3: Legacy Service Migration (Week 5-6)
+
 1. Migrate `prediction_models/` → `ai/models/`
 2. Migrate utility scripts → `ai/scripts/`
 3. Consolidate `aiExecutionService` into clients
@@ -429,12 +455,14 @@ console.log(health);
 **For each AI service becoming stable:**
 
 1. **Create new client implementation**
+
    ```javascript
    // ai/clients/GroqClient.js
    class GroqChatbotClient extends ChatbotAIClientInterface { ... }
    ```
 
 2. **Update AIAdapter to use new client**
+
    ```javascript
    // In AIAdapter.initializeClients()
    if (config.useGroq) {
@@ -443,6 +471,7 @@ console.log(health);
    ```
 
 3. **Controllers require NO changes**
+
    - They already use `aiAdapter.generateChatResponse()`
    - Implementation switching happens transparently
 
@@ -492,26 +521,26 @@ await aiAdapter.generateMedicalReport({ ... })
 
 ```javascript
 // Classify food
-await aiAdapter.classifyFoodImage({ imageData })
+await aiAdapter.classifyFoodImage({ imageData });
 
 // Classify recipe
-await aiAdapter.classifyRecipeImage({ imageData })
+await aiAdapter.classifyRecipeImage({ imageData });
 
 // Scan barcode
-await aiAdapter.scanBarcode({ barcodeData })
+await aiAdapter.scanBarcode({ barcodeData });
 
 // Extract nutrition
-await aiAdapter.extractNutritionLabel({ imageData })
+await aiAdapter.extractNutritionLabel({ imageData });
 ```
 
 ### System Operations
 
 ```javascript
 // Check health
-await aiAdapter.checkSystemHealth()
+await aiAdapter.checkSystemHealth();
 
 // Get config
-aiAdapter.getConfig()
+aiAdapter.getConfig();
 ```
 
 ---
@@ -523,6 +552,7 @@ aiAdapter.getConfig()
 **Decision:** Keep interface definitions separate from client code
 
 **Rationale:**
+
 - Controllers import adapters, not interfaces
 - Interfaces are for AI team (defines contracts)
 - Implementations can be updated without affecting controllers
@@ -533,6 +563,7 @@ aiAdapter.getConfig()
 **Decision:** Mock clients in every environment (dev, test, prod)
 
 **Rationale:**
+
 - Graceful degradation if external services fail
 - Testing and local development work offline
 - Production can use mocks for failed services
@@ -543,6 +574,7 @@ aiAdapter.getConfig()
 **Decision:** Only wrap access points, don't refactor existing AI code
 
 **Rationale:**
+
 - AI system is actively under development
 - Refactoring while unstable wastes effort
 - Wrappers don't interfere with AI team's work
@@ -553,16 +585,19 @@ aiAdapter.getConfig()
 ## Next Steps
 
 1. **Update Controllers** (Optional, happens gradually)
+
    - Start with new features
    - Migrate existing ones as you touch them
    - No rush - old and new patterns work concurrently
 
 2. **Monitor Integration**
+
    - Use health checks regularly
    - Track latency metrics
    - Log request IDs for debugging
 
 3. **Prepare for Sprint 2**
+
    - AI team focuses on Groq + Chroma
    - Backend team waits for stable APIs
    - Integration happens seamlessly through AIAdapter

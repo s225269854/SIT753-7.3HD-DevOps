@@ -99,8 +99,7 @@ function buildClassification({
   const normalizedConfidence =
     typeof confidence === 'number' && Number.isFinite(confidence) ? confidence : null;
 
-  const uncertain =
-    normalizedConfidence === null || normalizedConfidence < threshold || !label;
+  const uncertain = normalizedConfidence === null || normalizedConfidence < threshold || !label;
 
   return {
     label: uncertain ? null : label,

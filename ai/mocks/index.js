@@ -1,6 +1,6 @@
 /**
  * ai/mocks/index.js
- * 
+ *
  * Export all mock AI clients for testing and development
  */
 
@@ -11,5 +11,5 @@ const { MockImageClassificationClient } = require('./MockImageClassificationClie
 module.exports = {
   MockChatbotClient,
   MockMedicalPredictionClient,
-  MockImageClassificationClient
+  MockImageClassificationClient,
 };

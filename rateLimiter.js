@@ -1,8 +1,6 @@
 // rateLimiter.js
 const rateLimit = require('express-rate-limit');
-const {
-  registerUploadAbuse,
-} = require('./services/securityEvents/securityResponseService');
+const { registerUploadAbuse } = require('./services/securityEvents/securityResponseService');
 
 const uploadLimiter = rateLimit({
   windowMs: 10 * 60 * 1000, // 10 minutes
@@ -21,6 +19,5 @@ const uploadLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
- 
+
 module.exports = { uploadLimiter };
- 

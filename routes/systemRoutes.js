@@ -4,9 +4,7 @@ const { checkFileIntegrity, generateBaseline } = require('../tools/integrity/int
 const testErrorRouter = require('./testError');
 const { authenticateToken } = require('../middleware/authenticateToken');
 const authorizeRoles = require('../middleware/authorizeRoles');
-const {
-  createBlockMiddleware,
-} = require('../services/securityEvents/securityResponseService');
+const { createBlockMiddleware } = require('../services/securityEvents/securityResponseService');
 
 // Public health check (no auth required)
 router.get('/health', (req, res) => {
@@ -16,7 +14,7 @@ router.get('/health', (req, res) => {
     nodeEnv: process.env.NODE_ENV || 'development',
     nodeVersion: process.version,
     pythonCommand: process.env.PYTHON_BIN || 'python3',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -75,7 +73,7 @@ router.post('/generate-baseline', (req, res) => {
     const result = generateBaseline();
     res.status(200).json(result);
   } catch (err) {
-    res.status(500).json({ error: "Failed to generate baseline", details: err.message });
+    res.status(500).json({ error: 'Failed to generate baseline', details: err.message });
   }
 });
 
@@ -84,7 +82,7 @@ router.get('/integrity-check', (req, res) => {
     const anomalies = checkFileIntegrity();
     res.json({ anomalies });
   } catch (err) {
-    res.status(500).json({ error: "Failed to check integrity", details: err.message });
+    res.status(500).json({ error: 'Failed to check integrity', details: err.message });
   }
 });
 
@@ -92,6 +90,5 @@ router.get('/integrity-check', (req, res) => {
 if (process.env.NODE_ENV !== 'production') {
   router.use('/test-error', testErrorRouter);
 }
-
 
 module.exports = router;

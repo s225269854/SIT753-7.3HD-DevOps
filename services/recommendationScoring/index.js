@@ -24,5 +24,5 @@ module.exports = {
   rankRecipes: orchestrator.rankRecipes,
   scoreRecipe: orchestrator.scoreRecipe,
   STRATEGY_ID: orchestrator.STRATEGY_ID,
-  CONTRACT_VERSION: orchestrator.CONTRACT_VERSION
+  CONTRACT_VERSION: orchestrator.CONTRACT_VERSION,
 };

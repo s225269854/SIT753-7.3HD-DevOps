@@ -16,20 +16,22 @@ function serviceErrorToPayload(error) {
 
 function handleUnexpectedError(res, label, error, context = {}) {
   logger.error(label, { error: error.message, ...context });
-  return res.status(500).json(
-    createErrorResponse(
-      'Internal server error',
-      'CHATBOT_INTERNAL_ERROR',
-      process.env.NODE_ENV === 'development' ? { message: error.message } : undefined
-    )
-  );
+  return res
+    .status(500)
+    .json(
+      createErrorResponse(
+        'Internal server error',
+        'CHATBOT_INTERNAL_ERROR',
+        process.env.NODE_ENV === 'development' ? { message: error.message } : undefined
+      )
+    );
 }
 
 async function getChatResponse(req, res) {
   try {
     const result = await chatbotService.getChatResponse({
       userId: req.body.user_id,
-      userInput: req.body.user_input
+      userInput: req.body.user_input,
     });
     return res.status(result.statusCode).json(result.body);
   } catch (error) {
@@ -38,7 +40,7 @@ async function getChatResponse(req, res) {
     }
 
     return handleUnexpectedError(res, 'Error in chatbot response', error, {
-      userId: req.body.user_id
+      userId: req.body.user_id,
     });
   }
 }
@@ -53,7 +55,7 @@ async function addURL(req, res) {
     }
 
     return handleUnexpectedError(res, 'Error processing URL', error, {
-      urls: req.body.urls
+      urls: req.body.urls,
     });
   }
 }
@@ -81,7 +83,7 @@ async function getChatHistory(req, res) {
     }
 
     return handleUnexpectedError(res, 'Error retrieving chat history', error, {
-      userId: req.body.user_id
+      userId: req.body.user_id,
     });
   }
 }
@@ -96,7 +98,7 @@ async function clearChatHistory(req, res) {
     }
 
     return handleUnexpectedError(res, 'Error clearing chat history', error, {
-      userId: req.body.user_id
+      userId: req.body.user_id,
     });
   }
 }
@@ -106,5 +108,5 @@ module.exports = {
   addURL,
   addPDF,
   getChatHistory,
-  clearChatHistory
+  clearChatHistory,
 };

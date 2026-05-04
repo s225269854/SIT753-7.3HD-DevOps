@@ -1,6 +1,6 @@
 /**
  * middleware/requestLogger.js
- * 
+ *
  * Structured request logging middleware
  * Logs all incoming requests and responses
  */
@@ -21,17 +21,18 @@ const requestLoggingMiddleware = (req, res, next) => {
   // Generate and attach request ID
   const requestId = req.headers['x-request-id'] || generateRequestId();
   req.id = requestId;
-  
+
   // Track request start time
   const startTime = Date.now();
 
   // Extract useful request info
   const method = req.method;
   const path = req.path;
-  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || req.connection.remoteAddress;
+  const ip =
+    req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || req.connection.remoteAddress;
   const userAgent = req.headers['user-agent'] || 'unknown';
   const sessionId = req.sessionId || req.headers['x-session-id'];
-  
+
   // Log incoming request
   logger.info(`→ ${method} ${path}`, {
     requestId,
@@ -41,12 +42,12 @@ const requestLoggingMiddleware = (req, res, next) => {
     userAgent,
     ...(req.user ? { userId: req.user.userId } : {}),
     ...(sessionId ? { sessionId } : {}),
-    query: Object.keys(req.query).length > 0 ? req.query : undefined
+    query: Object.keys(req.query).length > 0 ? req.query : undefined,
   });
 
   // Capture response details
   const originalSend = res.send;
-  res.send = function(data) {
+  res.send = function (data) {
     // Calculate duration
     const duration = Date.now() - startTime;
     const statusCode = res.statusCode;
@@ -59,7 +60,7 @@ const requestLoggingMiddleware = (req, res, next) => {
 
     // Log response
     const logMessage = `← ${method} ${path} ${statusCode} (${duration}ms)`;
-    
+
     logger[logLevel](logMessage, {
       requestId,
       method,
@@ -68,7 +69,7 @@ const requestLoggingMiddleware = (req, res, next) => {
       duration,
       ...(req.user ? { userId: req.user.id } : {}),
       contentLength: res.get('content-length'),
-      ...(logLevel === 'error' ? { responseBody: data } : {})
+      ...(logLevel === 'error' ? { responseBody: data } : {}),
     });
 
     // Call original send

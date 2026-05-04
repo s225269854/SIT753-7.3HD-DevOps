@@ -3,7 +3,11 @@ const sinon = require('sinon');
 const proxyquire = require('proxyquire').noCallThru();
 
 describe('AuthService OAuth exchange', () => {
-  const createQueryBuilder = ({ maybeSingleData = null, singleData = null, updateData = null } = {}) => {
+  const createQueryBuilder = ({
+    maybeSingleData = null,
+    singleData = null,
+    updateData = null,
+  } = {}) => {
     const chain = {
       select: sinon.stub().returnsThis(),
       eq: sinon.stub().returnsThis(),
@@ -29,7 +33,8 @@ describe('AuthService OAuth exchange', () => {
   it('exchanges a Supabase access token into a backend session and creates an OAuth user when needed', async () => {
     process.env.SUPABASE_URL = process.env.SUPABASE_URL || 'https://example.supabase.co';
     process.env.SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'anon-key';
-    process.env.SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'service-role-key';
+    process.env.SUPABASE_SERVICE_ROLE_KEY =
+      process.env.SUPABASE_SERVICE_ROLE_KEY || 'service-role-key';
     process.env.JWT_TOKEN = process.env.JWT_TOKEN || 'test-jwt-secret';
 
     const authGetUserStub = sinon.stub().resolves({
@@ -41,10 +46,10 @@ describe('AuthService OAuth exchange', () => {
             full_name: 'OAuth User',
             first_name: 'OAuth',
             last_name: 'User',
-          }
-        }
+          },
+        },
       },
-      error: null
+      error: null,
     });
 
     const anonFindUserChain = createQueryBuilder({ maybeSingleData: null });
@@ -60,22 +65,22 @@ describe('AuthService OAuth exchange', () => {
         name: 'OAuth User',
         role_id: 7,
         account_status: 'active',
-        user_roles: { role_name: 'user' }
-      }
+        user_roles: { role_name: 'user' },
+      },
     });
 
     const anonClient = {
       auth: { getUser: authGetUserStub },
-      from: sinon.stub()
+      from: sinon.stub(),
     };
     anonClient.from.withArgs('users').onFirstCall().returns(anonFindUserChain);
     anonClient.from.withArgs('users').onSecondCall().returns(anonUpdateChain);
     anonClient.from.withArgs('auth_logs').returns({
-      insert: sinon.stub().resolves({ error: null })
+      insert: sinon.stub().resolves({ error: null }),
     });
 
     const serviceClient = {
-      from: sinon.stub()
+      from: sinon.stub(),
     };
     serviceClient.from.withArgs('users').returns(serviceInsertChain);
 
@@ -96,7 +101,7 @@ describe('AuthService OAuth exchange', () => {
       accessToken: 'backend-access',
       refreshToken: 'backend-refresh',
       expiresIn: 900,
-      tokenType: 'Bearer'
+      tokenType: 'Bearer',
     });
 
     const result = await authService.exchangeSupabaseToken(

@@ -4,7 +4,7 @@ const { addAiMealItem, getAiMealItems, deleteAiMealItem } = require('../model/ai
 const {
   createErrorResponse,
   createSuccessResponse,
-  formatMealPlans
+  formatMealPlans,
 } = require('../services/apiResponseService');
 
 function validationFailure(res, errors) {
@@ -39,11 +39,16 @@ const addMealPlan = async (req, res) => {
 
     await saveMealRelation(user_id, recipe_ids, meal_plan[0].id);
 
-    return res.status(201).json(createSuccessResponse({
-      mealPlan: meal_plan
-    }, {
-      message: 'Meal plan created successfully'
-    }));
+    return res.status(201).json(
+      createSuccessResponse(
+        {
+          mealPlan: meal_plan,
+        },
+        {
+          message: 'Meal plan created successfully',
+        }
+      )
+    );
   } catch (error) {
     console.error({ error: 'error' });
     return internalFailure(res, 'MEALPLAN_CREATE_FAILED');
@@ -59,11 +64,16 @@ const getMealPlan = async (req, res) => {
 
     const meal_plans = await get(requestedUserId);
 
-    return res.status(200).json(createSuccessResponse({
-      items: formatMealPlans(meal_plans || [])
-    }, {
-      count: Array.isArray(meal_plans) ? meal_plans.length : 0
-    }));
+    return res.status(200).json(
+      createSuccessResponse(
+        {
+          items: formatMealPlans(meal_plans || []),
+        },
+        {
+          count: Array.isArray(meal_plans) ? meal_plans.length : 0,
+        }
+      )
+    );
   } catch (error) {
     console.error({ error: 'error' });
     return internalFailure(res, 'MEALPLANS_LOAD_FAILED');
@@ -81,9 +91,11 @@ const deleteMealPlan = async (req, res) => {
 
     await deletePlan(id, user_id);
 
-    return res.status(200).json(createSuccessResponse(null, {
-      message: 'Meal plan deleted successfully'
-    }));
+    return res.status(200).json(
+      createSuccessResponse(null, {
+        message: 'Meal plan deleted successfully',
+      })
+    );
   } catch (error) {
     console.error({ error: 'error' });
     return internalFailure(res, 'MEALPLAN_DELETE_FAILED');
@@ -104,10 +116,11 @@ const addAiMealSuggestion = async (req, res) => {
 
     const item = await addAiMealItem(userId, req.body);
 
-    return res.status(201).json(createSuccessResponse(
-      { item },
-      { message: 'AI meal suggestion saved to your daily plan' }
-    ));
+    return res
+      .status(201)
+      .json(
+        createSuccessResponse({ item }, { message: 'AI meal suggestion saved to your daily plan' })
+      );
   } catch (error) {
     console.error('[mealplanController] addAiMealSuggestion error:', error);
     return internalFailure(res, 'AI_MEAL_SAVE_FAILED');
@@ -123,10 +136,7 @@ const getAiMealSuggestions = async (req, res) => {
 
     const items = await getAiMealItems(userId);
 
-    return res.status(200).json(createSuccessResponse(
-      { items },
-      { count: items.length }
-    ));
+    return res.status(200).json(createSuccessResponse({ items }, { count: items.length }));
   } catch (error) {
     console.error('[mealplanController] getAiMealSuggestions error:', error);
     return internalFailure(res, 'AI_MEALS_LOAD_FAILED');
@@ -147,10 +157,11 @@ const deleteAiMealSuggestion = async (req, res) => {
 
     await deleteAiMealItem(req.body.id, userId);
 
-    return res.status(200).json(createSuccessResponse(
-      null,
-      { message: 'AI meal suggestion removed from your daily plan' }
-    ));
+    return res
+      .status(200)
+      .json(
+        createSuccessResponse(null, { message: 'AI meal suggestion removed from your daily plan' })
+      );
   } catch (error) {
     console.error('[mealplanController] deleteAiMealSuggestion error:', error);
     return internalFailure(res, 'AI_MEAL_DELETE_FAILED');

@@ -7,7 +7,7 @@ const {
   getShoppingListValidation,
   addShoppingListItemValidation,
   updateShoppingListItemValidation,
-  deleteShoppingListItemValidation
+  deleteShoppingListItemValidation,
 } = require('../validators/shoppingListValidator.js');
 const validate = require('../middleware/validateRequest.js');
 
@@ -30,14 +30,16 @@ router.post(
 );
 
 // Shopping list collection
-router.route('/')
+router
+  .route('/')
   .post(createShoppingListValidation, validate, controller.createShoppingList)
   .get(getShoppingListValidation, validate, controller.getShoppingList);
 
 // Shopping list items
 router.post('/items', addShoppingListItemValidation, validate, controller.addShoppingListItem);
 
-router.route('/items/:id')
+router
+  .route('/items/:id')
   .patch(updateShoppingListItemValidation, validate, controller.updateShoppingListItem)
   .delete(deleteShoppingListItemValidation, validate, controller.deleteShoppingListItem);
 
