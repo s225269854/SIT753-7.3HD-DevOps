@@ -83,5 +83,24 @@ pipeline {
         }
     }
 
+    stage('Security') {
+        steps {
+            echo 'Running dependency security audit'
+
+            sh '''
+                npm audit --audit-level=high
+            '''
+
+            echo 'Running Docker image vulnerability scan with Trivy'
+
+            sh '''
+                trivy image --severity HIGH,CRITICAL --exit-code 1 --no-progress ${IMAGE_NAME}
+            '''
+
+            sh 'npm audit --json > audit-report.json'
+            archiveArtifacts artifacts: 'audit-report.json', allowEmptyArchive: true
+        }
+    }
+
   }
 }
