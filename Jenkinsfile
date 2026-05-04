@@ -6,15 +6,18 @@ pipeline {
     }
 
     environment {
+        PATH = "/usr/local/bin:/opt/homebrew/bin:/Users/chehulchinnappa/.docker/bin:${env.PATH}"
         APP_NAME = 'nutrihelp-api'
-        IMAGE_TAG = "jenkins-${BUILD_NUMBER}"
-        IMAGE_NAME = "${APP_NAME}:${IMAGE_TAG}"
+        VERSION = "beta-${BUILD_NUMBER}"
+        IMAGE_NAME = "${APP_NAME}:${VERSION}"
     }
 
     stages {
         
         stage('Build') {
             steps {
+                echo "Building ${APP_NAME} version ${VERSION}"
+                
                 echo 'Checking Docker availability'
                 sh 'docker --version'
                 sh 'docker ps'
