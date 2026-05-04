@@ -33,19 +33,17 @@ pipeline {
         sh 'docker images | grep ${APP_NAME}'
 
         echo 'Writing build metadata...'
-        sh ''
-        '
-        echo "APP_NAME=${APP_NAME}" > build - info.txt
-        echo "VERSION=${VERSION}" >> build - info.txt
-        echo "IMAGE_NAME=${IMAGE_NAME}" >> build - info.txt
-        echo "BUILD_NUMBER=${BUILD_NUMBER}" >> build - info.txt
-        echo "GIT_COMMIT=${GIT_COMMIT}" >> build - info.txt
-        cat build - info.txt ''
-        '
+        sh '''
+            echo "APP_NAME=${APP_NAME}" > build-info.txt
+            echo "VERSION=${VERSION}" >> build-info.txt
+            echo "IMAGE_NAME=${IMAGE_NAME}" >> build-info.txt
+            echo "BUILD_NUMBER=${BUILD_NUMBER}" >> build-info.txt
+            echo "GIT_COMMIT=${GIT_COMMIT}" >> build-info.txt
+            cat build-info.txt
+        '''
 
         echo 'Listing created Docker image...'
-        sh 'docker images | grep ${APP_NAME}'
-
+        sh "docker images | grep ${APP_NAME}"
       }
     }
 
