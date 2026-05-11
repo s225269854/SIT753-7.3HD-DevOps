@@ -14,7 +14,6 @@ pipeline {
   }
 
   stages {
-
     stage('Build') {
       steps {
         echo "Building ${APP_NAME} version ${VERSION}"
@@ -84,7 +83,7 @@ pipeline {
     }
 
     stage('Security') {
-    steps {
+      steps {
         echo 'Running npm dependency security audit'
         sh 'npm audit --audit-level=high'
 
@@ -167,7 +166,6 @@ pipeline {
 
               echo 'Staging container status'
               sh 'docker ps --filter "name=${STAGING_CONTAINER}" --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}"'
-
             }
           }
 
@@ -177,25 +175,25 @@ pipeline {
               sh 'docker rm -f ${STAGING_CONTAINER} || true'
             }
           }
-        }
-    
+    }
+
     stage('Release') {
-  environment {
-    PROD_CONTAINER = 'nutrihelp-api-prod'
-    PROD_PORT = '8082'
-    PROD_HTTPS_PORT = '8443'
-  }
+      environment {
+        PROD_CONTAINER = 'nutrihelp-api-prod'
+        PROD_PORT = '8082'
+        PROD_HTTPS_PORT = '8443'
+      }
 
-  steps {
-    echo "Promoting ${IMAGE_NAME} to production"
+      steps {
+        echo "Promoting ${IMAGE_NAME} to production"
 
-    sh '''
+        sh '''
         docker tag ${IMAGE_NAME} ${APP_NAME}:stable
         docker tag ${IMAGE_NAME} ${APP_NAME}:${VERSION}-release
     '''
 
-    echo 'Generating local TLS certificates'
-    sh '''
+        echo 'Generating local TLS certificates'
+        sh '''
         mkdir -p "${WORKSPACE}/certs"
 
         openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
@@ -207,16 +205,16 @@ pipeline {
         ls -la "${WORKSPACE}/certs"
     '''
 
-    withCredentials([
+        withCredentials([
       string(credentialsId: 'supabase-url', variable: 'SUPABASE_URL'),
       string(credentialsId: 'supabase-anon-key', variable: 'SUPABASE_ANON_KEY'),
       string(credentialsId: 'supabase-service-role-key', variable: 'SUPABASE_SERVICE_ROLE_KEY')
     ]) {
-      echo 'Stopping existing production container'
-      sh 'docker rm -f ${PROD_CONTAINER} || true'
+          echo 'Stopping existing production container'
+          sh 'docker rm -f ${PROD_CONTAINER} || true'
 
-      echo 'Starting production container'
-      sh '''
+          echo 'Starting production container'
+          sh '''
           docker run -d \
             --name ${PROD_CONTAINER} \
             --restart unless-stopped \
@@ -242,8 +240,8 @@ pipeline {
           docker exec ${PROD_CONTAINER} ls -la /usr/src/app/certs || true
       '''
 
-      echo 'Verifying production deployment health'
-      sh '''
+          echo 'Verifying production deployment health'
+          sh '''
           for i in $(seq 1 12); do
             if curl -k -sf https://localhost:${PROD_HTTPS_PORT}/api/system/health; then
               echo "\\nProduction HTTPS health check passed on attempt $i"
@@ -264,8 +262,8 @@ pipeline {
           exit 1
       '''
 
-      echo 'Writing release notes'
-      sh '''
+          echo 'Writing release notes'
+          sh '''
           echo "RELEASE_VERSION=${VERSION}" > release-info.txt
           echo "RELEASE_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> release-info.txt
           echo "GIT_COMMIT=${GIT_COMMIT}" >> release-info.txt
@@ -276,17 +274,91 @@ pipeline {
           cat release-info.txt
       '''
 
-      archiveArtifacts artifacts: 'release-info.txt', allowEmptyArchive: false
+          archiveArtifacts artifacts: 'release-info.txt', allowEmptyArchive: false
+    }
+      }
+
+      post {
+        failure {
+          echo 'Release failed — rolling back production container'
+          sh 'docker rm -f ${PROD_CONTAINER} || true'
+        }
+      }
+    }
+
+    stage('Monitoring') {
+      environment {
+        PROD_CONTAINER = 'nutrihelp-api-prod'
+        PROD_HTTP_PORT = '8082'
+        PROD_HTTPS_PORT = '8443'
+      }
+
+      steps {
+        echo 'Running post-deployment monitoring checks'
+
+        echo 'Checking production HTTPS health endpoint'
+        sh '''
+        curl -k -sf https://localhost:${PROD_HTTPS_PORT}/api/system/health
+    '''
+
+        echo 'Checking container resource usage'
+        sh '''
+        docker stats ${PROD_CONTAINER} --no-stream \
+          --format "table {{.Name}}\\t{{.CPUPerc}}\\t{{.MemUsage}}\\t{{.MemPerc}}" \
+          > monitoring-stats.txt
+
+        cat monitoring-stats.txt
+    '''
+
+        echo 'Collecting container logs for review'
+        sh '''
+        docker logs --tail 100 ${PROD_CONTAINER} > monitoring-logs.txt 2>&1 || true
+        cat monitoring-logs.txt
+    '''
+
+        echo 'Checking for ERROR or WARN entries in logs'
+        sh '''
+        ERROR_COUNT=$(grep -ci "error" monitoring-logs.txt || true)
+        WARN_COUNT=$(grep -ci "warn" monitoring-logs.txt || true)
+
+        echo "Errors found: $ERROR_COUNT" > monitoring-summary.txt
+        echo "Warnings found: $WARN_COUNT" >> monitoring-summary.txt
+
+        cat monitoring-summary.txt
+
+        if [ "$ERROR_COUNT" -gt 10 ]; then
+          echo "Too many errors in production logs — review required"
+          exit 1
+        fi
+    '''
+
+        echo 'Simulating uptime checks across key endpoints'
+        sh '''
+        BASE=https://localhost:${PROD_HTTPS_PORT}
+
+        echo "Endpoint Monitoring Results" > monitoring-endpoints.txt
+        echo "===========================" >> monitoring-endpoints.txt
+
+        for ENDPOINT in /api/system/health /api-docs; do
+          STATUS=$(curl -k -o /dev/null -sw "%{http_code}" $BASE$ENDPOINT || echo "000")
+          echo "Endpoint $ENDPOINT returned HTTP $STATUS" | tee -a monitoring-endpoints.txt
+        done
+    '''
+
+        echo 'Archiving monitoring evidence'
+        archiveArtifacts artifacts: 'monitoring-logs.txt,monitoring-stats.txt,monitoring-summary.txt,monitoring-endpoints.txt', allowEmptyArchive: true
+      }
     }
   }
 
   post {
-    failure {
-      echo 'Release failed — rolling back production container'
-      sh 'docker rm -f ${PROD_CONTAINER} || true'
+    success {
+      echo "Pipeline completed successfully for ${IMAGE_NAME}"
+      echo 'All stages passed — build, test, quality, security, deploy, release, monitoring'
     }
-  }
-}
-
+    failure {
+      echo "Pipeline FAILED for ${IMAGE_NAME}"
+      echo 'Check logs above for the failing stage'
+    }
   }
 }
