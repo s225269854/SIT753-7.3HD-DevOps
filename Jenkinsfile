@@ -95,17 +95,20 @@ pipeline {
             sh 'npm run openapi:validate'
 
             echo 'Running SonarQube analysis'
-        withSonarQubeEnv('SonarQube') {
-          sh '''
-            sonar-scanner \
-              -Dsonar.projectKey=nutrihelp-api \
-              -Dsonar.projectName="NutriHelp API" \
-              -Dsonar.projectVersion=${VERSION} \
-              -Dsonar.sources=src \
-              -Dsonar.exclusions=**/node_modules/**,**/test/**,**/*.test.js,**/coverage/** \
-              -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
-              -Dsonar.testExecutionReportPaths=test-results/sonar-report.xml
-          '''
+        script {
+            def scannerHome = tool 'sonar-scanner'
+            withSonarQubeEnv('SonarQube') {
+                sh """
+                    ${scannerHome}/bin/sonar-scanner \
+                      -Dsonar.projectKey=nutrihelp-api \
+                      -Dsonar.projectName="NutriHelp API" \
+                      -Dsonar.projectVersion=${VERSION} \
+                      -Dsonar.sources=src \
+                      -Dsonar.exclusions=**/node_modules/**,**/test/**,**/*.test.js,**/coverage/** \
+                      -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
+                      -Dsonar.testExecutionReportPaths=test-results/sonar-report.xml
+                """
+            }
         }
 
         echo 'Enforcing SonarQube quality gate'
