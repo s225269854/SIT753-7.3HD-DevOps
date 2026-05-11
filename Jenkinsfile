@@ -112,8 +112,70 @@ pipeline {
         '''
 
         archiveArtifacts artifacts: 'audit-report.json,trivy-report.json', allowEmptyArchive: true
+      }
     }
-}
+
+    stage('Deploy') {
+          environment {
+            STAGING_CONTAINER = 'nutrihelp-api-staging'
+            STAGING_PORT = '8081'
+          }
+
+          steps {
+            echo "Deploying ${IMAGE_NAME} to staging environment"
+
+            withCredentials([
+              string(credentialsId: 'supabase-url', variable: 'SUPABASE_URL'),
+              string(credentialsId: 'supabase-anon-key', variable: 'SUPABASE_ANON_KEY'),
+              string(credentialsId: 'supabase-service-role-key', variable: 'SUPABASE_SERVICE_ROLE_KEY')
+            ]) {
+              echo 'Stopping/Removing any existing staging container'
+              sh 'docker rm -f ${STAGING_CONTAINER} || true'
+
+              echo 'Starting new staging container'
+              sh '''
+                  docker run -d \
+                    --name ${STAGING_CONTAINER} \
+                    --restart unless-stopped \
+                    -p ${STAGING_PORT}:80 \
+                    -e NODE_ENV=staging \
+                    -e PORT=80 \
+                    -e JWT_SECRET=jenkins-staging-secret \
+                    -e SUPABASE_URL=${SUPABASE_URL} \
+                    -e SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY} \
+                    -e SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY} \
+                    ${IMAGE_NAME}
+              '''
+
+              echo 'Waiting for the container'
+              sh '''
+                  echo "Polling health endpoint..."
+                  for i in $(seq 1 12); do
+                    if curl -sf http://localhost:${STAGING_PORT}/api/system/health; then
+                      echo "\\nHealth check passed on attempt $i"
+                      exit 0
+                    fi
+                    echo "Attempt $i failed, retrying in 5s..."
+                    sleep 5
+                  done
+                  echo "Container failed to become healthy after 60 seconds"
+                  docker logs ${STAGING_CONTAINER}
+                  exit 1
+              '''
+
+              echo 'Staging container status'
+              sh 'docker ps --filter "name=${STAGING_CONTAINER}" --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}"'
+
+            }
+          }
+
+          post {
+            failure {
+              echo 'Deploy failed — rolling back by stopping staging container'
+              sh 'docker rm -f ${STAGING_CONTAINER} || true'
+            }
+          }
+        }
 
   }
 }
