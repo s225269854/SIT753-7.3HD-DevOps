@@ -40,9 +40,8 @@ pipeline {
             echo "GIT_COMMIT=${GIT_COMMIT}" >> build-info.txt
             cat build-info.txt
         '''
-
-        echo 'Listing created Docker image...'
-        sh "docker images | grep ${APP_NAME}"
+        echo 'Archiving build metadata artifact'
+        archiveArtifacts artifacts: 'build-info.txt', allowEmptyArchive: false
       }
     }
 
@@ -63,7 +62,22 @@ pipeline {
         ]) {
           echo 'Running stable CI test suite with valid, invalid, and edge case coverage'
           sh 'npm run test:ci'
+          echo 'Generating test coverage report'
+          sh 'npm run test:coverage || true'
         }
+
+        echo 'Publishing test results'
+        junit testResults: 'test-results/*.xml', allowEmptyResults: true
+
+        echo 'Publishing coverage report'
+        publishHTML(target: [
+          allowMissing: true,
+          alwaysLinkToLastBuild: true,
+          keepAll: true,
+          reportDir: 'coverage/lcov-report',
+          reportFiles: 'index.html',
+          reportName: 'Coverage Report'
+        ])
       }
     }
 
