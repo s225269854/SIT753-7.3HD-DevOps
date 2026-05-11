@@ -140,6 +140,8 @@ pipeline {
                     -p ${STAGING_PORT}:80 \
                     -e NODE_ENV=staging \
                     -e PORT=80 \
+                    -e HTTP_PORT=80\
+                    -e HTTPS_PORT=443\
                     -e JWT_SECRET=jenkins-staging-secret \
                     -e SUPABASE_URL=${SUPABASE_URL} \
                     -e SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY} \
