@@ -183,6 +183,7 @@ pipeline {
       environment {
         PROD_CONTAINER = 'nutrihelp-api-prod'
         PROD_PORT = '8082'
+        PROD_HTTPS_PORT = '8443'
       }
 
       steps {
@@ -192,6 +193,18 @@ pipeline {
             docker tag ${IMAGE_NAME} ${APP_NAME}:stable
             docker tag ${IMAGE_NAME} ${APP_NAME}:${VERSION}-release
         '''
+
+        echo 'Generating local TLS certificates for production container'
+          sh '''
+              mkdir -p certs
+
+              if [ ! -f certs/local-key.pem ] || [ ! -f certs/local-cert.pem ]; then
+                openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+                  -keyout certs/local-key.pem \
+                  -out certs/local-cert.pem \
+                  -subj "/CN=localhost"
+              fi
+          '''
 
         withCredentials([
           string(credentialsId: 'supabase-url', variable: 'SUPABASE_URL'),
@@ -207,6 +220,8 @@ pipeline {
                 --name ${PROD_CONTAINER} \
                 --restart unless-stopped \
                 -p ${PROD_PORT}:80 \
+                -p ${PROD_HTTPS_PORT}:443 \
+                -v "$PWD/certs:/usr/src/app/certs:ro" \
                 -e NODE_ENV=production \
                 -e PORT=80 \
                 -e HTTP_PORT=80 \
@@ -221,13 +236,20 @@ pipeline {
           echo 'Verifying production deployment health'
           sh '''
               for i in $(seq 1 12); do
-                if curl -sf http://localhost:${PROD_PORT}/api/system/health; then
-                  echo "\\nProduction health check passed on attempt $i"
+                if curl -k -sf https://localhost:${PROD_HTTPS_PORT}/api/system/health; then
+                  echo "\\nProduction HTTPS health check passed on attempt $i"
                   exit 0
                 fi
+
+                if curl -sf http://localhost:${PROD_PORT}/api/system/health; then
+                  echo "\\nProduction HTTP health check passed on attempt $i"
+                  exit 0
+                fi
+
                 echo "Attempt $i failed, retrying in 5s..."
                 sleep 5
               done
+
               echo "Production container failed health check"
               docker logs ${PROD_CONTAINER}
               exit 1
