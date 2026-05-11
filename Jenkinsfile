@@ -178,6 +178,82 @@ pipeline {
             }
           }
         }
+    
+    stage('Release') {
+      environment {
+        PROD_CONTAINER = 'nutrihelp-api-prod'
+        PROD_PORT = '8082'
+      }
+
+      steps {
+        echo "Promoting ${IMAGE_NAME} to production"
+
+        sh '''
+            docker tag ${IMAGE_NAME} ${APP_NAME}:stable
+            docker tag ${IMAGE_NAME} ${APP_NAME}:${VERSION}-release
+        '''
+
+        withCredentials([
+          string(credentialsId: 'supabase-url', variable: 'SUPABASE_URL'),
+          string(credentialsId: 'supabase-anon-key', variable: 'SUPABASE_ANON_KEY'),
+          string(credentialsId: 'supabase-service-role-key', variable: 'SUPABASE_SERVICE_ROLE_KEY')
+        ]) {
+          echo 'Stopping existing production container'
+          sh 'docker rm -f ${PROD_CONTAINER} || true'
+
+          echo 'Starting production container'
+          sh '''
+              docker run -d \
+                --name ${PROD_CONTAINER} \
+                --restart unless-stopped \
+                -p ${PROD_PORT}:80 \
+                -e NODE_ENV=production \
+                -e PORT=80 \
+                -e HTTP_PORT=80 \
+                -e HTTPS_PORT=443 \
+                -e JWT_SECRET=jenkins-prod-secret \
+                -e SUPABASE_URL=${SUPABASE_URL} \
+                -e SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY} \
+                -e SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY} \
+                ${APP_NAME}:stable
+          '''
+
+          echo 'Verifying production deployment health'
+          sh '''
+              for i in $(seq 1 12); do
+                if curl -sf http://localhost:${PROD_PORT}/api/system/health; then
+                  echo "\\nProduction health check passed on attempt $i"
+                  exit 0
+                fi
+                echo "Attempt $i failed, retrying in 5s..."
+                sleep 5
+              done
+              echo "Production container failed health check"
+              docker logs ${PROD_CONTAINER}
+              exit 1
+          '''
+
+          echo 'Writing release notes'
+          sh '''
+              echo "RELEASE_VERSION=${VERSION}"              > release-info.txt
+              echo "RELEASE_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> release-info.txt
+              echo "GIT_COMMIT=${GIT_COMMIT}"               >> release-info.txt
+              echo "DEPLOYED_IMAGE=${IMAGE_NAME}"           >> release-info.txt
+              echo "ENVIRONMENT=production"                 >> release-info.txt
+              cat release-info.txt
+          '''
+
+          archiveArtifacts artifacts: 'release-info.txt', allowEmptyArchive: false
+        }
+      }
+
+      post {
+        failure {
+          echo 'Release failed — rolling back production container'
+          sh 'docker rm -f ${PROD_CONTAINER} || true'
+        }
+      }
+    }
 
   }
 }
