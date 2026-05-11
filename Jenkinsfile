@@ -180,102 +180,113 @@ pipeline {
         }
     
     stage('Release') {
-      environment {
-        PROD_CONTAINER = 'nutrihelp-api-prod'
-        PROD_PORT = '8082'
-        PROD_HTTPS_PORT = '8443'
-      }
+  environment {
+    PROD_CONTAINER = 'nutrihelp-api-prod'
+    PROD_PORT = '8082'
+    PROD_HTTPS_PORT = '8443'
+  }
 
-      steps {
-        echo "Promoting ${IMAGE_NAME} to production"
+  steps {
+    echo "Promoting ${IMAGE_NAME} to production"
 
-        sh '''
-            docker tag ${IMAGE_NAME} ${APP_NAME}:stable
-            docker tag ${IMAGE_NAME} ${APP_NAME}:${VERSION}-release
-        '''
+    sh '''
+        docker tag ${IMAGE_NAME} ${APP_NAME}:stable
+        docker tag ${IMAGE_NAME} ${APP_NAME}:${VERSION}-release
+    '''
 
-        echo 'Generating local TLS certificates for production container'
-          sh '''
-              mkdir -p certs
+    echo 'Generating local TLS certificates'
+    sh '''
+        mkdir -p "${WORKSPACE}/certs"
 
-              if [ ! -f certs/local-key.pem ] || [ ! -f certs/local-cert.pem ]; then
-                openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-                  -keyout certs/local-key.pem \
-                  -out certs/local-cert.pem \
-                  -subj "/CN=localhost"
-              fi
-          '''
+        openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
+          -keyout "${WORKSPACE}/certs/local-key.pem" \
+          -out "${WORKSPACE}/certs/local-cert.pem" \
+          -subj "/CN=localhost"
 
-        withCredentials([
-          string(credentialsId: 'supabase-url', variable: 'SUPABASE_URL'),
-          string(credentialsId: 'supabase-anon-key', variable: 'SUPABASE_ANON_KEY'),
-          string(credentialsId: 'supabase-service-role-key', variable: 'SUPABASE_SERVICE_ROLE_KEY')
-        ]) {
-          echo 'Stopping existing production container'
-          sh 'docker rm -f ${PROD_CONTAINER} || true'
+        echo "Generated certificates:"
+        ls -la "${WORKSPACE}/certs"
+    '''
 
-          echo 'Starting production container'
-          sh '''
-              docker run -d \
-                --name ${PROD_CONTAINER} \
-                --restart unless-stopped \
-                -p ${PROD_PORT}:80 \
-                -p ${PROD_HTTPS_PORT}:443 \
-                -v "$PWD/certs:/usr/src/app/certs:ro" \
-                -e NODE_ENV=production \
-                -e PORT=80 \
-                -e HTTP_PORT=80 \
-                -e HTTPS_PORT=443 \
-                -e JWT_SECRET=jenkins-prod-secret \
-                -e SUPABASE_URL=${SUPABASE_URL} \
-                -e SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY} \
-                -e SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY} \
-                ${APP_NAME}:stable
-          '''
+    withCredentials([
+      string(credentialsId: 'supabase-url', variable: 'SUPABASE_URL'),
+      string(credentialsId: 'supabase-anon-key', variable: 'SUPABASE_ANON_KEY'),
+      string(credentialsId: 'supabase-service-role-key', variable: 'SUPABASE_SERVICE_ROLE_KEY')
+    ]) {
+      echo 'Stopping existing production container'
+      sh 'docker rm -f ${PROD_CONTAINER} || true'
 
-          echo 'Verifying production deployment health'
-          sh '''
-              for i in $(seq 1 12); do
-                if curl -k -sf https://localhost:${PROD_HTTPS_PORT}/api/system/health; then
-                  echo "\\nProduction HTTPS health check passed on attempt $i"
-                  exit 0
-                fi
+      echo 'Starting production container'
+      sh '''
+          docker run -d \
+            --name ${PROD_CONTAINER} \
+            --restart unless-stopped \
+            -p ${PROD_PORT}:80 \
+            -p ${PROD_HTTPS_PORT}:443 \
+            -v "${WORKSPACE}/certs:/usr/src/app/certs:ro" \
+            -e NODE_ENV=production \
+            -e PORT=80 \
+            -e HTTP_PORT=80 \
+            -e HTTPS_PORT=443 \
+            -e TLS_KEY_PATH=/usr/src/app/certs/local-key.pem \
+            -e TLS_CERT_PATH=/usr/src/app/certs/local-cert.pem \
+            -e JWT_SECRET=jenkins-prod-secret \
+            -e SUPABASE_URL=${SUPABASE_URL} \
+            -e SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY} \
+            -e SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY} \
+            ${APP_NAME}:stable
 
-                if curl -sf http://localhost:${PROD_PORT}/api/system/health; then
-                  echo "\\nProduction HTTP health check passed on attempt $i"
-                  exit 0
-                fi
+          echo "Container status after start:"
+          docker ps -a --filter "name=${PROD_CONTAINER}"
 
-                echo "Attempt $i failed, retrying in 5s..."
-                sleep 5
-              done
+          echo "Checking certs inside container:"
+          docker exec ${PROD_CONTAINER} ls -la /usr/src/app/certs || true
+      '''
 
-              echo "Production container failed health check"
-              docker logs ${PROD_CONTAINER}
-              exit 1
-          '''
+      echo 'Verifying production deployment health'
+      sh '''
+          for i in $(seq 1 12); do
+            if curl -k -sf https://localhost:${PROD_HTTPS_PORT}/api/system/health; then
+              echo "\\nProduction HTTPS health check passed on attempt $i"
+              exit 0
+            fi
 
-          echo 'Writing release notes'
-          sh '''
-              echo "RELEASE_VERSION=${VERSION}"              > release-info.txt
-              echo "RELEASE_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> release-info.txt
-              echo "GIT_COMMIT=${GIT_COMMIT}"               >> release-info.txt
-              echo "DEPLOYED_IMAGE=${IMAGE_NAME}"           >> release-info.txt
-              echo "ENVIRONMENT=production"                 >> release-info.txt
-              cat release-info.txt
-          '''
+            if curl -sf http://localhost:${PROD_PORT}/api/system/health; then
+              echo "\\nProduction HTTP health check passed on attempt $i"
+              exit 0
+            fi
 
-          archiveArtifacts artifacts: 'release-info.txt', allowEmptyArchive: false
-        }
-      }
+            echo "Attempt $i failed, retrying in 5s..."
+            sleep 5
+          done
 
-      post {
-        failure {
-          echo 'Release failed — rolling back production container'
-          sh 'docker rm -f ${PROD_CONTAINER} || true'
-        }
-      }
+          echo "Production container failed health check"
+          docker logs ${PROD_CONTAINER}
+          exit 1
+      '''
+
+      echo 'Writing release notes'
+      sh '''
+          echo "RELEASE_VERSION=${VERSION}" > release-info.txt
+          echo "RELEASE_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> release-info.txt
+          echo "GIT_COMMIT=${GIT_COMMIT}" >> release-info.txt
+          echo "SOURCE_IMAGE=${IMAGE_NAME}" >> release-info.txt
+          echo "DEPLOYED_IMAGE=${APP_NAME}:stable" >> release-info.txt
+          echo "HTTPS_URL=https://localhost:${PROD_HTTPS_PORT}/api/system/health" >> release-info.txt
+          echo "ENVIRONMENT=production" >> release-info.txt
+          cat release-info.txt
+      '''
+
+      archiveArtifacts artifacts: 'release-info.txt', allowEmptyArchive: false
     }
+  }
+
+  post {
+    failure {
+      echo 'Release failed — rolling back production container'
+      sh 'docker rm -f ${PROD_CONTAINER} || true'
+    }
+  }
+}
 
   }
 }
