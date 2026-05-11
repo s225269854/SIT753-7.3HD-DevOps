@@ -111,7 +111,7 @@ app.use(
     credentials: true,
   })
 );
-app.options('*', cors({ origin: FRONTEND_ORIGIN, credentials: true }));
+app.options(/.*/, cors({ origin: FRONTEND_ORIGIN, credentials: true }));
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Credentials', 'true');
   next();
