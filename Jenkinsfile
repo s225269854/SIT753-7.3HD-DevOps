@@ -103,7 +103,7 @@ pipeline {
                       -Dsonar.projectKey=nutrihelp-api \
                       -Dsonar.projectName="NutriHelp API" \
                       -Dsonar.projectVersion=${VERSION} \
-                      -Dsonar.sources=src \
+                      -Dsonar.sources=services,routes,middleware,server.js,test/ci\
                       -Dsonar.exclusions=**/node_modules/**,**/test/**,**/*.test.js,**/coverage/** \
                       -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info \
                       -Dsonar.testExecutionReportPaths=test-results/sonar-report.xml
