@@ -8,6 +8,7 @@ pipeline {
 
   environment {
     PATH = "/usr/local/bin:/opt/homebrew/bin:/Users/chehulchinnappa/.docker/bin:${env.PATH}"
+    JAVA_HOME = "/opt/homebrew/opt/openjdk@17"
     APP_NAME = 'nutrihelp-api'
     VERSION = "beta-${BUILD_NUMBER}"
     IMAGE_NAME = "${APP_NAME}:${VERSION}"
