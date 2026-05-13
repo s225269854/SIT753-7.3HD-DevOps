@@ -83,39 +83,39 @@ pipeline {
     }
 
     stage('Code Quality') {
-        steps {
-            echo 'Running code quality checks'
+    steps {
+        echo 'Running code quality checks'
 
-            echo 'Checking linting rules'
-            sh 'npm run lint:ci'
+        echo 'Checking linting rules'
+        sh 'npm run lint:ci'
 
-            echo 'Checking code formatting'
-            sh 'npm run format:check'
+        echo 'Checking code formatting'
+        sh 'npm run format:check'
 
-            echo 'Validating OpenAPI specification'
-            sh 'npm run openapi:validate'
+        echo 'Validating OpenAPI specification'
+        sh 'npm run openapi:validate'
 
-            echo 'Running SonarQube analysis'
+        echo 'Running SonarQube analysis'
         script {
             def scannerHome = tool 'sonar-scanner'
             withSonarQubeEnv('SonarQube') {
                 sh """
                     "${scannerHome}/bin/sonar-scanner" \
                       -Dsonar.projectKey=nutrihelp-api-hd \
-                      -Dsonar.projectName="NutriHelp API" \
+                      "-Dsonar.projectName=NutriHelp API" \
                       -Dsonar.projectVersion=${VERSION} \
                       -Dsonar.sources=services,routes,middleware,server.js,test/ci \
-                      -Dsonar.exclusions=**/node_modules/**,**/test/**,**/*.test.js,**/coverage/**
+                      "-Dsonar.exclusions=**/node_modules/**,**/test/**,**/*.test.js,**/coverage/**"
                 """
             }
         }
 
         echo 'Enforcing SonarQube quality gate'
         timeout(time: 3, unit: 'MINUTES') {
-          waitForQualityGate abortPipeline: true
-        }
+            waitForQualityGate abortPipeline: true
         }
     }
+}
 
     stage('Security') {
       steps {
