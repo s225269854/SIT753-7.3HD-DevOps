@@ -100,12 +100,12 @@ pipeline {
             def scannerHome = tool 'sonar-scanner'
             withSonarQubeEnv('SonarQube') {
                 sh """
-                    ${scannerHome}/bin/sonar-scanner \
+                    "${scannerHome}/bin/sonar-scanner" \
                       -Dsonar.projectKey=nutrihelp-api-hd \
-                      -Dsonar.projectName="NutriHelp API HD Pipeline" \
+                      -Dsonar.projectName=NutriHelp-API-HD-Pipeline \
                       -Dsonar.projectVersion=${VERSION} \
-                      -Dsonar.sources=services,routes,middleware,server.js,test/ci\
-                      -Dsonar.exclusions=**/node_modules/**,**/test/**,**/*.test.js,**/coverage/** \
+                      -Dsonar.sources=services,routes,middleware,server.js,test/ci \
+                      -Dsonar.exclusions=**/node_modules/**,**/test/**,**/*.test.js,**/coverage/**
                 """
             }
         }
