@@ -102,7 +102,7 @@ pipeline {
                 sh """
                     "${scannerHome}/bin/sonar-scanner" \
                       -Dsonar.projectKey=nutrihelp-api-hd \
-                      -Dsonar.projectName=NutriHelp-API-HD-Pipeline \
+                      -Dsonar.projectName="NutriHelp API" \
                       -Dsonar.projectVersion=${VERSION} \
                       -Dsonar.sources=services,routes,middleware,server.js,test/ci \
                       -Dsonar.exclusions=**/node_modules/**,**/test/**,**/*.test.js,**/coverage/**
